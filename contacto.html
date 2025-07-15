@@ -14,9 +14,11 @@
   </head>
   <body>
     <header class="menu-header">
-      <nav class="navbar navbar-expand-md navbar-light bg-white">
-        <div class="container-fluid">
-          <!-- 1. Toggler -->
+      <nav class="navbar navbar-expand-md navbar-light">
+        <div
+          class="container-fluid d-flex justify-content-between align-items-center position-relative"
+        >
+          <!-- Botón hamburguesa a la izquierda -->
           <button
             class="navbar-toggler"
             type="button"
@@ -29,13 +31,16 @@
             <span class="navbar-toggler-icon"></span>
           </button>
 
-          <!-- 2. Logo centrado -->
-          <a class="navbar-brand mx-auto" href="/index.html">
+          <!-- Logo centrado absolutamente -->
+          <a
+            class="navbar-brand position-absolute top-50 start-50 translate-middle"
+            href="/index.html"
+          >
             <img src="/Assets/logo.png" alt="Logo" style="max-height: 40px" />
           </a>
 
-          <!-- 3. Íconos a la derecha -->
-          <div class="d-flex align-items-center gap-3 ms-auto">
+          <!-- Iconos a la derecha, sin moverse -->
+          <div class="iconos-menu d-flex gap-3 align-items-center">
             <a href="#buscar">
               <img class="img-menu-size" src="/Assets/lupa.png" alt="Buscar" />
             </a>
@@ -47,28 +52,31 @@
               />
             </a>
           </div>
+        </div>
 
-          <!-- 4. Menú colapsable -->
-          <div class="collapse navbar-collapse bg-white" id="navbarContenido">
-            <ul class="navbar-nav me-auto ms-3 mb-2 mb-md-0">
-              <li class="nav-item">
-                <a class="nav-link" href="/index.html">Inicio</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/productos.html">Productos</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/contacto.html">Contacto</a>
-              </li>
-            </ul>
-          </div>
+        <!-- Menú desplegable -->
+        <div
+          class="collapse navbar-collapse justify-content-start"
+          id="navbarContenido"
+        >
+          <ul class="navbar-nav mb-2 mb-md-0">
+            <li class="nav-item">
+              <a class="nav-link" href="/index.html">Inicio</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/productos.html">Productos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/contacto.html">Contacto</a>
+            </li>
+          </ul>
         </div>
       </nav>
     </header>
 
     <main class="main-content-contacto">
       <section
-        class="container-fluid min-vh-80 d-flex justify-content-center align-items-center my-5 py-5"
+        class="container-fluid min-vh-90 d-flex justify-content-center align-items-center my-5 py-5"
       >
         <form
           class="card shadow-lg rounded-4 p-4 p-md-5 col-11 col-md-6 col-lg-4"

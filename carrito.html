@@ -13,42 +13,9 @@
     <title>todovaper.</title>
   </head>
   <body>
-    <header class="menu-header">
+<header class="menu-header">
       <nav class="navbar navbar-expand-md navbar-light bg-white">
         <div class="container-fluid">
-          <!-- 1. Toggler -->
-          <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarContenido"
-            aria-controls="navbarContenido"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span class="navbar-toggler-icon"></span>
-          </button>
-
-          <!-- 2. Logo centrado -->
-          <a class="navbar-brand mx-auto" href="/index.html">
-            <img src="/Assets/logo.png" alt="Logo" style="max-height: 40px" />
-          </a>
-
-          <!-- 3. Íconos a la derecha -->
-          <div class="d-flex align-items-center gap-3 ms-auto">
-            <a href="#buscar">
-              <img class="img-menu-size" src="/Assets/lupa.png" alt="Buscar" />
-            </a>
-            <a href="/carrito.html">
-              <img
-                class="img-menu-size"
-                src="/Assets/carrito.png"
-                alt="Carrito"
-              />
-            </a>
-          </div>
-
-          <!-- 4. Menú colapsable -->
           <div class="collapse navbar-collapse bg-white" id="navbarContenido">
             <ul class="navbar-nav me-auto ms-3 mb-2 mb-md-0">
               <li class="nav-item">
@@ -62,16 +29,44 @@
               </li>
             </ul>
           </div>
+
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarContenido"
+            aria-controls="navbarContenido"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <div class="position-absolute top-50 start-50 translate-middle">
+            <a class="navbar-brand" href="/index.html">
+              <img src="/Assets/logo.png" alt="Logo" style="max-height: 40px" />
+            </a>
+          </div>
+          <div class="d-flex align-items-center gap-3 ms-auto">
+            <a href="#buscar">
+              <img class="img-menu-size" src="/Assets/lupa.png" alt="Buscar" />
+            </a>
+            <a href="/carrito.html">
+              <img
+                class="img-menu-size"
+                src="/Assets/carrito.png"
+                alt="Carrito"
+              />
+            </a>
+          </div>
         </div>
       </nav>
-    </header>
-
-
+    <header>
     <main class="main-content-contacto ">
     <div class="container my-5 py-3 ">
   <h3 class="text-center pb-3 ">Carrito de compras</h3>
 
-  <div class="table-responsive w-75 mx-auto">
+  <div class="table-responsive w-100 w-md-75 mx-auto">
     <table class="table table-bordered align-middle text-center">
       <thead class="table-light">
         <tr>
@@ -85,24 +80,24 @@
       <tbody id="carrito-items">
         <tr>
           <td class="text-start">
-            <img src="x" alt="Vaper img" class="me-2" />
-            Ignite
+            <img src="./Assets/vapers/vaper (3).png" alt="Vaper img" class="img-producto-carrito" />
+            ELFBAR ICE KING 40K
           </td>
           <td>1</td>
-          <td>$15.000</td>
-          <td>$15.000</td>
+          <td>$30.000</td>
+          <td>$30.000</td>
           <td>
             <button class="btn btn-danger btn-sm">Eliminar</button>
           </td>
         </tr>
         <tr>
           <td class="text-start">
-            <img src="x" alt="Vaper img" class="me-2" />
-            Elfbar
+            <img src="./Assets/vapers/vaper (8).jpg" alt="Vaper img" class="img-producto-carrito" />
+            NASTY 5K
           </td>
           <td>1</td>
-          <td>$25.000</td>
-          <td>$25.000</td>
+          <td>$15.000</td>
+          <td>$15.000</td>
           <td>
             <button class="btn btn-danger btn-sm">Eliminar</button>
           </td>
@@ -119,7 +114,7 @@
   </div>
 
   <div class="d-flex justify-content-center">
-    <button class="btn btn-primary px-5">Finalizar compra</button>
+    <button id="button-finalizarcompra">TERMINAR COMPRA</button>
   </div>
 </div>
 

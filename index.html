@@ -16,39 +16,6 @@
     <header class="menu-header">
       <nav class="navbar navbar-expand-md navbar-light bg-white">
         <div class="container-fluid">
-          <!-- 1. Botón hamburguesa (izquierda) -->
-          <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarContenido"
-            aria-controls="navbarContenido"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span class="navbar-toggler-icon"></span>
-          </button>
-
-          <!-- 2. Logo centrado -->
-          <a class="navbar-brand mx-auto" href="/index.html">
-            <img src="/Assets/logo.png" alt="Logo" style="max-height: 40px" />
-          </a>
-
-          <!-- 3. Íconos (derecha) -->
-          <div class="d-flex align-items-center gap-3 ms-auto">
-            <a href="#buscar">
-              <img class="img-menu-size" src="/Assets/lupa.png" alt="Buscar" />
-            </a>
-            <a href="/carrito.html">
-              <img
-                class="img-menu-size"
-                src="/Assets/carrito.png"
-                alt="Carrito"
-              />
-            </a>
-          </div>
-
-          <!-- 4. Menú colapsable (fondo blanco) -->
           <div class="collapse navbar-collapse bg-white" id="navbarContenido">
             <ul class="navbar-nav me-auto ms-3 mb-2 mb-md-0">
               <li class="nav-item">
@@ -61,6 +28,36 @@
                 <a class="nav-link" href="/contacto.html">Contacto</a>
               </li>
             </ul>
+          </div>
+
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarContenido"
+            aria-controls="navbarContenido"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <div class="position-absolute top-50 start-50 translate-middle">
+            <a class="navbar-brand" href="/index.html">
+              <img src="/Assets/logo.png" alt="Logo" style="max-height: 40px" />
+            </a>
+          </div>
+          <div class="d-flex align-items-center gap-3 ms-auto">
+            <a href="#buscar">
+              <img class="img-menu-size" src="/Assets/lupa.png" alt="Buscar" />
+            </a>
+            <a href="/carrito.html">
+              <img
+                class="img-menu-size"
+                src="/Assets/carrito.png"
+                alt="Carrito"
+              />
+            </a>
           </div>
         </div>
       </nav>
@@ -89,7 +86,7 @@
             alt="Imagen de producto"
             width="100%"
           />
-          <h3 class="product-description-title">Lost Mary - 40.000 puffs</h3>
+          <h3 class="product-description-title">GrapeFruit - Lost Mary 30K</h3>
           <h5 class="product-price">$49.999</h5>
         </div>
         <div class="product-card">
@@ -98,7 +95,7 @@
             alt="Imagen de producto"
             width="100%"
           />
-          <h3 class="product-description-title">PRODUCTO 1</h3>
+          <h3 class="product-description-title">Peach Lemonade - Nasty 5K</h3>
           <h5 class="product-price">$49.999</h5>
         </div>
         <div class="product-card">
@@ -107,7 +104,7 @@
             alt="Imagen de producto"
             width="100%"
           />
-          <h3 class="product-description-title">PRODUCTO 2</h3>
+          <h3 class="product-description-title">Menta - Elfbar 40K</h3>
           <h5 class="product-price">$49.999</h5>
         </div>
         <div class="product-card">
@@ -116,7 +113,7 @@
             alt="Imagen de producto"
             width="100%"
           />
-          <h3 class="product-description-title">PRODUCTO 1</h3>
+          <h3 class="product-description-title">Frutilla - Elfbar 40K</h3>
           <h5 class="product-price">$49.999</h5>
         </div>
         <div class="product-card">
@@ -125,7 +122,7 @@
             alt="Imagen de producto"
             width="100%"
           />
-          <h3 class="product-description-title">PRODUCTO 2</h3>
+          <h3 class="product-description-title">GrapeFruit - Lost Mary 30K</h3>
           <h5 class="product-price">$49.999</h5>
         </div>
         <div class="product-card">
@@ -134,7 +131,7 @@
             alt="Imagen de producto"
             width="100%"
           />
-          <h3 class="product-description-title">PRODUCTO 1</h3>
+          <h3 class="product-description-title">Strawberry - Nasty 5K</h3>
           <h5 class="product-price">$49.999</h5>
         </div>
         <div class="product-card">
@@ -143,7 +140,7 @@
             alt="Imagen de producto"
             width="100%"
           />
-          <h3 class="product-description-title">PRODUCTO 2</h3>
+          <h3 class="product-description-title">Strawberry - Lost Mary 30K</h3>
           <h5 class="product-price">$49.999</h5>
         </div>
         <div class="product-card">
@@ -152,12 +149,15 @@
             alt="Imagen de producto"
             width="100%"
           />
-          <h3 class="product-description-title">PRODUCTO 2</h3>
+          <h3 class="product-description-title">PineApple - Nasty 5K</h3>
           <h5 class="product-price">$49.999</h5>
         </div>
       </section>
-      <div id="button-vermas">
-        <a href="productos.html"><button class="button">Ver todo</button></a>
+
+      <div id="contenedor-botton-vermas">
+        <a href="productos.html"
+          ><button id="button-vermas">Ver todo</button></a
+        >
       </div>
       <section class="content-info d-flex justify-content-center -wrap">
         <div class="info-card">

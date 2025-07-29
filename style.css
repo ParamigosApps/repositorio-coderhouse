@@ -16,11 +16,18 @@
   position: fixed;
   bottom: 56px;
   right: 8px;
+  margin-bottom: 8px;
   z-index: 1000;
   background-color: rgba(255, 255, 255, 0.163);
   border-radius: 50%;
   padding: 16px;
   box-shadow: 0 4px 16px rgba(64, 63, 63, 0.948);
+  transition: transform 0.2s;
+  transition: right 0.6s;
+}
+#chat:hover {
+  right: 16px;
+  transform: scale(1.24);
 }
 
 .main-content {
@@ -31,6 +38,26 @@
 .main-content-contacto {
   min-height: 90vh;
   background-color: #f7f7f7;
+}
+
+#ver-producto {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  min-height: 90vh;
+}
+
+.producto-info {
+  padding: 16px 32px;
+}
+.producto-info h3 {
+  margin-bottom: 40px;
+  font-size: 2rem;
+}
+.producto-info h4 {
+  margin-top: 24px;
 }
 
 #contacto-page {
@@ -199,32 +226,99 @@ body {
   color: #bfa100;
 }
 
-#button-vermas {
+#contenedor-botton-vermas {
   display: flex;
+  text-align: center;
   justify-content: center;
-  align-items: center;
-  margin: 20px 0 56px 0;
+  border: 0px;
 }
 
-.button {
-  padding: 8px 32px;
-  background: #0d0d0d;
-  color: #fff;
-  border: 1px solid #0d0d0d;
+#button-vermas {
+  text-align: center;
+  text-decoration: none;
+  padding: 8px 16px;
+  margin: 20px 0 56px 0;
   border-radius: 8px;
   font-size: 1.8rem;
+  border: 1px solid #0d0d0d;
+  background: #0d0d0d;
+  color: #fff;
   cursor: pointer;
   transition: background 0.2s;
+  transition: transform 0.3s;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-  text-decoration: none;
-  text-align: center;
 }
-.button:active {
+#button-vermas:active {
   transform: scale(0.95);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
-.button:hover {
-  background: #7ca9e9;
+#button-vermas:hover {
+  border: 2px solid #e7f87a;
+  background-color: #d0dc7a;
+  transform: scale(1.16);
+}
+
+#button-finalizarcompra {
+  text-align: center;
+  text-decoration: none;
+  padding: 8px 16px;
+  margin: 20px 0 56px 0;
+  border-radius: 8px;
+  font-size: 1.8rem;
+  border: 1px solid #0d0d0d;
+  background: #0d0d0d;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+  transition: transform 0.3s;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  background-color: #14a8e2;
+  font-size: 1.4rem;
+}
+#button-finalizarcompra:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+#button-finalizarcompra:hover {
+  border: 2px solid #e7f87a;
+  background-color: #d0dc7a;
+  transform: scale(1.16);
+}
+#button-finalizarcompra:hover {
+  border: 2px solid #235f77;
+  background-color: #6bd5ff;
+}
+
+#boton-enviar-form {
+  text-align: center;
+  text-decoration: none;
+  padding: 8px 16px;
+  margin: 20px 0 56px 0;
+  border-radius: 8px;
+  font-size: 1.8rem;
+  border: 1px solid #0d0d0d;
+  background: #0d0d0d;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+  transition: transform 0.3s;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  background-color: #14a8e2;
+  font-size: 1.4rem;
+}
+#boton-enviar-form:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+#boton-enviar-form:hover {
+  border: 2px solid #e7f87a;
+  background-color: #d0dc7a;
+  transform: scale(1.16);
+}
+#boton-enviar-form:hover {
+  border: 2px solid #235f77;
+  background-color: #6bd5ff;
+  transform: scale(1.08);
 }
 
 .content-info-main {
@@ -337,6 +431,11 @@ body {
 #info-box-contact p {
   font-size: 0.9rem;
   line-height: 0.2rem;
+}
+
+.img-producto-carrito {
+  width: 64px;
+  height: 64px;
 }
 
 .footer {

@@ -117,6 +117,7 @@ body
 .content-brands
   display: flex
   align-items: center
+  justify-content: center
   flex-wrap: wrap
   min-height: 120px
   width: 100%
@@ -129,19 +130,12 @@ body
     box-shadow: 0 8px 32px rgba(32,35,52,0.12)
     transform: scale(1.01)
 
-  .brand-card
-    transition: box-shadow 0.3s, transform 0.3s, background 0.3s
-    &:hover
-      background: #fffbe6
-      box-shadow: 0 12px 32px rgba(32,35,52,0.18)
-      transform: translateY(-8px) scale(1.07)
-
 .brand-card
     display: flex
     align-items: center
     justify-content: center
-    height: 80px
-    min-width: 120px
+    height: 60px
+    min-width: 100px
     border-radius: 8px
     background: #f5f6fa
     box-shadow: 0 2px 8px rgba(32,35,52,0.07)
@@ -151,11 +145,6 @@ body
         box-shadow: 0 6px 18px rgba(32,35,52,0.18)
         transform: translateY(-4px) scale(1.04)
 
-    img
-        max-height: 60px
-        max-width: 100px
-        object-fit: contain
-        margin: 0 8px
 
 .content-products
   min-height: 200px
@@ -384,12 +373,26 @@ body
     font-size: 1.0rem
 
 @media (max-width: 380px)
+  .logoimg
+    max-height: 16px
   #info-box-contact
     h3
       font-size: 0.9rem
     p
       font-size: 0.6rem
-
+  .content-brands
+    flex-wrap: wrap
+    justify-content: center
+    overflow-x: auto
+    gap: 16px
+    margin: 0px
+  .brand-card
+    flex: 0 0 auto
+    max-width: 80px
+    max-height: 50px
+    margin: 0px
+    h2
+      font-size: clamp(1.1rem, 2.5vw, 0.8rem)
 
 @media (max-width: 830px)
   .logoimg

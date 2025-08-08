@@ -4,6 +4,11 @@
   padding: 0;
 }
 
+.logoimg {
+  max-width: 180px;
+  transition: max-width 0.3s ease, transform 0.3s ease;
+}
+
 .img-footer-size {
   max-height: 32px;
 }
@@ -76,7 +81,7 @@ body {
   height: 12vh;
   width: 100%;
   top: 0;
-  background-color: #ffffff;
+  background-color: #f7f7f7;
   padding: 8px 32px 16px 32px;
 }
 .menu-header nav {
@@ -100,7 +105,7 @@ body {
 .menu-header nav .img-menu-size:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
   border-radius: 8px;
-  background: #fff;
+  background: #f7f7f7;
 }
 .menu-header nav .img-menu-size a {
   text-decoration: none;
@@ -118,11 +123,6 @@ body {
   transform: scale(0.95);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s ease, text-shadow 0.2s ease;
-}
-
-.menu-img-principal {
-  min-height: 300px;
-  min-height: 300px;
 }
 
 .content-brands {
@@ -419,7 +419,7 @@ body {
   justify-content: flex-start;
   flex-direction: column;
   min-width: 37.5%;
-  height: 70px;
+  min-height: 70px;
   padding: 0 0 16px 0;
 }
 #info-box-contact h3 {
@@ -457,10 +457,18 @@ body {
   font-size: 1rem;
 }
 
-@media (max-width: 756px) {
+@media (max-width: 380px) {
+  #info-box-contact h3 {
+    font-size: 0.9rem;
+  }
+  #info-box-contact p {
+    font-size: 0.6rem;
+  }
+}
+@media (max-width: 830px) {
   .logoimg {
-    max-height: 32px;
-    max-width: 80px;
+    max-width: 120px;
+    transition: max-height 0.3s ease, max-width 0.3s ease;
   }
   .content-products {
     padding: 16px 20px;
@@ -476,7 +484,7 @@ body {
   }
   .info-card img {
     max-height: 40px;
-    max-width: 40px;
+    max-width: 48px;
   }
   .info-card p {
     font-size: 0.8rem;
@@ -485,29 +493,17 @@ body {
 }
 @media (max-width: 1200px) {
   .content-products {
-    padding: 16px 0px;
-  }
-  .logoimg {
-    max-height: 48px;
-    max-width: 100px;
+    padding: 16px 8px;
   }
 }
 @media (min-width: 1251px) and (max-width: 1500px) {
   .content-products {
     padding: 16px 140px;
   }
-  .logoimg {
-    max-height: 48px;
-    max-width: 120px;
-  }
 }
 @media (min-width: 1501px) and (max-width: 1800px) {
   .content-products {
     padding: 16px 260px;
-  }
-  .logoimg {
-    max-height: 56px;
-    max-width: 140px;
   }
 }
 

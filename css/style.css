@@ -446,7 +446,17 @@ body {
 
 @media (max-width: 380px) {
   .logoimg {
-    max-height: 16px;
+    max-height: 14px;
+  }
+  .h2-nav {
+    font-size: 0.6rem;
+  }
+  h3 {
+    font-size: 0.9rem;
+  }
+  p {
+    font-size: 0.4rem;
+    line-height: 0.9rem;
   }
   #info-box-contact h3 {
     font-size: 0.9rem;
@@ -472,6 +482,9 @@ body {
   }
 }
 @media (max-width: 830px) {
+  .h2-nav {
+    font-size: 0.8rem;
+  }
   .logoimg {
     max-width: 120px;
     transition: max-height 0.3s ease, max-width 0.3s ease;

@@ -62,7 +62,12 @@
               <img src="./Assets/img/logo.png" alt="Logo" class="logoimg" />
             </a>
           </div>
+
           <div class="d-flex align-items-center gap-3 ms-auto">
+            <div class="box-username">
+              <h2 class="h2-nav" id="h2-nav-user"></h2>
+            </div>
+
             <a href="#buscar">
               <img
                 class="img-menu-size"
@@ -88,7 +93,6 @@
         alt="Imagen principal"
         style="width: 100%"
       />
-
       <section class="content-brands">
         <div class="brand-card"><h2>ELFBAR</h2></div>
         <div class="brand-card"><h2>LOST MARY</h2></div>
@@ -99,34 +103,37 @@
       <section
         class="content-products d-flex justify-content-center flex-wrap align-items-center"
       >
-        <div class="product-card">
+        <div class="product-card" id="producto1">
           <img
             src="Assets/vapers/vaper (1).webp"
             alt="Imagen de producto"
             width="100%"
           />
           <h3 class="product-description-title">GrapeFruit - Lost Mary 30K</h3>
-          <h5 class="product-price">$49.999</h5>
+          <h5 class="product-price">$30.000</h5>
+          <button class="btn-agregar">Agregar al carrito</button>
         </div>
-        <div class="product-card">
+        <div class="product-card" id="producto2">
           <img
             src="Assets/vapers/vaper (2).jpg"
             alt="Imagen de producto"
             width="100%"
           />
           <h3 class="product-description-title">Peach Lemonade - Nasty 5K</h3>
-          <h5 class="product-price">$49.999</h5>
+          <h5 class="product-price">$17.999</h5>
+          <button class="btn-agregar">Agregar al carrito</button>
         </div>
-        <div class="product-card">
+        <div class="product-card" id="producto3">
           <img
             src="Assets/vapers/vaper (3).png"
             alt="Imagen de producto"
             width="100%"
           />
           <h3 class="product-description-title">Menta - Elfbar 40K</h3>
-          <h5 class="product-price">$49.999</h5>
+          <h5 class="product-price">$32.999</h5>
+          <button class="btn-agregar">Agregar al carrito</button>
         </div>
-        <div class="product-card">
+        <div class="product-card" id="producto4">
           <img
             src="Assets/vapers/vaper (4).webp"
             alt="Imagen de producto"
@@ -134,42 +141,7 @@
           />
           <h3 class="product-description-title">Frutilla - Elfbar 40K</h3>
           <h5 class="product-price">$49.999</h5>
-        </div>
-        <div class="product-card">
-          <img
-            src="Assets/vapers/vaper (5).webp"
-            alt="Imagen de producto"
-            width="100%"
-          />
-          <h3 class="product-description-title">GrapeFruit - Lost Mary 30K</h3>
-          <h5 class="product-price">$49.999</h5>
-        </div>
-        <div class="product-card">
-          <img
-            src="Assets/vapers/vaper (6).jpg"
-            alt="Imagen de producto"
-            width="100%"
-          />
-          <h3 class="product-description-title">Strawberry - Nasty 5K</h3>
-          <h5 class="product-price">$49.999</h5>
-        </div>
-        <div class="product-card">
-          <img
-            src="Assets/vapers/vaper (7).webp"
-            alt="Imagen de producto"
-            width="100%"
-          />
-          <h3 class="product-description-title">Strawberry - Lost Mary 30K</h3>
-          <h5 class="product-price">$49.999</h5>
-        </div>
-        <div class="product-card">
-          <img
-            src="Assets/vapers/vaper (8).jpg"
-            alt="Imagen de producto"
-            width="100%"
-          />
-          <h3 class="product-description-title">PineApple - Nasty 5K</h3>
-          <h5 class="product-price">$49.999</h5>
+          <button class="btn-agregar">Agregar al carrito</button>
         </div>
       </section>
 
@@ -304,5 +276,6 @@
       integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
       crossorigin="anonymous"
     ></script>
+    <script src="./js/main.js"></script>
   </body>
 </html>

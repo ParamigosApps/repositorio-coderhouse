@@ -96,13 +96,11 @@ body {
   max-height: 24px;
   transition: transform 0.3s ease;
 }
-.menu-header nav .img-menu-size:hover {
-  transform: scale(1.25) rotate(-6deg);
-}
 .menu-header nav .img-menu-size:active {
   transform: scale(0.95) rotate(2deg);
 }
 .menu-header nav .img-menu-size:hover {
+  transform: scale(1.25) rotate(-6deg);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
   border-radius: 8px;
   background: #f7f7f7;
@@ -123,6 +121,7 @@ body {
   transform: scale(0.95);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s ease, text-shadow 0.2s ease;
+  display: none;
 }
 
 .content-brands {
@@ -161,8 +160,8 @@ body {
 .content-products {
   min-height: 200px;
   margin-bottom: 16px;
-  padding: 16px 80px;
-  gap: 8px;
+  padding: 12px 80px;
+  gap: 4px;
 }
 
 .product-card {
@@ -171,24 +170,24 @@ body {
   align-items: center;
   justify-content: space-between;
   width: 230px;
-  height: 330px;
+  height: 370px;
   background: #fff;
   border: 1px solid #d3d3d3;
-  border-radius: 16px;
-  padding: 18px 14px;
+  border-radius: 12px;
+  padding: 4px 14px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   transition: transform 0.2s, box-shadow 0.2s;
-  gap: 8px;
+  gap: 4px;
 }
-.product-card:hover {
+.product-card:active {
   transform: translateY(-6px) scale(1.03);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
 }
 .product-card img {
-  min-width: 210px;
-  min-height: 200px;
+  min-width: 170px;
+  min-height: 160px;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: 6px;
   background: #fff;
 }
 .product-card .product-description-title {
@@ -201,7 +200,7 @@ body {
 }
 .product-card .product-price {
   margin: 0px;
-  font-size: 1.3rem;
+  font-size: 1.6rem;
   color: #222;
   font-weight: bold;
   margin-bottom: 10px;
@@ -213,10 +212,6 @@ body {
   text-align: center;
   border: 1px solid #ffffff;
   transition: background 0.2s, color 0.2s;
-}
-.product-card .product-price:hover {
-  background: #fff3b0;
-  color: #bfa100;
 }
 
 #contenedor-botton-vermas {
@@ -280,6 +275,52 @@ body {
 #button-finalizarcompra:hover {
   border: 2px solid #235f77;
   background-color: #6bd5ff;
+}
+
+.btn-agregar {
+  text-align: center;
+  text-decoration: none;
+  padding: 8px 16px;
+  margin: 20px 0 56px 0;
+  border-radius: 8px;
+  font-size: 1.8rem;
+  border: 1px solid #0d0d0d;
+  background: #0d0d0d;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+  transition: transform 0.3s;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  width: 145px;
+  background-color: #87ceeb;
+  border: 2px solid #5abcf5;
+  font-size: 0.8rem;
+  margin: 0px 0px 6px 0px;
+  box-shadow: 0 4px 4px rgba(118, 198, 229, 0.4);
+}
+.btn-agregar:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+.btn-agregar:hover {
+  border: 2px solid #e7f87a;
+  background-color: #d0dc7a;
+  transform: scale(1.16);
+}
+.btn-agregar:hover {
+  background-color: #5bb8e6;
+  border: 2px solid #5abcf5;
+  transform: scale(1.12);
+  box-shadow: 0 6px 16px rgba(149, 215, 248, 0.5);
+}
+.btn-agregar:active {
+  background-color: #70c8f8;
+  border: 1px solid #2a8cc0;
+  transform: scale(0.96);
+  box-shadow: 0 2px 4px rgba(74, 163, 212, 0.4);
+}
+.btn-agregar i {
+  font-size: 1rem;
 }
 
 #boton-enviar-form {
@@ -523,6 +564,11 @@ body {
 @media (min-width: 1501px) and (max-width: 1800px) {
   .content-products {
     padding: 16px 260px;
+  }
+}
+@media (max-width: 550px) {
+  #h2-nav-user {
+    display: none;
   }
 }
 

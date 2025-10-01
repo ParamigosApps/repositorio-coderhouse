@@ -13,7 +13,7 @@ function actualizarBotonSesion() {
       actualizarBotonSesion();
     };
   } else {
-    textoSesion.textContent = "Ingreso/Registro";
+    textoSesion.textContent = "Iniciar sesión";
     linkSesion.setAttribute("href", "pages/iniciar-sesion.html");
     linkSesion.onclick = null;
   }

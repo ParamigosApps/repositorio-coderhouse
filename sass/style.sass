@@ -17,6 +17,7 @@ $boton-color: #0d0d0d
     max-height: $img-footer-size
 .img-menu-size
     max-height: $img-menu-size
+  
 
 #chat 
   position: fixed
@@ -85,7 +86,7 @@ body
   width: 100%
   top: 0
   background-color: $principal-color
-  padding: 8px 32px 16px 32px
+  padding: 4px 8px 8px 4px
 
 
   nav
@@ -93,7 +94,7 @@ body
     justify-content: space-between
     align-items: center
     list-style: none
-    gap: 16px
+    gap: 8px
     
     .img-menu-size
       max-height: $img-menu-size
@@ -416,6 +417,7 @@ body
     font-size: 1.0rem
 
 @media (max-width: 480px)
+
   .logoimg
     max-height: 14px
   
@@ -446,6 +448,15 @@ body
   .product-card
     width: 200px
     height: 370px
+    border: 1px solid #d3d3d3
+    padding: 4px 14px
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06)
+    transition: transform 0.2s, box-shadow 0.2s
+    gap: 4px
+
+  .h2-nav-inicio-sesion
+    @include h2-navegador()
+    font-size: 0.6rem
 
 
 

@@ -14,7 +14,7 @@
     <title>todovaper. - Carrito</title>
   </head>
   <body>
-<header class="menu-header">
+    <header class="menu-header">
       <nav class="navbar navbar-expand-md navbar-light bg-white">
         <div class="container-fluid">
           <div class="collapse navbar-collapse bg-white" id="navbarContenido">
@@ -51,16 +51,16 @@
 
           <div class="position-absolute top-50 start-50 translate-middle">
             <a class="navbar-brand" href="../index.html">
-                            <img
-                src="../Assets/img/logo.png"
-                alt="Logo"
-                class="logoimg"
-              />
+              <img src="../Assets/img/logo.png" alt="Logo" class="logoimg" />
             </a>
           </div>
           <div class="d-flex align-items-center gap-3 ms-auto">
             <a href="#buscar">
-              <img class="img-menu-size" src="../Assets/img/lupa.png" alt="Buscar" />
+              <img
+                class="img-menu-size"
+                src="../Assets/img/lupa.png"
+                alt="Buscar"
+              />
             </a>
             <a href="../pages/carrito.html">
               <img
@@ -72,64 +72,55 @@
           </div>
         </div>
       </nav>
-    <header>
-    <main class="main-content-contacto ">
-    <div class="container my-5 py-3 ">
-  <h3 class="text-center pb-3 ">Carrito de compras</h3>
+    </header>
+    <main class="main-content-contacto">
+      <div class="container my-5 py-3">
+        <h3 class="text-center pb-3">Carrito de compras</h3>
 
-  <div class="table-responsive w-100 w-md-75 mx-auto">
-    <table class="table table-bordered align-middle text-center">
-      <thead class="table-light">
-        <tr>
-          <th>Producto</th>
-          <th>Cantidad</th>
-          <th>Precio unitario</th>
-          <th>Subtotal</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="carrito-items">
-        <tr>
-          <td class="text-start">
-            <img src="../Assets/vapers/vaper (3).png" alt="Vaper img" class="img-producto-carrito" />
-            ELFBAR ICE KING 40K
-          </td>
-          <td>1</td>
-          <td>$30.000</td>
-          <td>$30.000</td>
-          <td>
-            <button class="btn btn-danger btn-sm">Eliminar</button>
-          </td>
-        </tr>
-        <tr>
-          <td class="text-start">
-            <img src="../Assets/vapers/vaper (8).jpg" alt="Vaper img" class="img-producto-carrito" />
-            NASTY 5K
-          </td>
-          <td>1</td>
-          <td>$15.000</td>
-          <td>$15.000</td>
-          <td>
-            <button class="btn btn-danger btn-sm">Eliminar</button>
-          </td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr>
-          <th colspan="3" class="text-end">Total:</th>
-          <th>$40.000</th>
-          <th></th>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
+        <div class="table-responsive w-100 w-md-75 mx-auto">
+          <table class="table table-bordered align-middle text-center">
+            <thead class="table-light">
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio unitario</th>
+                <th>Subtotal</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="carrito-items">
+              <!-- EJEMPLO DE PRODUCTO EN CARRITO
+              <tr>
+                <td class="text-start">
+                  <img
+                    src="../Assets/vapers/vaper (8).jpg"
+                    alt="Vaper img"
+                    class="img-producto-carrito"
+                  />
+                  NASTY 5K
+                </td>
+                <td>1</td>
+                <td>$15.000</td>
+                <td>$15.000</td>
+                <td>
+                  <button class="btn btn-danger btn-sm">Eliminar</button>
+                </td>
+              </tr> -->
+            </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="3" class="text-end">Total:</th>
+                <th id="MontoTotalCarrito">Sin articulos</th>
+                <th></th>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
 
-  <div class="d-flex justify-content-center">
-    <button id="button-finalizarcompra">TERMINAR COMPRA</button>
-  </div>
-</div>
-
-      </section>
+        <div class="d-flex justify-content-center">
+          <button id="button-finalizarcompra">FINALIZAR COMPRA</button>
+        </div>
+      </div>
 
       <section class="content-info2">
         <div class="info-box">
@@ -241,6 +232,6 @@
       integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
       crossorigin="anonymous"
     ></script>
-    <script src="./js/main.js"></script>
+    <script src="/js/carrito.js"></script>
   </body>
 </html>

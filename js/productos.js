@@ -4,7 +4,16 @@ class Producto {
     this.imgSrc = imgSrc;
     this.titulo = titulo;
     this.precio = precio;
-    this.stock = 10; //FALTA IMPLEMENTAR
+
+    const chequearStock = JSON.parse(localStorage.getItem(`stock-${this.id}`));
+    if (chequearStock !== null) {
+      this.stock = chequearStock;
+      console.log("Stock cargado desde localStorage :", this.stock);
+    } else {
+      this.stock = 3;
+      localStorage.setItem(`stock-${this.id}`, JSON.stringify(this.stock));
+      console.log("Stock inicializado");
+    }
   }
 
   render() {
@@ -12,11 +21,22 @@ class Producto {
     div.className = "product-card";
     div.id = this.id;
 
+    const sinStock = this.stock <= 0;
+
     div.innerHTML = `
       <img src="${this.imgSrc}" alt="Imagen de producto" width="100%" />
       <h3 class="product-description-title">${this.titulo}</h3>
       <h5 class="product-price">${this.precio}</h5>
-      <button id="btn-id-${this.id}" class="btn-agregar">Agregar al carrito</button>
+      <button 
+      id="btn-id-${this.id}" 
+      class="btn-agregar" 
+      ${sinStock ? "disabled" : ""}
+      ${sinStock ? "" : 'style="background-color: #4199f7ff; cursor: pointer;"'}
+    >
+      ${sinStock ? "Sin stock" : "Agregar al carrito"}
+      
+    </button>
+    
     `;
     return div;
   }
@@ -57,8 +77,18 @@ productos.forEach((producto) => {
   const boton = document.getElementById(`btn-id-${producto.id}`);
 
   boton.addEventListener("click", () => {
+    if (producto.stock <= 0) {
+      location.reload();
+      return;
+    }
+
     let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
     carrito.push(producto);
+    producto.stock -= 1; //FALTA IMPLEMENTAR
+    localStorage.setItem(
+      `stock-${producto.id}`,
+      JSON.stringify(producto.stock)
+    );
     localStorage.setItem("carrito", JSON.stringify(carrito));
     mostrarMensaje();
   });
@@ -72,3 +102,11 @@ function mostrarMensaje() {
     aviso.style.display = "none";
   }, 1500);
 }
+const cambiarBoton = document.getElementsByClassName("btn-agregar");
+
+Array.from(cambiarBoton).forEach((boton) => {
+  if (boton.textContent === "Sin stock") {
+    boton.style.backgroundColor = "gray";
+    boton.style.cursor = "not-allowed";
+  } else console.log("Hay stock disponible: " + boton.textContent);
+});

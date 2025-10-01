@@ -39,6 +39,18 @@ montoTotalCarrito.textContent = "$" + calcularTotal();
 carritoItems.addEventListener("click", (e) => {
   if (e.target.classList.contains("btn-danger")) {
     const index = e.target.dataset.index;
+    let productoAEliminar = carrito[index];
+
+    // Restaurar stock
+    let stockActual = JSON.parse(
+      localStorage.getItem(`stock-${productoAEliminar.id}`)
+    );
+    localStorage.setItem(
+      `stock-${productoAEliminar.id}`,
+      JSON.stringify(stockActual + 1)
+    );
+
+    // Actualizar carrito
     carrito.splice(index, 1);
     localStorage.setItem("carrito", JSON.stringify(carrito));
     location.reload();

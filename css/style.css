@@ -518,7 +518,7 @@ body {
   font-size: 1rem;
 }
 
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .logoimg {
     max-height: 14px;
   }
@@ -546,6 +546,10 @@ body {
   }
   .brand-card h2 {
     font-size: clamp(1.1rem, 2.5vw, 0.8rem);
+  }
+  .product-card {
+    width: 200px;
+    height: 370px;
   }
 }
 @media (max-width: 830px) {

@@ -17,6 +17,14 @@
   max-height: 24px;
 }
 
+#aviso-buscador {
+  display: none;
+  margin: 16px 0px;
+  font-size: 1rem;
+  color: #ff0000;
+  text-align: center;
+}
+
 #chat {
   position: fixed;
   bottom: 56px;

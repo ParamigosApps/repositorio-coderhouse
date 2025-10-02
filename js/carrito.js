@@ -56,3 +56,16 @@ carritoItems.addEventListener("click", (e) => {
     location.reload();
   }
 });
+
+function actualizarCarritoVisual() {
+  let imgCarrito = document.getElementById("img-carrito");
+  let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+  if (carrito.length > 0) {
+    imgCarrito.classList.add("con-productos");
+  } else {
+    imgCarrito.classList.remove("con-productos");
+  }
+}
+
+actualizarCarritoVisual();

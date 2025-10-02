@@ -17,7 +17,28 @@ $boton-color: #0d0d0d
     max-height: $img-footer-size
 .img-menu-size
     max-height: $img-menu-size
+
+#img-carrito
+  transition: transform 2.9s ease, filter 2.6s ease
+
+  &.con-productos 
+    animation: Brillo 1s infinite alternate
   
+@keyframes Brillo 
+  0% 
+    transform: scale(1)
+    filter: brightness(1)
+  
+  50% 
+    transform: scale(1.3)
+    filter: brightness(.5)
+  
+  100% 
+    transform: scale(1)
+    filter: brightness(1)
+  
+
+
 #aviso-buscador
   display: none
   margin: 16px 0px

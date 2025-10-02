@@ -8,11 +8,9 @@ class Producto {
     const chequearStock = JSON.parse(localStorage.getItem(`stock-${this.id}`));
     if (chequearStock !== null) {
       this.stock = chequearStock;
-      console.log("Stock cargado desde localStorage :", this.stock);
     } else {
       this.stock = 3;
       localStorage.setItem(`stock-${this.id}`, JSON.stringify(this.stock));
-      console.log("Stock inicializado");
     }
   }
 
@@ -84,12 +82,13 @@ productos.forEach((producto) => {
 
     let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
     carrito.push(producto);
-    producto.stock -= 1; //FALTA IMPLEMENTAR
+    producto.stock -= 1;
     localStorage.setItem(
       `stock-${producto.id}`,
       JSON.stringify(producto.stock)
     );
     localStorage.setItem("carrito", JSON.stringify(carrito));
+    actualizarCarritoVisual();
     mostrarMensaje();
   });
 });
@@ -108,5 +107,18 @@ Array.from(cambiarBoton).forEach((boton) => {
   if (boton.textContent === "Sin stock") {
     boton.style.backgroundColor = "gray";
     boton.style.cursor = "not-allowed";
-  } else console.log("Hay stock disponible: " + boton.textContent);
+  }
 });
+
+function actualizarCarritoVisual() {
+  let imgCarrito = document.getElementById("img-carrito");
+  let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+  if (carrito.length > 0) {
+    imgCarrito.classList.add("con-productos");
+  } else {
+    imgCarrito.classList.remove("con-productos");
+  }
+}
+
+actualizarCarritoVisual();

@@ -135,7 +135,10 @@ window.productos = [
 ];
 
 function cargarProductos() {
-  if (paginaActual.includes("producto.html")) return; //no se otro metodo para no cargar los productos en la pagina detalle-producto para que no produzca error
+  if (paginaActual.includes("producto.html")) {
+    console.log("pagina detalle producto");
+    return;
+  } else console.log("se ejecuta con normalidad"); //no se otro metodo para no cargar los productos en la pagina detalle-producto para que no produzca error
 
   window.productos.forEach((producto, index) => {
     if (index >= productosPorPaginas) return;

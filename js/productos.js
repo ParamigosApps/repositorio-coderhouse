@@ -116,7 +116,7 @@ window.productos = [
     "producto10",
     "/Assets/vapers/vaper10.png",
     "Green Apple - Torch 5.0",
-    "$32.999"
+    "$60.000"
   ),
 
   new Producto(

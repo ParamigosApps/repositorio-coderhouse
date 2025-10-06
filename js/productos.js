@@ -108,7 +108,7 @@ window.productos = [
   ),
   new Producto(
     "producto9",
-    "/Assets/vapers/vaper9.png",
+    "/Assets/vapers/vaper09.png",
     "Paradise OG - Torch 7.5",
     "$75.000"
   ),
@@ -224,5 +224,9 @@ function mostrarMensaje(mensaje, color) {
 }
 actualizarCarritoVisual();
 
-if (paginaActual == "index.html" || paginaActual == "productos.html")
+if (
+  paginaActual == "index.html" ||
+  paginaActual == "productos.html" ||
+  paginaActual != "detalle-producto.html"
+)
   cargarProductos();

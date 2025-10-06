@@ -135,6 +135,8 @@ window.productos = [
 ];
 
 function cargarProductos() {
+  if (paginaActual.includes("producto.html")) return; //no se otro metodo para no cargar los productos en la pagina detalle-producto para que no produzca error
+
   window.productos.forEach((producto, index) => {
     if (index >= productosPorPaginas) return;
 
@@ -222,11 +224,5 @@ function mostrarMensaje(mensaje, color) {
     duration: 2500,
   }).showToast();
 }
+cargarProductos();
 actualizarCarritoVisual();
-
-if (
-  paginaActual == "index.html" ||
-  paginaActual == "productos.html" ||
-  paginaActual != "detalle-producto.html"
-)
-  cargarProductos();

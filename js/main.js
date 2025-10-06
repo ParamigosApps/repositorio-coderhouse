@@ -1,11 +1,19 @@
 const linkSesion = document.getElementById("linkSesion");
 const textoSesion = document.getElementById("textoSesion");
 
+textoSesion.addEventListener("mouseover", () => {
+  textoSesion.textContent = "Cerrar sesión";
+});
+
+textoSesion.addEventListener("mouseout", () => {
+  actualizarBotonSesion();
+});
+
 function actualizarBotonSesion() {
   const logueado = localStorage.getItem("logueado");
 
   if (logueado === "true") {
-    textoSesion.textContent = "Cerrar sesión";
+    textoSesion.textContent = "Hola, " + localStorage.getItem("usuarioActual");
     linkSesion.removeAttribute("href");
     linkSesion.onclick = () => {
       localStorage.removeItem("logueado");

@@ -11,11 +11,11 @@ inputBuscador.addEventListener("keyup", () => {
 
   let sinResultados = true;
   Array.from(productos).forEach((producto) => {
-    const card = producto.parentElement;
+    const card = producto.closest(".product-card");
     const textoProducto = producto.textContent.toLowerCase();
 
     if (textoProducto.includes(valorBuscado)) {
-      card.style.display = "block";
+      card.style.display = "";
       sinResultados = false;
     } else {
       card.style.display = "none";
@@ -39,8 +39,8 @@ inputBuscador.addEventListener("input", () => {
     );
 
     Array.from(productos).forEach((producto) => {
-      const card = producto.parentElement;
-      card.style.display = "block";
+      const card = producto.closest(".product-card");
+      card.style.display = "";
     });
   }
 });

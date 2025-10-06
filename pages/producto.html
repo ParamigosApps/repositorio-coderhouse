@@ -10,6 +10,11 @@
       integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
       crossorigin="anonymous"
     />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
     <link rel="icon" href="../Assets/Document_files/favicon.png" />
     <title>todovaper. - Producto</title>
   </head>
@@ -50,23 +55,32 @@
           </button>
 
           <div class="position-absolute top-50 start-50 translate-middle">
-            <a class="navbar-brand" href="index.html">
-              <img src="../Assets/img/logo.png" alt="Logo" class="logoimg" />
+            <a class="navbar-brand" href="../index.html">
+              <img src="/Assets/img/logo.png" alt="Logo" class="logoimg" />
             </a>
           </div>
           <div class="d-flex align-items-center gap-3 ms-auto">
+            <a
+              class="nav-link"
+              id="linkSesion"
+              href="pages/iniciar-sesion.html"
+            >
+              <h2 class="h2-nav-inicio-sesion" id="textoSesion">
+                Iniciar sesión
+              </h2>
+            </a>
             <a href="/pages/productos.html">
               <img
                 class="img-menu-size"
-                src="../Assets/img/lupa.png"
+                src="/Assets/img/lupa.png"
                 alt="Buscar"
               />
             </a>
-            <a href="html/carrito.html">
+            <a href="/pages/carrito.html">
               <img
                 id="img-carrito"
                 class="img-menu-size"
-                src="../Assets/img/carrito.png"
+                src="/Assets/img/carrito.png"
                 alt="Carrito"
               />
             </a>
@@ -75,11 +89,11 @@
       </nav>
     </header>
 
-    <main class="main-content">
-      <section id="ver-producto">
+    <main class="main-content-ver-producto">
+      <section id="detalle-producto">
         <div id="img-ver-producto">
           <img
-            src="Assets/vapers/vaper (6).jpg"
+            src="/Assets/vapers/vaper (2).jpg"
             alt="Imagen de producto"
             width="100%"
           />
@@ -102,8 +116,8 @@
               />
             </div>
 
-            <div id="button">
-              <button class="button">Añadir al carrito</button>
+            <div>
+              <button class="btn-agregar">Añadir al carrito</button>
             </div>
           </div>
         </section>
@@ -118,7 +132,7 @@
         </a>
       </div>
       <section class="content-info2">
-        <div class="info-box">
+        <div class="info-box-pagoyenvios">
           <div><h3>MEDIOS DE PAGOS</h3></div>
           <div>
             <img
@@ -174,7 +188,7 @@
           </div>
         </div>
 
-        <div class="info-box">
+        <div class="info-box-pagoyenvios">
           <div><h3>MEDIOS DE ENVÍOS</h3></div>
           <div>
             <img
@@ -220,7 +234,12 @@
       integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
       crossorigin="anonymous"
     ></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/toastify-js"
+    ></script>
     <script src="/js/main.js"></script>
-    <script src="/js/iniciar-sesion.js"></script>
+    <script src="/js/productos.js"></script>
+    <script src="/js/detalles-productos.js"></script>
   </body>
 </html>

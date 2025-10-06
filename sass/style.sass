@@ -9,7 +9,7 @@ $img-menu-minsize: 36px
 $principal-color: #f7f7f7 
 $boton-color: #0d0d0d
 
-
+//LOGO, IMAGENES, ICONOS
 .logoimg
   max-width: 180px
   transition: max-width 0.3s ease, transform 0.3s ease
@@ -17,34 +17,58 @@ $boton-color: #0d0d0d
     max-height: $img-footer-size
 .img-menu-size
     max-height: $img-menu-size
-
+.img-producto-carrito
+  width: 64px
+  height: 64px
 #img-carrito
   transition: transform 2.9s ease, filter 2.6s ease
 
   &.con-productos 
     animation: Brillo 1s infinite alternate
   
+.img-footer-size
+        transition: transform 0.3s ease
+
+        &:hover
+            transform: scale(1.10) rotate(+6deg)
+
+        &:active
+            transform: scale(0.95) rotate(2deg)
+
+#img-ver-producto
+  max-width: 400px
+  border-radius: 8px
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18)
+  transition: transform 0.3s ease
+
+  &:hover
+      transform: scale(1.10) 
+
+  &:active
+      transform: scale(0.95) 
+  
 @keyframes Brillo 
   0% 
     transform: scale(1)
     filter: brightness(1)
-  
+
   50% 
     transform: scale(1.3)
     filter: brightness(.5)
-  
+
   100% 
     transform: scale(1)
     filter: brightness(1)
-  
 
-
+//BUSCADOR
 #aviso-buscador
   display: none
   margin: 16px 0px
   font-size: 1.0rem
   color: #ff0000
   text-align: center
+
+//WHATSAPP CHAT BUTTON
 #chat 
   position: fixed
   bottom: 56px
@@ -61,32 +85,19 @@ $boton-color: #0d0d0d
     right: 16px
     transform: scale(1.24)
 
-#mensajeCarrito
-  position: fixed
-  bottom: 180px
-  right: 8px
-  z-index: 1000
-  display: none
-  background-color: rgba(92, 203, 18, 0.756)
-  padding: 16px
-  box-shadow: 0 4px 16px rgba(64, 63, 63, 0.948)
 
-.main-content
+.main-content, .main-content-contacto
   min-height: 90vh
   background-color: $principal-color  
-
-.main-content-contacto
-
-  min-height: 90vh
-  background-color: $principal-color
   
-#ver-producto
+#detalle-producto
   display: flex
-  flex-direction: row
-  align-items: center
-  align-content: center
   justify-content: center
   min-height: 90vh
+  background-color: $principal-color
+  border: 1px solid #d3d3d3
+  padding: 16px 120px
+  
 
 .producto-info
   padding: 16px 32px
@@ -197,11 +208,10 @@ body
   font: 1em sans-serif
 
 .content-products
-  min-height: 200px
-  margin-bottom: 16px
+  gap: 20px
+  justify-items: center
   padding: 12px 80px
-  gap: 4px
-
+  background: #f7f7f7
 
 .product-card
     display: flex
@@ -213,25 +223,29 @@ body
     background: #fff
     border: 1px solid #d3d3d3
     border-radius: 12px
-    padding: 4px 14px
+    padding: 4px 16px
     box-shadow: 0 2px 12px rgba(0,0,0,0.06)
     transition: transform 0.2s, box-shadow 0.2s
     gap: 4px
+    a 
+      text-decoration: none 
+      color: inherit 
     
     &:active
       transform: translateY(-6px) scale(1.03)
       box-shadow: 0 8px 24px rgba(0,0,0,0.16)
 
+    h3
+      height: 50px
     img
-        min-width: 170px
-        min-height: 160px
+        height: 200px
         object-fit: cover
         border-radius: 6px
         background: #fff
         
-
+        
     .product-description-title
-        font-size: 1.2rem
+        font-size: 1.15rem
         color: #222
         text-align: center
         font-weight: bold
@@ -252,8 +266,10 @@ body
         text-align: center
         border: 1px solid #ffffff
         transition: background 0.2s, color 0.2s
+        
 
-#contenedor-botton-vermas
+
+#contenedor-button
   display: flex
   text-align: center
   justify-content: center
@@ -279,13 +295,17 @@ body
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18)
   
   &:hover 
-    border: 2px solid #e7f87a
-    background-color: #d0dc7a
+    box-shadow: 0 0 12px rgba(0, 0, 0, 5.8)
     transform: scale(1.16)
 
+//BOTONES
 #button-vermas
   @include boton($boton-color)
+  font-size: 1.1rem
 
+#button-mostrarmas
+  @include boton($boton-color)
+  font-size: 1.1rem
 #button-finalizarcompra
   @include boton($boton-color)
   background-color: #14a8e2
@@ -303,18 +323,18 @@ body
   font-size: 0.8rem
   margin: 0px 0px 6px 0px
   box-shadow: 0 4px 4px rgba(118, 198, 229, 0.4)
+  display: flex
+  justify-content: center
+  align-items: center
 
   &:hover
     background-color: #5bb8e6
-    border: 2px solid #5abcf5
     transform: scale(1.12)
-    box-shadow: 0 6px 16px rgba(149, 215, 248, 0.5)
 
   &:active
     background-color: #70c8f8
     border: 1px solid #2a8cc0
     transform: scale(0.96)
-    box-shadow: 0 2px 4px rgba(74, 163, 212, 0.4)
 
   i
     font-size: 1.0rem
@@ -322,7 +342,7 @@ body
 #boton-enviar-form
   @include boton($boton-color)
   background-color: #14a8e2
-  font-size: 1.4rem
+  font-size: 1.2rem
 
   &:hover 
       border: 2px solid #235f77
@@ -360,25 +380,16 @@ body
     object-fit: contain
     margin-bottom: 16px
   
-.content-info2
+.content-info2,.info-box-pagoyenvios
   display: flex
   flex-wrap: wrap
+
+.content-info2
   gap: 16px
   padding: 36px 64px
   border-top: 1px solid #aeaeae
 
-.img-footer-size
-        transition: transform 0.3s ease
-
-        &:hover
-            transform: scale(1.10) rotate(+6deg)
-
-        &:active
-            transform: scale(0.95) rotate(2deg)
-
-.info-box
-  display: flex
-  flex-wrap: wrap
+.info-box-pagoyenvios
   justify-content: flex-start
   flex-direction: column
   align-items: start
@@ -394,7 +405,7 @@ body
   justify-content: flex-start
   flex-direction: column
   align-items: start
-  min-width: 37.5%
+  min-width: 38%
   min-height: 70px
   padding: 0 0 32px 0
   h3
@@ -409,7 +420,7 @@ body
   display: flex
   justify-content: flex-start
   flex-direction: column
-  min-width: 37.5%
+  min-width: 38%
   min-height: 70px
   padding: 0 0 16px 0
   h3
@@ -426,11 +437,7 @@ body
     font-size: 0.9rem
     line-height: 0.2rem
 
-.img-producto-carrito
-  width: 64px
-  height: 64px
 
-  
 .footer
   height: 8vh
   background-color: #202334
@@ -442,15 +449,13 @@ body
     margin-top: 12px
     font-size: 1.0rem
 
-@media (max-width: 480px)
 
+// MEDIA QUERIES
+@media (max-width: 480px)
   .logoimg
     max-height: 14px
-  
   .h2-nav
     font-size: 0.6rem
-
-
   #info-box-contact
     h3
       font-size: 0.9rem
@@ -479,6 +484,7 @@ body
     box-shadow: 0 2px 12px rgba(0,0,0,0.06)
     transition: transform 0.2s, box-shadow 0.2s
     gap: 4px
+    align-self: center
 
   .h2-nav-inicio-sesion
     @include h2-navegador()
@@ -497,11 +503,7 @@ body
   .content-products
     padding: 16px 20px
 
-  .info-box
-    width: 100%
-  #info-box-contact
-    width: 100%
-  #info-box-redes
+  .info-box-pagoyenvios, #info-box-contact, #info-box-redes
     width: 100%
 
   .info-card
@@ -512,7 +514,6 @@ body
     p
       font-size: 0.8rem
       text-align: center
-
 
 @media (max-width: 1200px)
   .content-products
@@ -529,4 +530,4 @@ body
 #h2-nav-user 
   @media (max-width: 550px) 
     display: none
-  
+

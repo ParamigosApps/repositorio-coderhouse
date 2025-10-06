@@ -71,5 +71,3 @@ function ConfirmarCerrarSesion() {
     }
   });
 }
-
-ConfirmarCerrarSesion();

@@ -108,7 +108,7 @@ window.productos = [
   ),
   new Producto(
     "producto9",
-    "/Assets/vapers/vaper09.png",
+    "/Assets/vapers/vaper09.PNG",
     "Paradise OG - Torch 7.5",
     "$75.000"
   ),

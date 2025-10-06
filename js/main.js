@@ -37,6 +37,7 @@ function actualizarCarritoVisual() {
   } else {
     imgCarrito.classList.remove("con-productos");
   }
+  ConfirmarCerrarSesion();
 }
 
 actualizarCarritoVisual();
@@ -55,7 +56,6 @@ function ConfirmarCerrarSesion() {
     cancelButtonColor: "#3085d6",
     confirmButtonText: "Cerrar sesión",
     cancelButtonText: "Mantener sesión",
-    draggable: true,
   }).then((result) => {
     if (result.isConfirmed) {
       localStorage.setItem("logueado", "false");

@@ -35,6 +35,7 @@ function iniciarSesion(e) {
     return;
   }
   let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+
   const usuarioValido = usuarios.find(
     (u) =>
       u.usuario === userIngresado.value && u.password === passIngresado.value

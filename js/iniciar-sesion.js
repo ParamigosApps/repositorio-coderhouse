@@ -21,6 +21,14 @@ submit.addEventListener("click", (e) => {
 });
 
 function iniciarSesion(e) {
+  if (localStorage.getItem("logueado") === "true") {
+    e.preventDefault();
+    aviso.textContent =
+      "Te encuentras en una sesión activa. Cierra sesión para iniciar con otra cuenta.";
+    aviso.style.color = "red";
+    aviso2.textContent = "";
+    return;
+  }
   if (!userIngresado.value || !passIngresado.value) {
     e.preventDefault();
     aviso.textContent = "Por favor, completa todos los campos.";
@@ -44,11 +52,22 @@ function iniciarSesion(e) {
   aviso.textContent =
     "¡Iniciaste sesión correctamente! Bienvenido " + usuarioValido.usuario;
   aviso.style.color = "green";
-  AvisoInicioSesion();
+  Bienvenido(
+    "Iniciaste sesión correctamente. Serás redirigido a la página principal."
+  );
 }
 
 function registrarUsuario(e) {
   e.preventDefault();
+
+  if (localStorage.getItem("logueado") === "true") {
+    e.preventDefault();
+    aviso.textContent =
+      "Te encuentras en una sesión activa. Cierra sesión para iniciar con otra cuenta.";
+    aviso.style.color = "red";
+    aviso2.textContent = "";
+    return;
+  }
 
   let valido = true;
 
@@ -101,17 +120,11 @@ function registrarUsuario(e) {
 
   aviso.textContent = "Usuario registrado correctamente!";
   aviso.style.color = "green";
-  AvisoInicioSesion();
+  Bienvenido(
+    "Te registraste correctamente. Serás redirigido a la página principal."
+  );
 }
 
-function AvisoInicioSesion() {
-  aviso2.textContent = "Será redirigido a la pagina principal en 3 segundos!";
-  aviso2.style.color = "green";
-
-  setTimeout(() => {
-    window.location.href = "/index.html";
-  }, 3000);
-}
 // INICIAR SESION / REGISTRARSE ESCUCHAR CAMBIO
 check.addEventListener("change", () => {
   if (check.checked) {
@@ -130,3 +143,27 @@ check.addEventListener("change", () => {
     aviso.style.color = "red";
   }
 });
+
+function Bienvenido(mensaje) {
+  Swal.fire({
+    title: "Bienvenido/a " + localStorage.getItem("usuarioActual"),
+    text: mensaje,
+    confirmButtonText: "Ir al inicio",
+    icon: "success",
+    draggable: true,
+  }).then(() => {
+    window.location.href = "/index.html";
+  });
+}
+
+function NuevoRegistro(mensaje) {
+  Swal.fire({
+    title: "Bienvenido/a " + localStorage.getItem("usuarioActual"),
+    text: mensaje,
+    confirmButtonText: "Ir al inicio",
+    icon: "success",
+    draggable: true,
+  }).then(() => {
+    window.location.href = "/index.html";
+  });
+}

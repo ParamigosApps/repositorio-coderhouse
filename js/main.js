@@ -14,9 +14,10 @@ function actualizarBotonSesion() {
   const logueado = localStorage.getItem("logueado");
 
   if (logueado === "true") {
-    textoSesion.textContent = "Hola, " + localStorage.getItem("usuarioActual");
+    textoSesion.textContent = localStorage.getItem("usuarioActual");
 
     linkSesion.onclick = () => {
+      event.preventDefault();
       ConfirmarCerrarSesion();
     };
   } else {
@@ -37,13 +38,12 @@ function actualizarCarritoVisual() {
   } else {
     imgCarrito.classList.remove("con-productos");
   }
-  ConfirmarCerrarSesion();
 }
 
 actualizarCarritoVisual();
 
 function ConfirmarCerrarSesion() {
-  if (localStorage.getItem("logueado") !== "true") return;
+  if (localStorage.getItem("logueado") != "true") return;
   return Swal.fire({
     title:
       "¿Desea cerrar la sesión de " +
@@ -67,7 +67,14 @@ function ConfirmarCerrarSesion() {
         "success",
         (confirmButtonText = "Aceptar")
       );
-      actualizarCarritoVisual();
+      const formulario = document.querySelector(".inicio-sesion");
+      const cerrarSesionSection = document.getElementById(
+        "cerrar-sesion-section"
+      );
+      formulario.style.display = "block";
+      cerrarSesionSection.style.display = "block";
     }
   });
 }
+
+actualizarCarritoVisual();

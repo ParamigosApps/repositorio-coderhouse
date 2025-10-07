@@ -5,6 +5,9 @@ const passIngresado = document.getElementById("InputPassword");
 const submit = document.getElementById("submit");
 const aviso = document.getElementById("p-error-inicio-sesion");
 const aviso2 = document.getElementById("p-error-inicio-sesion2");
+const formulario = document.querySelector(".inicio-sesion");
+const cerrarSesionSection = document.getElementById("cerrar-sesion-section");
+const pTextoCerrarSesion = document.getElementById("p-texto-cerrar-sesion");
 
 let usuarioRegistrado = false;
 
@@ -166,5 +169,53 @@ function NuevoRegistro(mensaje) {
     draggable: true,
   }).then(() => {
     window.location.href = "/index.html";
+  });
+}
+
+function MostrarIniciarSesion() {
+  if (localStorage.getItem("logueado") !== "true") return;
+
+  formulario.style.display = "none";
+  cerrarSesionSection.style.display = "block";
+  pTextoCerrarSesion.textContent =
+    "Has iniciado sesión como " + localStorage.getItem("usuarioActual");
+  const buttonCerrarSesion = document.getElementById("button-cerrarsesion");
+  buttonCerrarSesion.onclick = ConfirmarCerrarSesion;
+}
+
+MostrarIniciarSesion();
+
+function ConfirmarCerrarSesion() {
+  if (localStorage.getItem("logueado") != "true") return;
+  return Swal.fire({
+    title:
+      "¿Desea cerrar la sesión de " +
+      localStorage.getItem("usuarioActual") +
+      "?",
+    text: "Para realizar esta acción, presione continuar.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Cerrar sesión",
+    cancelButtonText: "Mantener sesión",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      localStorage.setItem("logueado", "false");
+      localStorage.removeItem("usuarioActual");
+      actualizarBotonSesion();
+      Swal.fire(
+        "Sesión cerrada",
+        "Has cerrado sesión correctamente.",
+        "success",
+        (confirmButtonText = "Aceptar")
+      );
+      const formulario = document.querySelector(".inicio-sesion");
+      const cerrarSesionSection = document.getElementById(
+        "cerrar-sesion-section"
+      );
+      formulario.style.display = "block";
+      cerrarSesionSection.style.display = "none";
+    }
   });
 }

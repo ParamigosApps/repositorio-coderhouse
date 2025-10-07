@@ -69,6 +69,13 @@
                 Iniciar sesión
               </h2>
             </a>
+            <a href="/pages/iniciar-sesion.html">
+              <img
+                class="img-menu-size"
+                src="/Assets/img/sesion.png"
+                alt="Inicio de sesión"
+              />
+            </a>
             <a href="/pages/productos.html">
               <img
                 class="img-menu-size"
@@ -91,8 +98,16 @@
 
     <main class="main-content-inicio-sesion">
       <section
-        class="container-fluid min-vh-90 d-flex justify-content-center align-items-center my-5 py-5"
+        class="container-fluid min-vh-90 d-flex flex-column justify-content-center align-items-center my-5 py-5"
       >
+        <section
+          id="cerrar-sesion-section"
+          class="text-center mb-4"
+          style="display: none"
+        >
+          <p id="p-texto-cerrar-sesion">Haz click aqui para cerrar tu sesión</p>
+          <button id="button-cerrarsesion">Cerrar sesión</button>
+        </section>
         <form class="inicio-sesion">
           <div class="form-group">
             <label for="InputUser">Usuario</label>

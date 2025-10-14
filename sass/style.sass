@@ -59,8 +59,22 @@ $boton-color: #0d0d0d
   100% 
     transform: scale(1)
     filter: brightness(1)
+// ------------------------------DETALLE PRODUCTO ------------------------------- //
+#contenedor-detalleproducto
+  display: flex
+  align-items: center
+  justify-content: center
+  flex-wrap: wrap
+#img-contenedor-productodetalles
+  width: 50%
+  border: 1px solid #ed3838
+#info-contenedor-productodetalles
+  border: 1px solid #ed3838
 
-//BUSCADOR
+
+#categoria-detalleproducto,#tituloydescripcion-detalleproducto,#precio-detalleproducto,#cantidad-detalleproducto
+  background-color: #06ce06
+// ------------------------------BUSCADOR ------------------------------- //
 #aviso-buscador
   display: none
   margin: 16px 0px
@@ -68,7 +82,7 @@ $boton-color: #0d0d0d
   color: #ff0000
   text-align: center
 
-//WHATSAPP CHAT BUTTON
+// ------------------------------WHATSAPP BOTON FLOTANTE ------------------------------- //
 #chat 
   position: fixed
   bottom: 56px
@@ -275,46 +289,29 @@ body
 @mixin boton($boton-color) 
   text-align: center
   text-decoration: none
+  font-size: 1.0rem
   padding: 8px 16px
   margin: 20px 0 56px 0
   border-radius: 8px
-  font-size: 1.8rem
   border: 1px solid $boton-color
   background: $boton-color
   color: #fff
   cursor: pointer
   transition: background 0.2s
   transition: transform 0.3s
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18)
-
-  &:active
-    transform: scale(0.95)
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18)
-  
+  box-shadow: 0 4px 16px rgba(17, 40, 75, 0.505)
   &:hover 
-    box-shadow: 0 0 12px rgba(0, 0, 0, 5.8)
-    transform: scale(1.16)
+    transform: scale(1.2)
+    box-shadow: 0 8px 32px rgba(22, 108, 194, 0.731)
+    transition: transform 0#2b95ec66s ease, box-shadow 0.3s ease
+
 
 //BOTONES
-#button-vermas
+.btn-primary
   @include boton($boton-color)
-  font-size: 1.1rem
 
-#button-mostrarmas
+#btn-cerrarsesion
   @include boton($boton-color)
-  font-size: 1.1rem
-#button-finalizarcompra
-  @include boton($boton-color)
-  background-color: #14a8e2
-  font-size: 1.4rem
-
-  &:hover 
-      border: 2px solid #235f77
-      background-color: #6bd5ff
-
-#button-cerrarsesion
-  @include boton($boton-color)
-  font-size: 1.1rem
   background: #d80808
   border: 1px solid #f1d3d3
 
@@ -333,12 +330,6 @@ body
   &:hover
     background-color: #5bb8e6
     transform: scale(1.12)
-
-  &:active
-    background-color: #70c8f8
-    border: 1px solid #2a8cc0
-    transform: scale(0.96)
-
   i
     font-size: 1.0rem
 
@@ -351,6 +342,24 @@ body
       border: 2px solid #235f77
       background-color: #6bd5ff
       transform: scale(1.08)
+
+#btn-finalizarcompra
+  width: 260px
+  height: 60px
+  background-color: #2dbe4f        // verde principal
+  border: 2px solid #218838
+  font-size: 1.6rem
+  margin: 20px 0 0 0
+  box-shadow: 0 6px 8px rgba(99, 230, 129, 0.539)
+  color: #fff
+  font-weight: bold
+  border-radius: 12px
+  transition: all 0.3s ease
+
+  &:hover
+    background-color: #2ac54b      // verde más oscuro al pasar el mouse
+    transform: scale(1.12)
+    box-shadow: 0 10px 15px rgba(76, 205, 104, 0.728)
 
 .content-info-main
   min-height: 150px
@@ -440,7 +449,7 @@ body
     font-size: 0.9rem
     line-height: 0.2rem
 
-
+// ------------------------------ FOOTER ------------------------------- //
 .footer
   height: 8vh
   background-color: #202334
@@ -452,8 +461,45 @@ body
     margin-top: 12px
     font-size: 1.0rem
 
+// ------------------------------ CHECK OUT ------------------------------- //
+.main-content-checkout
+  min-height: 150vh
+  margin: 48px 80px
 
-// MEDIA QUERIES
+#form-contenedor
+  display: flex
+  flex-wrap: wrap
+  justify-content: center
+  padding: 24px
+  background: #ffffff
+  border-radius: 12px
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.16)
+  background: linear-gradient(55deg, #00000003 0%, #00000005 50%)
+  transition: transform 0.3s ease, box-shadow 0.3s ease
+
+.box-checkout
+  padding: 20px 24px 36px 24px
+  margin: 12px 32px
+  width: 100%
+  border-radius: 4px
+  background: linear-gradient(25deg, #00000003 0%, #00000001 20%)
+  box-shadow: 0 4px 6px rgba(10, 10, 10, 0.192)
+  transition: all 0.3s ease
+
+  h5
+    font-size: 1.4rem
+    width: 100%
+    text-align: center
+    padding: 0px 0px 24px 0px
+
+// ------------------------------MEDIA QUERIES ------------------------------- //
+@media (max-width: 1200px)
+  .content-products
+    padding: 16px 8px
+
+  .main-content-checkout
+    margin: 12px 120px
+
 @media (max-width: 480px)
   .logoimg
     max-height: 24px
@@ -491,7 +537,9 @@ body
 
   .h2-nav-inicio-sesion
     display: none
-    
+  
+  .main-content-checkout
+    margin: 12px 0px
 
 
 @media (max-width: 830px)
@@ -504,12 +552,15 @@ body
   .h2-nav-inicio-sesion
     font-size: 0.8rem
 
+  .main-content-checkout
+    margin: 12px 00px
+
   .logoimg
     max-width: 140px
     transition: max-height 0.3s ease, max-width 0.3s ease
 
   .content-products
-    padding: 16px 20px
+    padding: 16px 240px
 
   .info-box-pagoyenvios, #info-box-contact, #info-box-redes
     width: 100%
@@ -523,17 +574,20 @@ body
       font-size: 0.8rem
       text-align: center
 
-@media (max-width: 1200px)
-  .content-products
-    padding: 16px 8px
 
 @media (min-width: 1251px) and (max-width: 1500px)
   .content-products
-    padding: 16px 140px
+    padding: 16px 240px
+    margin: 12px 140px
+  
+
 
 @media (min-width: 1501px) and (max-width: 1800px)
   .content-products
-    padding: 16px 260px
+    margin: 12px 160px
+
+  .main-content-checkout
+    padding: 16px 240px
   
 #h2-nav-user 
   @media (max-width: 550px) 

@@ -179,7 +179,7 @@ function MostrarIniciarSesion() {
   cerrarSesionSection.style.display = "block";
   pTextoCerrarSesion.textContent =
     "Has iniciado sesión como " + localStorage.getItem("usuarioActual");
-  const buttonCerrarSesion = document.getElementById("button-cerrarsesion");
+  const buttonCerrarSesion = document.getElementById("btn-cerrarsesion");
   buttonCerrarSesion.onclick = ConfirmarCerrarSesion;
 }
 

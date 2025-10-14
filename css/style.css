@@ -66,6 +66,26 @@
     filter: brightness(1);
   }
 }
+#contenedor-detalleproducto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+#img-contenedor-productodetalles {
+  width: 50%;
+  border: 1px solid #ed3838;
+}
+
+#info-contenedor-productodetalles {
+  border: 1px solid #ed3838;
+}
+
+#categoria-detalleproducto, #tituloydescripcion-detalleproducto, #precio-detalleproducto, #cantidad-detalleproducto {
+  background-color: #06ce06;
+}
+
 #aviso-buscador {
   display: none;
   margin: 16px 0px;
@@ -297,127 +317,64 @@ body {
   justify-content: center;
 }
 
-#button-vermas {
+.btn-primary {
   text-align: center;
   text-decoration: none;
+  font-size: 1rem;
   padding: 8px 16px;
   margin: 20px 0 56px 0;
   border-radius: 8px;
-  font-size: 1.8rem;
   border: 1px solid #0d0d0d;
   background: #0d0d0d;
   color: #fff;
   cursor: pointer;
   transition: background 0.2s;
   transition: transform 0.3s;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-  font-size: 1.1rem;
+  box-shadow: 0 4px 16px rgba(17, 40, 75, 0.505);
 }
-#button-vermas:active {
-  transform: scale(0.95);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-}
-#button-vermas:hover {
-  box-shadow: 0 0 12px rgb(0, 0, 0);
-  transform: scale(1.16);
+.btn-primary:hover {
+  transform: scale(1.2);
+  box-shadow: 0 8px 32px rgba(22, 108, 194, 0.731);
+  transition: transform 0 rgba(43, 149, 236, 0.4) s ease, box-shadow 0.3s ease;
 }
 
-#button-mostrarmas {
+#btn-cerrarsesion {
   text-align: center;
   text-decoration: none;
+  font-size: 1rem;
   padding: 8px 16px;
   margin: 20px 0 56px 0;
   border-radius: 8px;
-  font-size: 1.8rem;
   border: 1px solid #0d0d0d;
   background: #0d0d0d;
   color: #fff;
   cursor: pointer;
   transition: background 0.2s;
   transition: transform 0.3s;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-  font-size: 1.1rem;
-}
-#button-mostrarmas:active {
-  transform: scale(0.95);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-}
-#button-mostrarmas:hover {
-  box-shadow: 0 0 12px rgb(0, 0, 0);
-  transform: scale(1.16);
-}
-
-#button-finalizarcompra {
-  text-align: center;
-  text-decoration: none;
-  padding: 8px 16px;
-  margin: 20px 0 56px 0;
-  border-radius: 8px;
-  font-size: 1.8rem;
-  border: 1px solid #0d0d0d;
-  background: #0d0d0d;
-  color: #fff;
-  cursor: pointer;
-  transition: background 0.2s;
-  transition: transform 0.3s;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-  background-color: #14a8e2;
-  font-size: 1.4rem;
-}
-#button-finalizarcompra:active {
-  transform: scale(0.95);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-}
-#button-finalizarcompra:hover {
-  box-shadow: 0 0 12px rgb(0, 0, 0);
-  transform: scale(1.16);
-}
-#button-finalizarcompra:hover {
-  border: 2px solid #235f77;
-  background-color: #6bd5ff;
-}
-
-#button-cerrarsesion {
-  text-align: center;
-  text-decoration: none;
-  padding: 8px 16px;
-  margin: 20px 0 56px 0;
-  border-radius: 8px;
-  font-size: 1.8rem;
-  border: 1px solid #0d0d0d;
-  background: #0d0d0d;
-  color: #fff;
-  cursor: pointer;
-  transition: background 0.2s;
-  transition: transform 0.3s;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-  font-size: 1.1rem;
+  box-shadow: 0 4px 16px rgba(17, 40, 75, 0.505);
   background: #d80808;
   border: 1px solid #f1d3d3;
 }
-#button-cerrarsesion:active {
-  transform: scale(0.95);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-}
-#button-cerrarsesion:hover {
-  box-shadow: 0 0 12px rgb(0, 0, 0);
-  transform: scale(1.16);
+#btn-cerrarsesion:hover {
+  transform: scale(1.2);
+  box-shadow: 0 8px 32px rgba(22, 108, 194, 0.731);
+  transition: transform 0 rgba(43, 149, 236, 0.4) s ease, box-shadow 0.3s ease;
 }
 
 .btn-agregar {
   text-align: center;
   text-decoration: none;
+  font-size: 1rem;
   padding: 8px 16px;
   margin: 20px 0 56px 0;
   border-radius: 8px;
-  font-size: 1.8rem;
   border: 1px solid #0d0d0d;
   background: #0d0d0d;
   color: #fff;
   cursor: pointer;
   transition: background 0.2s;
   transition: transform 0.3s;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 4px 16px rgba(17, 40, 75, 0.505);
   width: 145px;
   background-color: #87ceeb;
   border: 2px solid #5abcf5;
@@ -428,22 +385,14 @@ body {
   justify-content: center;
   align-items: center;
 }
-.btn-agregar:active {
-  transform: scale(0.95);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-}
 .btn-agregar:hover {
-  box-shadow: 0 0 12px rgb(0, 0, 0);
-  transform: scale(1.16);
+  transform: scale(1.2);
+  box-shadow: 0 8px 32px rgba(22, 108, 194, 0.731);
+  transition: transform 0 rgba(43, 149, 236, 0.4) s ease, box-shadow 0.3s ease;
 }
 .btn-agregar:hover {
   background-color: #5bb8e6;
   transform: scale(1.12);
-}
-.btn-agregar:active {
-  background-color: #70c8f8;
-  border: 1px solid #2a8cc0;
-  transform: scale(0.96);
 }
 .btn-agregar i {
   font-size: 1rem;
@@ -452,32 +401,48 @@ body {
 #boton-enviar-form {
   text-align: center;
   text-decoration: none;
+  font-size: 1rem;
   padding: 8px 16px;
   margin: 20px 0 56px 0;
   border-radius: 8px;
-  font-size: 1.8rem;
   border: 1px solid #0d0d0d;
   background: #0d0d0d;
   color: #fff;
   cursor: pointer;
   transition: background 0.2s;
   transition: transform 0.3s;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 4px 16px rgba(17, 40, 75, 0.505);
   background-color: #14a8e2;
   font-size: 1.2rem;
 }
-#boton-enviar-form:active {
-  transform: scale(0.95);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-}
 #boton-enviar-form:hover {
-  box-shadow: 0 0 12px rgb(0, 0, 0);
-  transform: scale(1.16);
+  transform: scale(1.2);
+  box-shadow: 0 8px 32px rgba(22, 108, 194, 0.731);
+  transition: transform 0 rgba(43, 149, 236, 0.4) s ease, box-shadow 0.3s ease;
 }
 #boton-enviar-form:hover {
   border: 2px solid #235f77;
   background-color: #6bd5ff;
   transform: scale(1.08);
+}
+
+#btn-finalizarcompra {
+  width: 260px;
+  height: 60px;
+  background-color: #2dbe4f;
+  border: 2px solid #218838;
+  font-size: 1.6rem;
+  margin: 20px 0 0 0;
+  box-shadow: 0 6px 8px rgba(99, 230, 129, 0.539);
+  color: #fff;
+  font-weight: bold;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+#btn-finalizarcompra:hover {
+  background-color: #2ac54b;
+  transform: scale(1.12);
+  box-shadow: 0 10px 15px rgba(76, 205, 104, 0.728);
 }
 
 .content-info-main {
@@ -596,6 +561,47 @@ body {
   font-size: 1rem;
 }
 
+.main-content-checkout {
+  min-height: 150vh;
+  margin: 48px 80px;
+}
+
+#form-contenedor {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.16);
+  background: linear-gradient(55deg, rgba(0, 0, 0, 0.0117647059) 0%, rgba(0, 0, 0, 0.0196078431) 50%);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.box-checkout {
+  padding: 20px 24px 36px 24px;
+  margin: 12px 32px;
+  width: 100%;
+  border-radius: 4px;
+  background: linear-gradient(25deg, rgba(0, 0, 0, 0.0117647059) 0%, rgba(0, 0, 0, 0.0039215686) 20%);
+  box-shadow: 0 4px 6px rgba(10, 10, 10, 0.192);
+  transition: all 0.3s ease;
+}
+.box-checkout h5 {
+  font-size: 1.4rem;
+  width: 100%;
+  text-align: center;
+  padding: 0px 0px 24px 0px;
+}
+
+@media (max-width: 1200px) {
+  .content-products {
+    padding: 16px 8px;
+  }
+  .main-content-checkout {
+    margin: 12px 120px;
+  }
+}
 @media (max-width: 480px) {
   .logoimg {
     max-height: 24px;
@@ -638,6 +644,9 @@ body {
   .h2-nav-inicio-sesion {
     display: none;
   }
+  .main-content-checkout {
+    margin: 12px 0px;
+  }
 }
 @media (max-width: 830px) {
   .img-menu-size {
@@ -649,12 +658,15 @@ body {
   .h2-nav-inicio-sesion {
     font-size: 0.8rem;
   }
+  .main-content-checkout {
+    margin: 12px 0px;
+  }
   .logoimg {
     max-width: 140px;
     transition: max-height 0.3s ease, max-width 0.3s ease;
   }
   .content-products {
-    padding: 16px 20px;
+    padding: 16px 240px;
   }
   .info-box-pagoyenvios, #info-box-contact, #info-box-redes {
     width: 100%;
@@ -668,19 +680,18 @@ body {
     text-align: center;
   }
 }
-@media (max-width: 1200px) {
-  .content-products {
-    padding: 16px 8px;
-  }
-}
 @media (min-width: 1251px) and (max-width: 1500px) {
   .content-products {
-    padding: 16px 140px;
+    padding: 16px 240px;
+    margin: 12px 140px;
   }
 }
 @media (min-width: 1501px) and (max-width: 1800px) {
   .content-products {
-    padding: 16px 260px;
+    margin: 12px 160px;
+  }
+  .main-content-checkout {
+    padding: 16px 240px;
   }
 }
 @media (max-width: 550px) {

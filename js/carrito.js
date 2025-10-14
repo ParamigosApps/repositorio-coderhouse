@@ -1,5 +1,6 @@
 const carritoItems = document.getElementById("carrito-items");
 const montoTotalCarrito = document.getElementById("MontoTotalCarrito");
+const btnFinalizarCompra = document.getElementById("btn-comprar");
 const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 carritoItems.innerHTML = "";
 
@@ -76,8 +77,6 @@ carritoItems.addEventListener("click", (e) => {
     // AÑADIR 1 UNIDAD AL CARRITO
   } else if (e.target.classList.contains("btn-success")) {
     sumarProductoAlCarrito(producto, index);
-    console.log("Producto a sumar: ", producto);
-    console.log("Índice del producto: ", index);
   } else {
     Swal.fire({
       title: "No hay más stock",
@@ -172,3 +171,10 @@ function mostrarMensaje(mensaje, color) {
   }).showToast();
 }
 actualizarCarritoVisual();
+
+// OCULTAR BOTON FINALIZAR SI CARRITO ESTA VACIO
+if (calcularTotal() <= 0) btnFinalizarCompra.style.display = "none";
+
+btnFinalizarCompra.addEventListener("click", (e) => {
+  window.location.href = "/pages/checkout.html";
+});

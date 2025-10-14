@@ -1,0 +1,86 @@
+[
+  {
+    "id": "1",
+    "imgSrc": "/Assets/vapers/vaper (1).webp",
+    "titulo": "GrapeFruit - Lost Mary 30K",
+    "precio": "$30.000",
+    "destacado": "false"
+  },
+  {
+    "id": "2",
+    "imgSrc": "/Assets/vapers/vaper (2).jpg",
+    "titulo": "Peach Lemonade - Nasty 5K",
+    "precio": "$17.999",
+    "destacado": "false"
+  },
+  {
+    "id": "3",
+    "imgSrc": "/Assets/vapers/vaper (3).png",
+    "titulo": "Menta - Elfbar 40K",
+    "precio": "$32.999",
+    "destacado": "false"
+  },
+  {
+    "id": "4",
+    "imgSrc": "/Assets/vapers/vaper (4).webp",
+    "titulo": "Frutilla - Elfbar 40K",
+    "precio": "$49.999",
+    "destacado": "false"
+  },
+  {
+    "id": "5",
+    "imgSrc": "/Assets/vapers/vaper (6).jpg",
+    "titulo": "Mango Strawberry - Nasty 5K",
+    "precio": "$17.999",
+    "destacado": "false"
+  },
+  {
+    "id": "6",
+    "imgSrc": "/Assets/vapers/vaper (7).webp",
+    "titulo": "Orange Strawberry - Losty Mary 30K",
+    "precio": "$30.000",
+    "destacado": "false"
+  },
+  {
+    "id": "7",
+    "imgSrc": "/Assets/vapers/vaper (8).jpg",
+    "titulo": "PineApple Lemonade - Nasty 5K",
+    "precio": "$17.999",
+    "destacado": "false"
+  },
+  {
+    "id": "8",
+    "imgSrc": "/Assets/vapers/vaper (10).webp",
+    "titulo": "Grape - ELFBAR 40K",
+    "precio": "$32.999",
+    "destacado": "false"
+  },
+  {
+    "id": "9",
+    "imgSrc": "/Assets/vapers/vaper09.PNG",
+    "titulo": "Paradise OG - Torch 7.5",
+    "precio": "$75.000",
+    "destacado": "false"
+  },
+  {
+    "id": "10",
+    "imgSrc": "/Assets/vapers/vaper10.png",
+    "titulo": "Green Apple - Torch 5.0",
+    "precio": "$60.000",
+    "destacado": "false"
+  },
+  {
+    "id": "11",
+    "imgSrc": "/Assets/vapers/vaper11.webp",
+    "titulo": "Lemon - Torch 7.5",
+    "precio": "$75.000",
+    "destacado": "false"
+  },
+  {
+    "id": "12",
+    "imgSrc": "/Assets/vapers/vaper12.jpg",
+    "titulo": "Watermelon - Torch 7.5",
+    "precio": "$75.000",
+    "destacado": "false"
+  }
+]

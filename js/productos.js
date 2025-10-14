@@ -3,6 +3,8 @@ const cambiarBoton = document.getElementsByClassName("btn-agregar");
 const botonMostrarMas = document.getElementById("button-mostrarmas");
 const paginaActual = window.location.pathname.split("/").pop();
 
+window.productos = []; // Array de productos obtenidos de JSON
+
 let productosPorPaginas = 4;
 let mostrarMas = 4;
 
@@ -15,7 +17,10 @@ class Producto {
     this.titulo = titulo;
     this.precio = precio;
     this.enCarrito = 1;
-
+    this.categoria = "VAPES"; // FALTA IMPLEMENTAR
+    this.subCategoria = "GENERAL"; // FALTA IMPLEMENTAR
+    this.descripcion = null; // FALTA IMPLEMENTAR
+    this.destacado = false;
     const chequearStock = JSON.parse(localStorage.getItem(`stock-${this.id}`));
     if (chequearStock !== null) {
       this.stock = chequearStock;
@@ -32,7 +37,7 @@ class Producto {
 
     const sinStock = this.stock <= 0;
 
-    div.innerHTML = `<a href="/pages/producto.html?id=${this.id}">
+    div.innerHTML = `<a href="../pages/producto.html?id=${this.id}">
       <img src="${this.imgSrc}" alt="Imagen de producto" />
       <h3 class="product-description-title">${this.titulo}</h3>
       <h5 class="product-price">${this.precio}</h5>
@@ -55,87 +60,8 @@ class Producto {
     return div;
   }
 }
-
-// Array de productos
-window.productos = [
-  new Producto(
-    "producto1",
-    "/Assets/vapers/vaper (1).webp",
-    "GrapeFruit - Lost Mary 30K",
-    "$30.000"
-  ),
-  new Producto(
-    "producto2",
-    "/Assets/vapers/vaper (2).jpg",
-    "Peach Lemonade - Nasty 5K",
-    "$17.999"
-  ),
-  new Producto(
-    "producto3",
-    "/Assets/vapers/vaper (3).png",
-    "Menta - Elfbar 40K",
-    "$32.999"
-  ),
-  new Producto(
-    "producto4",
-    "/Assets/vapers/vaper (4).webp",
-    "Frutilla - Elfbar 40K",
-    "$49.999"
-  ),
-  new Producto(
-    "producto5",
-    "/Assets/vapers/vaper (6).jpg",
-    "Mango Strawberry - Nasty 5K",
-    "$17.999"
-  ),
-  new Producto(
-    "producto6",
-    "/Assets/vapers/vaper (7).webp",
-    "Orange Strawberry - Losty Mary 30K",
-    "$30.000"
-  ),
-  new Producto(
-    "producto7",
-    "/Assets/vapers/vaper (8).jpg",
-    "PineApple Lemonade - Nasty 5K",
-    "$17.999"
-  ),
-  new Producto(
-    "producto8",
-    "/Assets/vapers/vaper (10).webp",
-    "Grape - ELFBAR 40K",
-    "$32.999"
-  ),
-  new Producto(
-    "producto9",
-    "/Assets/vapers/vaper09.PNG",
-    "Paradise OG - Torch 7.5",
-    "$75.000"
-  ),
-  new Producto(
-    "producto10",
-    "/Assets/vapers/vaper10.png",
-    "Green Apple - Torch 5.0",
-    "$60.000"
-  ),
-
-  new Producto(
-    "producto11",
-    "/Assets/vapers/vaper11.webp",
-    "Lemon - Torch 7.5",
-    "$75.000"
-  ),
-
-  new Producto(
-    "producto12",
-    "/Assets/vapers/vaper12.jpg",
-    "Watermelon - Torch 7.5",
-    "$75.000"
-  ),
-];
-
 function cargarProductos() {
-  if (paginaActual.includes("producto.html")) return; //no se otro metodo para no cargar los productos en la pagina detalle-producto para que no produzca error
+  if (container == null) return;
 
   window.productos.forEach((producto, index) => {
     if (index >= productosPorPaginas) return;
@@ -151,7 +77,6 @@ function cargarProductos() {
 }
 
 function vincularBotones(producto, boton) {
-  //BOTONES
   boton.addEventListener("click", () => {
     if (producto.stock <= 0) {
       boton.textContent = "Sin stock";
@@ -180,7 +105,7 @@ function vincularBotones(producto, boton) {
       JSON.stringify(producto.stock)
     );
     localStorage.setItem("carrito", JSON.stringify(carrito));
-    actualizarCarritoVisual();
+    actualizarCarrito();
     mostrarMensaje(
       "Añadiste: " + producto.titulo + " al carrito ",
       "#2bff00c4"
@@ -196,14 +121,14 @@ Array.from(cambiarBoton).forEach((boton) => {
 if (botonMostrarMas != null) {
   botonMostrarMas.addEventListener("click", () => {
     productosPorPaginas += mostrarMas;
-    if (productosPorPaginas >= productos.length) {
+    if (productosPorPaginas >= window.productos.length) {
       botonMostrarMas.style.display = "none";
     }
     cargarProductos();
   });
 }
 
-function actualizarCarritoVisual() {
+function actualizarCarrito() {
   let imgCarrito = document.getElementById("img-carrito");
   let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 
@@ -224,5 +149,24 @@ function mostrarMensaje(mensaje, color) {
     duration: 2500,
   }).showToast();
 }
-cargarProductos();
-actualizarCarritoVisual();
+
+// JSON CARGAR PRODUCTOS
+async function cargarProductosJSON() {
+  try {
+    const response = await fetch("/database.json"); // Ajusta la ruta según dónde pusiste tu JSON
+    const data = await response.json();
+
+    window.productos = data.map(
+      (p) => new Producto(p.id, p.imgSrc, p.titulo, p.precio)
+    );
+
+    cargarProductos();
+  } catch (error) {
+    console.error("Error cargando productos JSON:", error);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  cargarProductosJSON();
+  actualizarCarrito();
+});

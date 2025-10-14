@@ -599,7 +599,7 @@ body {
     padding: 16px 8px;
   }
   .main-content-checkout {
-    margin: 12px 120px;
+    margin: 12px 60px;
   }
 }
 @media (max-width: 480px) {
@@ -645,7 +645,10 @@ body {
     display: none;
   }
   .main-content-checkout {
-    margin: 12px 0px;
+    margin: 12px 40px;
+  }
+  .content-products {
+    padding: 16px 0px;
   }
 }
 @media (max-width: 830px) {
@@ -666,7 +669,7 @@ body {
     transition: max-height 0.3s ease, max-width 0.3s ease;
   }
   .content-products {
-    padding: 16px 240px;
+    padding: 16px 0px;
   }
   .info-box-pagoyenvios, #info-box-contact, #info-box-redes {
     width: 100%;

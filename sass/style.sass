@@ -69,11 +69,11 @@ $boton-color: #0d0d0d
   width: 50%
   border: 1px solid #ed3838
 #info-contenedor-productodetalles
-  border: 1px solid #ed3838
+
 
 
 #categoria-detalleproducto,#tituloydescripcion-detalleproducto,#precio-detalleproducto,#cantidad-detalleproducto
-  background-color: #06ce06
+
 // ------------------------------BUSCADOR ------------------------------- //
 #aviso-buscador
   display: none
@@ -107,7 +107,6 @@ $boton-color: #0d0d0d
 
 #titulo-productosdestacados
   border-top: 1px solid #d9d8d868
-  margin: 4px 20px
   padding: 16px 0 16px 60px
   font-size: 1.8rem
   
@@ -500,6 +499,15 @@ body
     padding: 0px 0px 24px 0px
 
 // ------------------------------MEDIA QUERIES ------------------------------- //
+
+// Pantallas grandes intermedias
+@media (min-width: 1251px) and (max-width: 18
+  00px)
+  .content-products
+    padding: 16px 10px
+    margin: 12px 100px
+
+// Pantallas medianas
 @media (max-width: 1200px)
   .content-products
     padding: 16px 8px
@@ -507,16 +515,58 @@ body
   .main-content-checkout
     margin: 12px 100px
 
+// Pantallas pequeñas
+@media (max-width: 830px)
+  .img-menu-size
+    height: $img-menu-minsize - 16px
+
+  .h2-nav,
+  .h2-nav-inicio-sesion
+    font-size: 0.8rem
+
+  .main-content-checkout
+    margin: 12px 0px
+
+  .logoimg
+    max-width: 140px
+    transition: max-height 0.3s ease, max-width 0.3s ease
+
+  .content-products,
+  #titulo-productosdestacados
+    padding: 16px 0px
+
+  .info-box-pagoyenvios,
+  #info-box-contact,
+  #info-box-redes
+    width: 100%
+
+  .info-card
+    img
+      max-height: 40px
+      max-width: 48px
+
+    p
+      font-size: 0.8rem
+      text-align: center
+
+// Pantallas muy pequeñas
+@media (max-width: 550px)
+  #h2-nav-user
+    display: none
+
 @media (max-width: 480px)
   .logoimg
     max-height: 24px
+
   .h2-nav
     font-size: 0.6rem
+
   #info-box-contact
     h3
       font-size: 0.9rem
     p
       font-size: 0.6rem
+
   .content-brands
     flex-wrap: wrap
     justify-content: center
@@ -529,76 +579,17 @@ body
     max-width: 80px
     max-height: 50px
     margin: 0px
+
     h2
-      font-size: clamp(1.1rem, 2.5vw, 0.8rem)
-    
+      font-size: clamp(0.8rem, 2.5vw, 1.1rem)
+
   .product-card
     width: 200px
     height: 370px
     border: 1px solid #d3d3d3
     padding: 4px 14px
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06)
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06)
     transition: transform 0.2s, box-shadow 0.2s
     gap: 4px
     align-self: center
-
-  .h2-nav-inicio-sesion
-    display: none
-  
-  .main-content-checkout
-    margin: 12px 40px
-
-  .content-products
-    padding: 16px 0px
-
-@media (max-width: 830px)
-  .img-menu-size
-    height: $img-menu-minsize - 16px
-
-  .h2-nav
-    font-size: 0.8rem
-
-  .h2-nav-inicio-sesion
-    font-size: 0.8rem
-
-  .main-content-checkout
-    margin: 12px 0px
-
-  .logoimg
-    max-width: 140px
-    transition: max-height 0.3s ease, max-width 0.3s ease
-
-  .content-products
-    padding: 16px 0px
-
-  .info-box-pagoyenvios, #info-box-contact, #info-box-redes
-    width: 100%
-
-  .info-card
-    img
-      max-height: 40px
-      max-width: 48px
-  
-    p
-      font-size: 0.8rem
-      text-align: center
-
-
-@media (min-width: 1251px) and (max-width: 1500px)
-  .content-products
-    padding: 16px 240px
-    margin: 12px 140px
-  
-
-
-@media (min-width: 1501px) and (max-width: 1800px)
-  .content-products
-    margin: 12px 160px
-
-  .main-content-checkout
-    padding: 16px 240px
-  
-#h2-nav-user 
-  @media (max-width: 550px) 
-    display: none
 

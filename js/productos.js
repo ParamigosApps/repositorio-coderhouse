@@ -68,6 +68,7 @@ function cargarProductos() {
 
     if (document.getElementById(producto.id)) return;
 
+    if (paginaActual == "index.html") console.log("producto destacado");
     const card = producto.render();
     container.appendChild(card);
 
@@ -153,7 +154,7 @@ function mostrarMensaje(mensaje, color) {
 // JSON CARGAR PRODUCTOS
 async function cargarProductosJSON() {
   try {
-    const response = await fetch("/database.json"); // Ajusta la ruta según dónde pusiste tu JSON
+    const response = await fetch("/database.json");
     const data = await response.json();
 
     window.productos = data.map(

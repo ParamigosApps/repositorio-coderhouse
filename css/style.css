@@ -116,6 +116,13 @@
   background-color: #f7f7f7;
 }
 
+#titulo-productosdestacados {
+  border-top: 1px solid rgba(217, 216, 216, 0.4078431373);
+  margin: 4px 20px;
+  padding: 16px 0 16px 60px;
+  font-size: 1.8rem;
+}
+
 #detalle-producto {
   display: flex;
   justify-content: center;
@@ -427,11 +434,11 @@ body {
 }
 
 #btn-finalizarcompra {
-  width: 260px;
+  width: 230px;
   height: 60px;
   background-color: #2dbe4f;
   border: 2px solid #218838;
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   margin: 20px 0 0 0;
   box-shadow: 0 6px 8px rgba(99, 230, 129, 0.539);
   color: #fff;
@@ -440,7 +447,7 @@ body {
   transition: all 0.3s ease;
 }
 #btn-finalizarcompra:hover {
-  background-color: #2ac54b;
+  background-color: #41ec66;
   transform: scale(1.12);
   box-shadow: 0 10px 15px rgba(76, 205, 104, 0.728);
 }
@@ -599,7 +606,7 @@ body {
     padding: 16px 8px;
   }
   .main-content-checkout {
-    margin: 12px 60px;
+    margin: 12px 100px;
   }
 }
 @media (max-width: 480px) {

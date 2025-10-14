@@ -1,4 +1,5 @@
 const container = document.getElementById("productos-container");
+const containerDestacados = document.getElementById("container-destacados");
 const cambiarBoton = document.getElementsByClassName("btn-agregar");
 const botonMostrarMas = document.getElementById("button-mostrarmas");
 const paginaActual = window.location.pathname.split("/").pop();
@@ -11,7 +12,7 @@ let mostrarMas = 4;
 if (paginaActual == "productos.html") productosPorPaginas = 8;
 
 class Producto {
-  constructor(id, imgSrc, titulo, precio) {
+  constructor(id, imgSrc, titulo, precio, destacado = false) {
     this.id = id;
     this.imgSrc = imgSrc;
     this.titulo = titulo;
@@ -20,7 +21,7 @@ class Producto {
     this.categoria = "VAPES"; // FALTA IMPLEMENTAR
     this.subCategoria = "GENERAL"; // FALTA IMPLEMENTAR
     this.descripcion = null; // FALTA IMPLEMENTAR
-    this.destacado = false;
+    this.destacado = destacado;
     const chequearStock = JSON.parse(localStorage.getItem(`stock-${this.id}`));
     if (chequearStock !== null) {
       this.stock = chequearStock;
@@ -61,20 +62,41 @@ class Producto {
   }
 }
 function cargarProductos() {
-  if (container == null) return;
+  let containerExistente;
 
-  window.productos.forEach((producto, index) => {
-    if (index >= productosPorPaginas) return;
+  if (container) containerExistente = container;
+  else if (containerDestacados) containerExistente = containerDestacados;
+  //
 
-    if (document.getElementById(producto.id)) return;
+  if (containerDestacados) {
+    let i = 0;
 
-    if (paginaActual == "index.html") console.log("producto destacado");
-    const card = producto.render();
-    container.appendChild(card);
+    window.productos.forEach((producto) => {
+      if (i >= productosPorPaginas) return;
+      if (!producto.destacado) return;
 
-    const boton = card.querySelector(".btn-agregar");
-    vincularBotones(producto, boton);
-  });
+      i++;
+      const card = producto.render();
+      containerExistente.appendChild(card);
+
+      const boton = card.querySelector(".btn-agregar");
+      vincularBotones(producto, boton);
+    });
+  }
+
+  if (container) {
+    window.productos.forEach((producto, index) => {
+      if (index >= productosPorPaginas) return;
+
+      if (document.getElementById(producto.id)) return;
+
+      const card = producto.render();
+      containerExistente.appendChild(card);
+
+      const boton = card.querySelector(".btn-agregar");
+      vincularBotones(producto, boton);
+    });
+  }
 }
 
 function vincularBotones(producto, boton) {
@@ -158,7 +180,7 @@ async function cargarProductosJSON() {
     const data = await response.json();
 
     window.productos = data.map(
-      (p) => new Producto(p.id, p.imgSrc, p.titulo, p.precio)
+      (p) => new Producto(p.id, p.imgSrc, p.titulo, p.precio, p.destacado)
     );
 
     cargarProductos();

@@ -616,6 +616,7 @@ body {
 @media (max-width: 1200px) {
   .content-products {
     padding: 16px 8px;
+    margin: 0px 0px;
   }
   .main-content-checkout {
     margin: 12px 200px;

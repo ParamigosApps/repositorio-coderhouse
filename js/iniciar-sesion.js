@@ -3,11 +3,14 @@ const check = document.getElementById("CheckNuevoUsuario");
 const userIngresado = document.getElementById("InputUser");
 const passIngresado = document.getElementById("InputPassword");
 const submit = document.getElementById("submit");
-const aviso = document.getElementById("p-error-inicio-sesion");
-const aviso2 = document.getElementById("p-error-inicio-sesion2");
+const aviso = document.getElementById("p-texto-primario");
+const aviso2 = document.getElementById("p-texto-secundario");
 const formulario = document.querySelector(".inicio-sesion");
 const cerrarSesionSection = document.getElementById("cerrar-sesion-section");
 const pTextoCerrarSesion = document.getElementById("p-texto-cerrar-sesion");
+
+const userMinCaracteres = 6;
+const passMinCaracteres = 8;
 
 let usuarioRegistrado = false;
 
@@ -76,8 +79,8 @@ function registrarUsuario(e) {
   let valido = true;
 
   // Validar usuario
-  if (userIngresado.value.length < 4) {
-    aviso.textContent = " *Usuario deben tener al menos 4 caracteres*";
+  if (userIngresado.value.length < userMinCaracteres) {
+    aviso.textContent = `*Usuario debe tener al menos ${userMinCaracteres} caracteres*`;
     aviso.style.color = "red";
     valido = false;
   } else {
@@ -86,8 +89,8 @@ function registrarUsuario(e) {
   }
 
   // Validar contraseña
-  if (passIngresado.value.length < 4) {
-    aviso2.textContent = "*Contraseña deben tener al menos 4 caracteres*";
+  if (passIngresado.value.length < passMinCaracteres) {
+    aviso2.textContent = `*Contraseña deben tener al menos ${passMinCaracteres} caracteres*`;
     aviso2.style.color = "red";
     valido = false;
   } else {
@@ -135,9 +138,10 @@ check.addEventListener("change", () => {
     submit.textContent = "Registrarse";
     userIngresado.placeholder = "Crea tu usuario";
     passIngresado.placeholder = "Crea tu contraseña";
-    aviso.textContent = "Usuario min: 4 caracteres.";
-    aviso2.textContent = "Contraseña min: 4 caracteres.";
+    aviso.textContent = `Usuario min: ${userMinCaracteres} caracteres.`;
+    aviso2.textContent = `Contraseña min: ${passMinCaracteres} caracteres.`;
     aviso.style.color = "black";
+    aviso2.style.color = "black";
   } else {
     submit.textContent = "Iniciar sesión";
     userIngresado.placeholder = "Ingresa tu usuario";

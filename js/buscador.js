@@ -44,3 +44,24 @@ inputBuscador.addEventListener("input", () => {
     });
   }
 });
+
+//Ordenar por precio
+const ordenPrecio = document.getElementById("orden-precio");
+
+ordenPrecio.addEventListener("change", () => {
+  const cards = Array.from(contenedorProductos.children);
+
+  cards.sort((a, b) => {
+    const precioA = Number(
+      a.querySelector(".product-price").textContent.replace(/\D/g, "")
+    );
+    const precioB = Number(
+      b.querySelector(".product-price").textContent.replace(/\D/g, "")
+    );
+
+    if (ordenPrecio.value === "asc") return precioA - precioB;
+    else if (ordenPrecio.value === "desc") return precioB - precioA;
+  });
+
+  cards.forEach((card) => contenedorProductos.appendChild(card));
+});

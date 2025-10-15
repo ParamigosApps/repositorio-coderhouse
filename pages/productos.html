@@ -97,24 +97,59 @@
     </header>
 
     <main class="main-content">
-      <h2 class="text-center p-4">Todos los productos</h2>
-      <form class="d-flex justify-content-center mb-4" role="search">
-        <input
-          class="form-control w-50"
-          id="buscador"
-          type="search"
-          placeholder="Buscar productos..."
-          aria-label="Buscar"
-        />
-      </form>
-      <div><p id="aviso-buscador"></p></div>
-      <section
-        id="productos-container"
-        class="content-products d-flex justify-content-center flex-wrap align-items-center"
-      ></section>
-      <div id="contenedor-button">
-        <button class="btn-primary" id="button-mostrarmas">Mostrar más</button>
-      </div>
+      <section id="contenedor-barrayproductos">
+        <!-- BARRA LATERAL -->
+        <aside id="barra-lateral-productos">
+          <div class="categorias">
+            <h4>Categorías</h4>
+            <p>Próximamente...</p>
+          </div>
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL DE PRODUCTOS -->
+        <div class="contenido-productos">
+          <!-- BARRA SUPERIOR: TITULO, ORDENAR Y BUSCADOR -->
+          <section id="barra-superior-productos">
+            <h2 class="titulo-productos text-center p-4">
+              Todos los productos
+            </h2>
+
+            <div class="filtros-container">
+              <!-- SELECT ORDENAR PRECIO -->
+              <select id="orden-precio">
+                <option value="">Ordenar por precio</option>
+                <option value="asc">Menor a Mayor</option>
+                <option value="desc">Mayor a Menor</option>
+              </select>
+
+              <!-- BUSCADOR -->
+              <form role="search" class="form-buscador">
+                <input
+                  id="buscador"
+                  type="search"
+                  placeholder="Buscar productos..."
+                  aria-label="Buscar"
+                />
+              </form>
+            </div>
+
+            <div id="aviso-buscador"></div>
+          </section>
+
+          <!-- CONTENEDOR DE PRODUCTOS -->
+          <section
+            id="productos-container"
+            class="content-products d-flex justify-content-center flex-wrap align-items-center"
+          ></section>
+
+          <!-- BOTON MOSTRAR MÁS -->
+          <div class="separador-contenedor-inf">
+            <button class="btn-primary" id="button-mostrarmas">
+              Mostrar más
+            </button>
+          </div>
+        </div>
+      </section>
       <div id="chat">
         <a href="https://wa.me/5491121894427" target="_blank" rel="noopener">
           <img

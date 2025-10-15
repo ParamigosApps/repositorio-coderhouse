@@ -3,6 +3,7 @@ const contenedorDetalle = document.getElementById("contenedor-detalleproducto");
 const parametrosURL = new URLSearchParams(window.location.search);
 const idProducto = parametrosURL.get("id");
 
+// Mostramos el producto clickeado, guiandonos por su id
 function mostrarProducto() {
   let listaproductos = window.productos;
   let producto = listaproductos.find((p) => p.id == idProducto);
@@ -44,42 +45,8 @@ function mostrarProducto() {
         </button></div>
   </section>
 `;
-  // `
-  //   <section class="producto-info">
-  //   <div id="comprar-producto" class="d-flex flex-wrap align-items-start gap-4">
 
-  //     <!-- Imagen a la izquierda -->
-  //     <div class="producto-imagen flex-shrink-0">
-  //       <img src="${producto.imgSrc}" alt="${
-  //     producto.titulo
-  //   }" style="max-width:250px; width:100%; border-radius:8px;">
-  //     </div>
-
-  //     <!-- Contenido a la derecha -->
-  //     <div class="producto-detalle flex-grow-1">
-  //       <h6>${producto.categoria?.toUpperCase() || "CATEGORIA"} / ${
-  //     producto.subCategoria?.toUpperCase() || "SUB CATEGORIA"
-  //   }</h6>
-  //       <h4>${producto.subtitulo || ""}</h4>
-  //       <h2>${producto.titulo}</h2>
-  //       <h3 class="product-price">${producto.precio}</h3>
-
-  //       <label for="cantidad" class="form-label fw-bold text-primary d-block text-left mt-3">Cantidad</label>
-  //       <select class="form-select form-select-sm border border-2 border-info rounded-pill text-center w-50" id="cantidad" name="cantidad"></select>
-  //       <div class="form-text text-muted mb-3">Selecciona la cantidad deseada.</div>
-
-  //       <button class="btn-agregar w-50" id="agregar-detalle" style="background-color: ${
-  //         sinStock ? "#9dcdff" : "#4199f7"
-  //       };">
-  //         ${sinStock ? "Sin stock" : "Añadir al carrito"}
-  //       </button>
-  //     </div>
-
-  //   </div>
-  // </section>
-  // `;
-
-  // LLENAR EL SELECT DINÁMICAMENTE SEGÚN EL STOCK
+  // Llenamos la cantidad elegible segun stock disponible
   const cantidadSelect = document.getElementById("cantidad");
   cantidadSelect.innerHTML = "";
 
@@ -92,6 +59,8 @@ function mostrarProducto() {
   }
 
   const boton = document.getElementById("agregar-detalle");
+
+  // Escuchamos click para añadir productos al carrito, descontarlo del stock, chequear si hay stock, ect.
   boton.addEventListener("click", () => {
     const cantidad = parseInt(document.getElementById("cantidad").value) || 1;
 

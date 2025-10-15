@@ -1,15 +1,17 @@
 const linkSesion = document.getElementById("linkSesion");
 const textoSesion = document.getElementById("textoSesion");
 
+// Cambia el nombre del usuario a Cerrar sesion y permite acceder a la funcion
 textoSesion.addEventListener("mouseover", () => {
   if (localStorage.getItem("logueado") === "true")
     textoSesion.textContent = "Cerrar sesión";
 });
-
+// Cuando se quita el mouse de encima
 textoSesion.addEventListener("mouseout", () => {
   actualizarBotonSesion();
 });
 
+//Mostramos el nombre del usuario iniciado o el "iniciar sesion"
 function actualizarBotonSesion() {
   const logueado = localStorage.getItem("logueado");
 
@@ -27,8 +29,7 @@ function actualizarBotonSesion() {
   }
 }
 
-actualizarBotonSesion();
-
+// Animamos el icono de carrito si contiene productos
 function actualizarCarritoVisual() {
   let imgCarrito = document.getElementById("img-carrito");
   let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
@@ -39,8 +40,6 @@ function actualizarCarritoVisual() {
     imgCarrito.classList.remove("con-productos");
   }
 }
-
-actualizarCarritoVisual();
 
 function ConfirmarCerrarSesion() {
   if (localStorage.getItem("logueado") != "true") return;
@@ -77,4 +76,5 @@ function ConfirmarCerrarSesion() {
   });
 }
 
+actualizarBotonSesion();
 actualizarCarritoVisual();

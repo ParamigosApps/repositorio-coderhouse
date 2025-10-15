@@ -4,7 +4,7 @@ const cambiarBoton = document.getElementsByClassName("btn-agregar");
 const botonMostrarMas = document.getElementById("button-mostrarmas");
 const paginaActual = window.location.pathname.split("/").pop();
 
-window.productos = []; // Array de productos obtenidos de JSON
+window.productos = [];
 
 let productosPorPaginas = 4;
 let mostrarMas = 4;
@@ -31,6 +31,7 @@ class Producto {
     }
   }
 
+  //Prefab de nuestra card, para exhibir los productos
   render() {
     const div = document.createElement("div");
     div.className = "product-card";
@@ -62,12 +63,7 @@ class Producto {
   }
 }
 function cargarProductos() {
-  let containerExistente;
-
-  if (container) containerExistente = container;
-  else if (containerDestacados) containerExistente = containerDestacados;
-  //
-
+  //Si es para mostrar productos destacados
   if (containerDestacados) {
     let i = 0;
 
@@ -77,13 +73,13 @@ function cargarProductos() {
 
       i++;
       const card = producto.render();
-      containerExistente.appendChild(card);
+      containerDestacados.appendChild(card);
 
       const boton = card.querySelector(".btn-agregar");
       vincularBotones(producto, boton);
     });
   }
-
+  //Si es para mostrar todos los productos
   if (container) {
     window.productos.forEach((producto, index) => {
       if (index >= productosPorPaginas) return;
@@ -91,14 +87,14 @@ function cargarProductos() {
       if (document.getElementById(producto.id)) return;
 
       const card = producto.render();
-      containerExistente.appendChild(card);
+      container.appendChild(card);
 
       const boton = card.querySelector(".btn-agregar");
       vincularBotones(producto, boton);
     });
   }
 }
-
+// Escuchamos cuando clickean agregar al carrito, verificamos stock, descontamos...
 function vincularBotones(producto, boton) {
   boton.addEventListener("click", () => {
     if (producto.stock <= 0) {
@@ -128,19 +124,21 @@ function vincularBotones(producto, boton) {
       JSON.stringify(producto.stock)
     );
     localStorage.setItem("carrito", JSON.stringify(carrito));
-    actualizarCarrito();
+    animacionCarrito();
     mostrarMensaje(
       "Añadiste: " + producto.titulo + " al carrito ",
       "#2bff00c4"
     );
   });
 }
+//Chequeamos el stock, si no cambiamos boton
 Array.from(cambiarBoton).forEach((boton) => {
   if (boton.textContent === "Sin stock") {
     boton.style.backgroundColor = "gray";
   }
 });
 
+// Boton para mostrar mas productos por pagina
 if (botonMostrarMas != null) {
   botonMostrarMas.addEventListener("click", () => {
     productosPorPaginas += mostrarMas;
@@ -151,7 +149,8 @@ if (botonMostrarMas != null) {
   });
 }
 
-function actualizarCarrito() {
+// Animamos el carrito si hay productos añadidos
+function animacionCarrito() {
   let imgCarrito = document.getElementById("img-carrito");
   let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 
@@ -176,7 +175,7 @@ function mostrarMensaje(mensaje, color) {
 // JSON CARGAR PRODUCTOS
 async function cargarProductosJSON() {
   try {
-    const response = await fetch("/database.json");
+    const response = await fetch("/json/productos.json");
     const data = await response.json();
 
     window.productos = data.map(
@@ -191,5 +190,5 @@ async function cargarProductosJSON() {
 
 document.addEventListener("DOMContentLoaded", () => {
   cargarProductosJSON();
-  actualizarCarrito();
+  animacionCarrito();
 });

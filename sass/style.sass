@@ -13,9 +13,12 @@ body
   font-family: "Arial", sans-serif
   color: #f2f2f2
 
-.main-content, .main-content-contacto
+.main-content, .main-content-productos, .main-content-contacto
   min-height: 90vh
   background-color: $principal-color 
+
+.main-content-productos
+  padding: 0px 8px
 
 //LOGO, IMAGENES, ICONOS
 .logoimg
@@ -77,9 +80,44 @@ body
 #img-contenedor-productodetalles
   width: 50%
   border: 1px solid #ed3838
-//#info-contenedor-productodetalles
 
-//#categoria-detalleproducto,#tituloydescripcion-detalleproducto,#precio-detalleproducto,#cantidad-detalleproducto
+// ------------------------------ PAGINA PRODUCTOS - CONTENEDOR Y BARRA LATERAL ------------------------------- //
+#contenedor-barrayproductos
+  display: grid
+  grid-template-columns: 20% 1fr
+  height: auto  // o 100% si querés altura completa
+
+#productos-container
+  display: grid
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
+  gap: 16px
+  padding: 16px
+
+#barra-lateral-productos
+  background-color: #ffffff
+  box-shadow: 2px 0 5px rgba(0,0,0,0.05)
+  padding: 16px
+  border-radius: 8px 0 0 0px
+  overflow-y: auto
+  min-width: 0
+  
+  position: sticky
+
+#barra-lateral-productos:hover
+  box-shadow: 4px 0 10px rgba(0,0,0,0.1)
+  background-color: #f1f3f5
+
+#barra-superior-productos
+  background-color: #ffffff
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1)
+  padding: 12px 16px
+  border-bottom: 2px solid #e0e0e0
+
+
+#img-detalleproducto
+  img
+    height: 400px
+    width: 400px
 
 // ------------------------------BUSCADOR ------------------------------- //
 #aviso-buscador
@@ -94,6 +132,7 @@ body
   flex-direction: column
   gap: 8px
   width: 100%
+
 
 #orden-precio
   align-self: flex-end
@@ -146,18 +185,10 @@ body
     margin-bottom: 40px
   h4
     margin-top: 24px
-
-// #contacto-page
-//   min-height: 90vh
-//   background-color: $principal-color
-//   padding: 16px 32px
-//   display: flex
-//   asign-items: center
   
   
 // ------------------------------ MENU HEADER - NAV ------------------------------- //
 .menu-header
-  height: 12vh
   width: 100%
   top: 0
   background-color: $principal-color
@@ -212,25 +243,7 @@ body
   font: 1em sans-serif
 #p-texto-secundario
   font: 1em sans-serif
-// ------------------------------ PAGINA PRODUCTOS - CONTENEDOR Y BARRA LATERAL ------------------------------- //
-#contenedor-barrayproductos
-  display: grid
-  grid-template-columns: 20% 1fr
-  gap: 16px
-  height: auto  // o 100% si querés altura completa
 
-#barra-lateral-productos
-  padding: 16px
-  overflow-y: auto
-  min-width: 0
-  
-  position: sticky
-
-#productos-container
-  display: grid
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
-  gap: 16px
-  padding: 16px
   
 // ------------------------------ SEPARADORES SUP-INF DE PRODUCTOS ------------------------------- //
 .separador-contenedor-sup, .separador-contenedor-inf

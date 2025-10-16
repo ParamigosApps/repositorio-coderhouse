@@ -110,7 +110,8 @@ function quitarProductoDelCarrito(index) {
 
   mostrarMensaje(
     "Quitaste " + productoAEliminar.titulo + " del carrito.",
-    "#ff2d03c1"
+    "#ff2d03c1",
+    "#fffffffa"
   );
 }
 // QUITAR 1 UNIDAD DEL CARRITO
@@ -134,7 +135,8 @@ function QuitarUnidadDelCarrito(index) {
 
   mostrarMensaje(
     "Quitaste 1 unidad de " + producto.titulo + " al carrito.",
-    "#ff2d03c1"
+    "#ff2d03c1",
+    "#fffffffa"
   );
 }
 // SUMAR PRODUCTOS
@@ -165,7 +167,8 @@ function sumarProductoAlCarrito(index) {
 
   mostrarMensaje(
     "Añadiste 1 unidad de " + producto.titulo + " al carrito.",
-    "#2bff00c4"
+    "#ffffffd7",
+    "#000000fa"
   );
 }
 
@@ -180,12 +183,15 @@ function actualizarCarritoVisual() {
   }
 }
 // NOTIFICACIONES TOASTIFY
-function mostrarMensaje(mensaje, color) {
+function mostrarMensaje(mensaje, color, colorletra) {
   Toastify({
     text: mensaje,
     position: "right",
     gravity: "bottom",
-    backgroundColor: color,
+    style: {
+      background: color,
+      color: colorletra,
+    },
     duration: 2500,
   }).showToast();
 }

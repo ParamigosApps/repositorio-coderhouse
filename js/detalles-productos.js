@@ -113,7 +113,7 @@ function mostrarProducto() {
 
 async function cargarProductosJSON() {
   try {
-    const response = await fetch("/database.json"); // Ajusta la ruta según dónde pusiste tu JSON
+    const response = await fetch("/json/productos.json"); // Ajusta la ruta según dónde pusiste tu JSON
     const data = await response.json();
 
     window.productos = data.map(

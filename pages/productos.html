@@ -96,14 +96,20 @@
       </nav>
     </header>
 
-    <main class="main-content">
+    <main class="main-content-productos">
       <section id="contenedor-barrayproductos">
         <!-- BARRA LATERAL -->
         <aside id="barra-lateral-productos">
+          <!-- SELECT ORDENAR PRECIO -->
           <div class="categorias">
             <h4>Categorías</h4>
             <p>Próximamente...</p>
           </div>
+          <select id="orden-precio">
+            <option value="">Ordenar por precio</option>
+            <option value="asc">Menor a Mayor</option>
+            <option value="desc">Mayor a Menor</option>
+          </select>
         </aside>
 
         <!-- CONTENIDO PRINCIPAL DE PRODUCTOS -->
@@ -115,13 +121,6 @@
             </h2>
 
             <div class="filtros-container">
-              <!-- SELECT ORDENAR PRECIO -->
-              <select id="orden-precio">
-                <option value="">Ordenar por precio</option>
-                <option value="asc">Menor a Mayor</option>
-                <option value="desc">Mayor a Menor</option>
-              </select>
-
               <!-- BUSCADOR -->
               <form role="search" class="form-buscador">
                 <input

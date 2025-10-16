@@ -9,6 +9,7 @@ window.productos = [];
 let productosPorPaginas = 4;
 let mostrarMas = 4;
 
+let cartelEnCurso = false;
 if (paginaActual == "productos.html") productosPorPaginas = 8;
 
 class Producto {
@@ -100,7 +101,7 @@ function vincularBotones(producto, boton) {
     if (producto.stock <= 0) {
       boton.textContent = "Sin stock";
       boton.style.backgroundColor = "#9dcdffff";
-      mostrarMensaje("Producto sin stock", "#ff2d03c1");
+      mostrarMensaje("Producto sin stock", "#ff2d03e0", "#ffffffff");
       return;
     }
 
@@ -126,9 +127,18 @@ function vincularBotones(producto, boton) {
     localStorage.setItem("carrito", JSON.stringify(carrito));
     animacionCarrito();
     mostrarMensaje(
-      "Añadiste: " + producto.titulo + " al carrito ",
-      "#2bff00c4"
+      `Se añadio con éxito: <b>${producto.titulo}</b>`,
+      "#ffffffd7",
+      "#000000fa",
+      false
     );
+
+    if (!cartelEnCurso) {
+      setTimeout(() => {
+        mostrarIrAlCarrito("<b>¿Desea ir al Carrito?</b>  ¡Haz Click Aqui!");
+      }, 4000);
+      cartelEnCurso = true;
+    }
   });
 }
 //Chequeamos el stock, si no cambiamos boton
@@ -162,14 +172,48 @@ function animacionCarrito() {
 }
 
 // NOTIFICACIONES TOASTIFY
-function mostrarMensaje(mensaje, color) {
+function mostrarMensaje(mensaje, color, colorletra) {
+  const toastmsj = document.createElement("div");
+  toastmsj.innerHTML = mensaje;
+
   Toastify({
-    text: mensaje,
+    node: toastmsj,
     position: "right",
     gravity: "bottom",
-    backgroundColor: color,
+    style: {
+      background: color,
+      color: colorletra,
+    },
     duration: 2500,
   }).showToast();
+}
+
+function mostrarIrAlCarrito(mensaje) {
+  const toastmsj = document.createElement("div");
+  toastmsj.innerHTML = mensaje;
+  Toastify({
+    node: toastmsj,
+    duration: 4000,
+    gravity: "top",
+    position: "center",
+    style: {
+      background: "#ffffffb0",
+      width: "250px", // ancho fijo
+      height: "75px", // alto fijo
+      lineHeight: "25px", // centra el texto verticalmente
+      textAlign: "center",
+      borderRadius: "4px",
+      fontSize: "1.2rem",
+      fontWeight: "500",
+      color: "#000000fa",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+    },
+    stopOnFocus: true,
+    onClick: function () {
+      window.location.href = "../pages/carrito.html";
+    },
+  }).showToast();
+  cartelEnCurso = false;
 }
 
 // JSON CARGAR PRODUCTOS

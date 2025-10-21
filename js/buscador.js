@@ -16,6 +16,7 @@ inputBuscador.addEventListener("input", () => {
     botonMostrarMas.style.display = "block";
     window.mostrarTodo = false;
     cargarProductos();
+    ordenarPorPrecio();
     return;
   }
 
@@ -25,7 +26,7 @@ inputBuscador.addEventListener("input", () => {
   // Mostramos todos los productos temporalmente para filtrar
   window.mostrarTodo = true;
   cargarProductos();
-
+  ordenarPorPrecio();
   const productos = contenedorProductos.getElementsByClassName(
     "product-description-title"
   );
@@ -50,3 +51,26 @@ inputBuscador.addEventListener("input", () => {
     avisoBuscador.style.display = "none";
   }
 });
+
+//Ordenar por precio
+const ordenPrecio = document.getElementById("orden-precio");
+
+ordenPrecio.addEventListener("change", ordenarPorPrecio);
+
+function ordenarPorPrecio() {
+  const cards = Array.from(contenedorProductos.children);
+
+  cards.sort((a, b) => {
+    const precioA = Number(
+      a.querySelector(".product-price").textContent.replace(/\D/g, "")
+    );
+    const precioB = Number(
+      b.querySelector(".product-price").textContent.replace(/\D/g, "")
+    );
+
+    if (ordenPrecio.value === "asc") return precioA - precioB;
+    else if (ordenPrecio.value === "desc") return precioB - precioA;
+  });
+
+  cards.forEach((card) => contenedorProductos.appendChild(card));
+}

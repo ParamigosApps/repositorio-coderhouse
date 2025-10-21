@@ -228,7 +228,12 @@ async function cargarProductosJSON() {
 
     cargarProductos();
   } catch (error) {
-    console.error("Error cargando productos JSON:", error);
+    const p = document.createElement("p");
+    p.textContent = "Hubo un error al cargar los productos.";
+
+    if (container) container.appendChild(p);
+
+    if (containerDestacados) containerDestacados.appendChild(p);
   }
 }
 

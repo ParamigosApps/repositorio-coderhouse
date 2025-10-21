@@ -184,9 +184,9 @@ body {
   transform: scale(1.24);
 }
 
-#titulo-productosdestacados {
-  padding: 4px 0 4px 60px;
-  font-size: 1.8rem;
+.titulos-productos {
+  padding: 16px 0 12px 0px;
+  font-size: 2rem;
 }
 
 #detalle-producto {

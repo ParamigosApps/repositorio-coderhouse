@@ -128,7 +128,7 @@ function vincularBotones(producto, boton) {
     animacionCarrito();
     mostrarMensaje(
       `Se añadio con éxito: <b>${producto.titulo}</b>`,
-      "#ffffffd7",
+      "#ffffffe9",
       "#000000fa",
       false
     );
@@ -197,10 +197,10 @@ function mostrarIrAlCarrito(mensaje) {
     gravity: "top",
     position: "center",
     style: {
-      background: "#ffffffb0",
-      width: "250px", // ancho fijo
-      height: "75px", // alto fijo
-      lineHeight: "25px", // centra el texto verticalmente
+      background: "#ffffffda",
+      width: "250px",
+      height: "75px",
+      lineHeight: "25px",
       textAlign: "center",
       borderRadius: "4px",
       fontSize: "1.2rem",

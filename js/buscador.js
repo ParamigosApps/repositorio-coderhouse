@@ -2,8 +2,29 @@ const inputBuscador = document.getElementById("buscador");
 const contenedorProductos = document.getElementById("productos-container");
 const avisoBuscador = document.getElementById("aviso-buscador");
 
-inputBuscador.addEventListener("keyup", () => {
-  const valorBuscado = inputBuscador.value.toLowerCase();
+// Evitamos recargar la pagina y perder la busqueda
+inputBuscador.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") e.preventDefault();
+});
+
+inputBuscador.addEventListener("input", () => {
+  const valorBuscado = inputBuscador.value.toLowerCase().trim();
+
+  // Si no hay texto, restauramos vista normal
+  if (valorBuscado === "") {
+    avisoBuscador.style.display = "none";
+    botonMostrarMas.style.display = "block";
+    window.mostrarTodo = false;
+    cargarProductos();
+    return;
+  }
+
+  // Ocultamos el botón de "mostrar más" mientras se filtra
+  botonMostrarMas.style.display = "none";
+
+  // Mostramos todos los productos temporalmente para filtrar
+  window.mostrarTodo = true;
+  cargarProductos();
 
   const productos = contenedorProductos.getElementsByClassName(
     "product-description-title"
@@ -28,40 +49,4 @@ inputBuscador.addEventListener("keyup", () => {
   } else {
     avisoBuscador.style.display = "none";
   }
-});
-
-inputBuscador.addEventListener("input", () => {
-  if (inputBuscador.value === "") {
-    avisoBuscador.style.display = "none";
-
-    const productos = contenedorProductos.getElementsByClassName(
-      "product-description-title"
-    );
-
-    Array.from(productos).forEach((producto) => {
-      const card = producto.closest(".product-card");
-      card.style.display = "";
-    });
-  }
-});
-
-//Ordenar por precio
-const ordenPrecio = document.getElementById("orden-precio");
-
-ordenPrecio.addEventListener("change", () => {
-  const cards = Array.from(contenedorProductos.children);
-
-  cards.sort((a, b) => {
-    const precioA = Number(
-      a.querySelector(".product-price").textContent.replace(/\D/g, "")
-    );
-    const precioB = Number(
-      b.querySelector(".product-price").textContent.replace(/\D/g, "")
-    );
-
-    if (ordenPrecio.value === "asc") return precioA - precioB;
-    else if (ordenPrecio.value === "desc") return precioB - precioA;
-  });
-
-  cards.forEach((card) => contenedorProductos.appendChild(card));
 });

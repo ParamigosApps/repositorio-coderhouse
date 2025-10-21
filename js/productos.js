@@ -5,9 +5,8 @@ const botonMostrarMas = document.getElementById("button-mostrarmas");
 const paginaActual = window.location.pathname.split("/").pop();
 
 window.productos = [];
-
+window.mostrarTodo = false;
 let productosPorPaginas = 4;
-let mostrarMas = 4;
 
 let cartelEnCurso = false;
 if (paginaActual == "productos.html") productosPorPaginas = 8;
@@ -63,38 +62,7 @@ class Producto {
     return div;
   }
 }
-function cargarProductos() {
-  //Si es para mostrar productos destacados
-  if (containerDestacados) {
-    let i = 0;
 
-    window.productos.forEach((producto) => {
-      if (i >= productosPorPaginas) return;
-      if (!producto.destacado) return;
-
-      i++;
-      const card = producto.render();
-      containerDestacados.appendChild(card);
-
-      const boton = card.querySelector(".btn-agregar");
-      vincularBotones(producto, boton);
-    });
-  }
-  //Si es para mostrar todos los productos
-  if (container) {
-    window.productos.forEach((producto, index) => {
-      if (index >= productosPorPaginas) return;
-
-      if (document.getElementById(producto.id)) return;
-
-      const card = producto.render();
-      container.appendChild(card);
-
-      const boton = card.querySelector(".btn-agregar");
-      vincularBotones(producto, boton);
-    });
-  }
-}
 // Escuchamos cuando clickean agregar al carrito, verificamos stock, descontamos...
 function vincularBotones(producto, boton) {
   boton.addEventListener("click", () => {
@@ -151,7 +119,7 @@ Array.from(cambiarBoton).forEach((boton) => {
 // Boton para mostrar mas productos por pagina
 if (botonMostrarMas != null) {
   botonMostrarMas.addEventListener("click", () => {
-    productosPorPaginas += mostrarMas;
+    productosPorPaginas += productosPorPaginas;
     if (productosPorPaginas >= window.productos.length) {
       botonMostrarMas.style.display = "none";
     }
@@ -237,6 +205,44 @@ async function cargarProductosJSON() {
   }
 }
 
+function cargarProductos() {
+  if (containerDestacados) {
+    containerDestacados.innerHTML = "";
+
+    let i = 0;
+    window.productos.forEach((producto) => {
+      if (!window.mostrarTodo) if (i >= productosPorPaginas) return;
+
+      if (!producto.destacado) return;
+
+      i++;
+      const card = producto.render();
+      containerDestacados.appendChild(card);
+
+      const boton = card.querySelector(".btn-agregar");
+      vincularBotones(producto, boton);
+    });
+  }
+  //Si es para mostrar todos los productos
+  if (container) {
+    container.innerHTML = "";
+    window.productos.forEach((producto, index) => {
+      if (index >= productosPorPaginas && !window.mostrarTodo) return;
+
+      //if (document.getElementById(producto.id)) return;
+
+      const card = producto.render();
+      container.appendChild(card);
+
+      const boton = card.querySelector(".btn-agregar");
+      vincularBotones(producto, boton);
+    });
+  }
+}
+
+function limpiar() {
+  container.innerHTML = "";
+}
 document.addEventListener("DOMContentLoaded", () => {
   cargarProductosJSON();
   animacionCarrito();

@@ -722,6 +722,11 @@ body {
     margin: 12px 200px;
   }
 }
+@media (max-width: 1000px) {
+  #contenedor-barrayproductos {
+    grid-template-columns: 30% 2fr;
+  }
+}
 @media (max-width: 900px) {
   .img-menu-size {
     height: 20px;
@@ -756,9 +761,20 @@ body {
     text-align: center;
   }
 }
+@media (max-width: 700px) {
+  #contenedor-barrayproductos {
+    display: block;
+  }
+  .categorias {
+    margin-top: 4px;
+  }
+}
 @media (max-width: 550px) {
   #h2-nav-user {
     display: none;
+  }
+  #contenedor-barrayproductos {
+    display: block;
   }
 }
 @media (max-width: 480px) {

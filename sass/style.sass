@@ -85,7 +85,7 @@ body
 #contenedor-barrayproductos
   display: grid
   grid-template-columns: 20% 1fr
-  height: auto  // o 100% si querés altura completa
+  height: auto
 
 #productos-container
   display: grid
@@ -592,6 +592,10 @@ body
   .main-content-checkout
     margin: 12px 200px
 
+@media (max-width: 1000px)
+  #contenedor-barrayproductos
+    grid-template-columns: 30% 2fr
+
 // Pantallas pequeñas
 @media (max-width: 900px)
   .img-menu-size
@@ -624,11 +628,19 @@ body
       font-size: 0.8rem
       text-align: center
   
+@media (max-width: 700px)
+  #contenedor-barrayproductos
+    display: block
+
+  .categorias
+    margin-top: 4px
+    
 // Pantallas muy pequeñas
 @media (max-width: 550px)
   #h2-nav-user
     display: none
-
+  #contenedor-barrayproductos
+    display: block
 @media (max-width: 480px)
   .logoimg
     max-height: 24px

@@ -240,9 +240,6 @@ function cargarProductos() {
   }
 }
 
-function limpiar() {
-  container.innerHTML = "";
-}
 document.addEventListener("DOMContentLoaded", () => {
   cargarProductosJSON();
   animacionCarrito();

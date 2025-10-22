@@ -402,7 +402,7 @@ body {
   box-shadow: 0 4px 16px rgba(17, 40, 75, 0.505);
 }
 .btn-primary:hover {
-  transform: scale(1.2);
+  transform: scale(1.1);
   box-shadow: 0 8px 32px rgba(22, 108, 194, 0.731);
   transition: transform 0 rgba(43, 149, 236, 0.4) s ease, box-shadow 0.3s ease;
 }
@@ -425,7 +425,7 @@ body {
   border: 1px solid #f1d3d3;
 }
 #btn-cerrarsesion:hover {
-  transform: scale(1.2);
+  transform: scale(1.1);
   box-shadow: 0 8px 32px rgba(22, 108, 194, 0.731);
   transition: transform 0 rgba(43, 149, 236, 0.4) s ease, box-shadow 0.3s ease;
 }
@@ -452,7 +452,7 @@ body {
   font-size: 0.9rem;
 }
 .btn-ingresar:hover {
-  transform: scale(1.2);
+  transform: scale(1.1);
   box-shadow: 0 8px 32px rgba(22, 108, 194, 0.731);
   transition: transform 0 rgba(43, 149, 236, 0.4) s ease, box-shadow 0.3s ease;
 }
@@ -485,7 +485,7 @@ body {
   align-items: center;
 }
 .btn-agregar:hover {
-  transform: scale(1.2);
+  transform: scale(1.1);
   box-shadow: 0 8px 32px rgba(22, 108, 194, 0.731);
   transition: transform 0 rgba(43, 149, 236, 0.4) s ease, box-shadow 0.3s ease;
 }
@@ -514,7 +514,7 @@ body {
   font-size: 1.2rem;
 }
 #boton-enviar-form:hover {
-  transform: scale(1.2);
+  transform: scale(1.1);
   box-shadow: 0 8px 32px rgba(22, 108, 194, 0.731);
   transition: transform 0 rgba(43, 149, 236, 0.4) s ease, box-shadow 0.3s ease;
 }

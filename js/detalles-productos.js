@@ -67,7 +67,7 @@ function mostrarProducto() {
     if (producto.stock <= 0) {
       boton.textContent = "Sin stock";
       boton.style.backgroundColor = "#9dcdff";
-      mostrarMensaje("Producto sin stock", "#ff2d03c1");
+      mostrarMensaje("Producto sin stock", "#ff2d03e0", "#ffffffff");
       return;
     }
 
@@ -105,8 +105,10 @@ function mostrarProducto() {
     localStorage.setItem("carrito", JSON.stringify(carrito));
     actualizarCarritoVisual();
     mostrarMensaje(
-      `Añadiste ${cantidad} x ${producto.titulo} al carrito`,
-      "#2bff00c4"
+      `Se añadio con éxito: <b>${producto.titulo}</b>`,
+      "#ffffffe9",
+      "#000000fa",
+      false
     );
   });
 }
@@ -128,12 +130,18 @@ async function cargarProductosJSON() {
 cargarProductosJSON();
 
 // NOTIFICACIONES TOASTIFY
-function mostrarMensaje(mensaje, color) {
+function mostrarMensaje(mensaje, color, colorletra) {
+  const toastmsj = document.createElement("div");
+  toastmsj.innerHTML = mensaje;
+
   Toastify({
-    text: mensaje,
+    node: toastmsj,
     position: "right",
     gravity: "bottom",
-    backgroundColor: color,
+    style: {
+      background: color,
+      color: colorletra,
+    },
     duration: 2500,
   }).showToast();
 }

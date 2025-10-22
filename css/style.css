@@ -14,10 +14,6 @@ body {
   background-color: #f7f7f7;
 }
 
-.main-content-productos {
-  padding: 0px 8px;
-}
-
 .logoimg {
   max-width: 180px;
   transition: max-width 0.3s ease, transform 0.3s ease;
@@ -815,7 +811,7 @@ body {
     gap: 4px;
   }
 }
-@media (max-width: 420px) {
+@media (max-width: 432px) {
   .product-card {
     width: 180px;
     height: 290px;
@@ -843,11 +839,13 @@ body {
     height: 170px;
   }
 }
-root {
-  color-scheme: light;
-  supported-color-schemes: light;
+@media (prefers-color-scheme: dark) {
+  html, body, .container, .card, .bg-light {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    forced-color-adjust: none !important;
+  }
 }
-
 html, body {
   background-color: #f7f7f7 !important;
   color: #000000 !important;

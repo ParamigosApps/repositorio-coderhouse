@@ -843,5 +843,11 @@ body {
     height: 170px;
   }
 }
+html, body {
+  background-color: #f7f7f7 !important;
+  color: #000000 !important;
+  color-scheme: light;
+  forced-color-adjust: none !important;
+}
 
 /*# sourceMappingURL=style.css.map */

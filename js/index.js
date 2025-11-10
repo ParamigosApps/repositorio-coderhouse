@@ -5,13 +5,6 @@ import { renderizarCatalogo } from "/js/cargarCatalogo.js";
 import { cargarEventos, cargarMisEntradas } from "/js/entradas.js";
 import { pagarEntrada } from "./pagarEntrada.js";
 
-document.getElementById("btnPagar").addEventListener("click", () => {
-  const nombre = "Concierto";
-  const precio = 1000;
-  const cantidad = 2;
-  pagarEntrada(nombre, precio, cantidad);
-});
-
 document.addEventListener("DOMContentLoaded", () => {
   // Botones y contenedores
   const btnProximosEventos = document.getElementById("btnProximosEventos");

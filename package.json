@@ -1,15 +1,19 @@
 {
-  "name": "todovaper",
-  "version": "1.0.0",
-  "type": "commonjs",
-  "scripts": {
-    "start": "live-server"
-  },
-  "dependencies": {
-    "dotenv": "^17.2.3",
-    "mercadopago": "^2.10.0"
-  },
-  "devDependencies": {
-    "live-server": "^1.2.2"
+  "version": 3,
+  "name": "appbares",
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1.js"
+    }
+  ],
+  "env": {
+    "MP_ACCESS_TOKEN": "@mp_access_token"
   }
 }

@@ -1,6 +1,6 @@
-
 {
-  "version": "2",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 3,
   "name": "appbares",
   "builds": [
     {
@@ -20,7 +20,7 @@
       "use": "@vercel/static"
     },
     {
-      "src": "assets/**",
+      "src": "Assets/**",
       "use": "@vercel/static"
     }
   ],

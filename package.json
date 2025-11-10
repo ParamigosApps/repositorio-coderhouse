@@ -3,15 +3,26 @@
   "version": "1.0.0",
   "description": "Proyecto de catálogo y entradas para Todovaper",
   "main": "index.js",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "start": "live-server"
   },
   "keywords": [],
   "author": "Iván Ruiz",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "mercadopago": "^2.10.0"
+  },
   "devDependencies": {
     "live-server": "^1.2.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ParamigosApps/repositorio-coderhouse.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ParamigosApps/repositorio-coderhouse/issues"
+  },
+  "homepage": "https://github.com/ParamigosApps/repositorio-coderhouse#readme"
 }

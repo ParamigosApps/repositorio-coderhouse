@@ -1,48 +1,24 @@
-const evento = {
-  nombre: "Fiesta en la terraza",
-  precio: 1500,
-  maxEntradasPorUsuario: 2,
-};
+// Función para crear la preferencia y redirigir a MercadoPago
+export async function pagarEntrada(nombreEvento, precio, cantidad) {
+  try {
+    const response = await fetch("/api/crear-preferencia", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ nombreEvento, precio, cantidad }),
+    });
 
-document
-  .getElementById("btnConseguirEntrada")
-  .addEventListener("click", async () => {
-    const evento = {
-      nombre: "Fiesta en la terraza",
-      precio: 1500,
-      maxEntradasPorUsuario: 2,
-    };
-    const cantidad = prompt(
-      `¿Cuántas entradas querés? (Máx: ${evento.maxEntradasPorUsuario})`,
-      1
-    );
-
-    if (
-      !cantidad ||
-      isNaN(cantidad) ||
-      cantidad < 1 ||
-      cantidad > evento.maxEntradasPorUsuario
-    ) {
-      alert("Cantidad inválida");
-      return;
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || "Error desconocido");
     }
 
-    try {
-      const res = await fetch("/api/crear-preferencia", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombreEvento: evento.nombre,
-          precio: evento.precio,
-          cantidad,
-        }),
-      });
-
-      const data = await res.json();
-      if (data.init_point) window.location.href = data.init_point;
-      else alert("Error al generar el pago");
-    } catch (err) {
-      console.error(err);
-      alert("Error al conectar con MercadoPago");
-    }
-  });
+    const data = await response.json();
+    // Redirigir al init_point de MercadoPago
+    window.location.href = data.init_point;
+  } catch (error) {
+    console.error("Error al pagar la entrada:", error);
+    alert("Ocurrió un error al procesar el pago: " + error.message);
+  }
+}

@@ -1,16 +1,19 @@
-/*
-import mercadopago from "mercadopago";
+require("dotenv").config();
+const mercadopago = require("mercadopago");
 
-// Configurá tu access token de MercadoPago aquí
-mercadopago.configurations.setAccessToken("TU_ACCESS_TOKEN_AQUI");
+// Versión 2.x workaround para configurar el Access Token
+mercadopago.configurations = { access_token: process.env.MP_ACCESS_TOKEN };
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
+module.exports = async function handler(req, res) {
+  if (req.method !== "POST")
     return res.status(405).json({ error: "Método no permitido" });
-  }
 
   try {
     const { nombreEvento, precio, cantidad } = req.body;
+
+    if (!nombreEvento || !precio || !cantidad) {
+      return res.status(400).json({ error: "Faltan datos obligatorios" });
+    }
 
     const preference = {
       items: [
@@ -35,4 +38,4 @@ export default async function handler(req, res) {
     console.error("Error al crear preferencia:", error);
     return res.status(500).json({ error: error.message });
   }
-}*/
+};

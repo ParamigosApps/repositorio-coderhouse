@@ -73,6 +73,14 @@ export async function cargarEventos() {
     contenedor.innerHTML = `<p class="text-danger text-center mt-3">Error al cargar eventos.</p>`;
   }
 }
+import { pagarEntrada } from "./pagarEntrada.js";
+
+document.getElementById("btnPagar").addEventListener("click", () => {
+  const nombre = "Concierto";
+  const precio = 1000;
+  const cantidad = 2;
+  pagarEntrada(nombre, precio, cantidad);
+});
 
 // -----------------------------
 // Pedir entrada

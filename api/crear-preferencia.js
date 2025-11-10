@@ -52,6 +52,7 @@ export default async function handler(req, res) {
     let response;
     try {
       response = await mercadopago.preferences.create(preference);
+      console.log("🔹 Respuesta cruda de MercadoPago:", response);
     } catch (mpErr) {
       console.error("❌ Error MercadoPago:", mpErr);
       if (mpErr.response && mpErr.response.body) {
@@ -71,9 +72,18 @@ export default async function handler(req, res) {
         .json({ error: "Respuesta inesperada de MercadoPago" });
     }
 
-    console.log("✅ Preferencia creada correctamente:", response.body);
+    // Log completo antes de devolver al cliente
+    console.log("✅ Preferencia lista para el cliente:", {
+      init_point: response.body.init_point,
+      sandbox_init_point: response.body.sandbox_init_point,
+      full_response: response.body,
+    });
 
-    return res.status(200).json({ init_point: response.body.init_point });
+    return res.status(200).json({
+      init_point: response.body.init_point,
+      sandbox_init_point: response.body.sandbox_init_point,
+      full_response: response.body, // para depuración completa
+    });
   } catch (err) {
     console.error("❌ Error general en handler:", err);
     return res

@@ -7,7 +7,7 @@
       "use": "@vercel/node"
     },
     {
-      "src": "index.html",
+      "src": "public/**/*",
       "use": "@vercel/static"
     }
   ],
@@ -15,9 +15,12 @@
     {
       "src": "/api/(.*)",
       "dest": "/api/$1.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
     }
   ],
-  "outputDirectory": "public",
   "env": {
     "MP_ACCESS_TOKEN": "@mp_access_token"
   }

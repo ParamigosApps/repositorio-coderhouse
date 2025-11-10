@@ -1,9 +1,15 @@
 const mercadopago = require("mercadopago");
 
-// ✅ Configuración correcta del token
+// ✅ Configuración del token
 if (!process.env.MP_ACCESS_TOKEN) {
   console.error(
     "⚠️ MP_ACCESS_TOKEN no está definido en las variables de entorno"
+  );
+} else {
+  console.log(
+    "✅ MP_ACCESS_TOKEN definido (mostrando solo los primeros 5 caracteres):",
+    process.env.MP_ACCESS_TOKEN.slice(0, 5),
+    "..."
   );
 }
 
@@ -22,12 +28,18 @@ export default async function handler(req, res) {
     console.log("📝 Datos recibidos:", req.body);
 
     if (!nombreEvento || !precio || !cantidad) {
-      console.warn("Faltan datos obligatorios:", req.body);
+      console.warn("❌ Faltan datos obligatorios");
       return res.status(400).json({ error: "Faltan datos obligatorios" });
     }
 
-    // ⚠️ Cambia esta URL por tu URL pública de ngrok o tu dominio
-    const NGROK_URL = "https://abcd1234.ngrok.io";
+    // ✅ URL pública de tu proyecto en Vercel
+    const BACK_URL = "https://repositorio-coderhouse.vercel.app/index.html";
+
+    // Verificamos si la URL es válida (HTTPS)
+    if (!BACK_URL.startsWith("https://")) {
+      console.warn("❌ BACK_URL no es HTTPS:", BACK_URL);
+      return res.status(400).json({ error: "URL de retorno inválida" });
+    }
 
     const preference = {
       items: [
@@ -39,9 +51,9 @@ export default async function handler(req, res) {
         },
       ],
       back_urls: {
-        success: `${NGROK_URL}/success.html`,
-        failure: `${NGROK_URL}/failure.html`,
-        pending: `${NGROK_URL}/pending.html`,
+        success: BACK_URL,
+        failure: BACK_URL,
+        pending: BACK_URL,
       },
       auto_return: "approved",
     };
@@ -54,7 +66,8 @@ export default async function handler(req, res) {
       response = await mercadopago.preferences.create(preference);
       console.log("🔹 Respuesta cruda de MercadoPago:", response);
     } catch (mpErr) {
-      console.error("❌ Error MercadoPago:", mpErr);
+      console.error("❌ Error completo MercadoPago:", mpErr);
+
       if (mpErr.response && mpErr.response.body) {
         console.error("🔸 Detalles MercadoPago:", mpErr.response.body);
         return res.status(mpErr.status || 500).json({
@@ -62,7 +75,10 @@ export default async function handler(req, res) {
           raw: mpErr.response.body,
         });
       }
-      return res.status(500).json({ error: "Error de MercadoPago" });
+
+      return res
+        .status(500)
+        .json({ error: mpErr.message || "Error de MercadoPago" });
     }
 
     if (!response || !response.body) {

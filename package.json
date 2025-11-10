@@ -5,6 +5,10 @@
     {
       "src": "api/**/*.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -13,6 +17,7 @@
       "dest": "/api/$1.js"
     }
   ],
+  "outputDirectory": "public",
   "env": {
     "MP_ACCESS_TOKEN": "@mp_access_token"
   }

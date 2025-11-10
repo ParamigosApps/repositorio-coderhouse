@@ -2,6 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 3,
   "name": "appbares",
+  "outputDirectory": "Assets",
   "builds": [
     {
       "src": "api/**/*.js",

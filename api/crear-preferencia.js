@@ -15,7 +15,13 @@ if (!MP_TOKEN) {
 }
 
 export default async function handler(req, res) {
-  console.log("📥 Llamada entrante a crear-preferencia");
+  console.log("📥 Handler llamado");
+  console.log("Env token:", process.env.MP_ACCESS_TOKEN ? "Sí" : "No");
+  console.log("Método recibido:", req.method);
+
+  return res
+    .status(200)
+    .json({ test: "Función serverless corriendo correctamente" });
 
   if (!MP_TOKEN) {
     console.error("❌ MP_ACCESS_TOKEN no definido - abortando petición");

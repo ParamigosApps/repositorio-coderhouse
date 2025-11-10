@@ -2,20 +2,27 @@
 import mercadopago from "mercadopago";
 
 // ✅ Configuración del token
-if (!process.env.MP_ACCESS_TOKEN) {
+const MP_TOKEN = process.env.MP_ACCESS_TOKEN;
+if (!MP_TOKEN) {
   console.error("❌ MP_ACCESS_TOKEN no definido");
 } else {
   console.log(
     "✅ MP_ACCESS_TOKEN definido (primeros 5 caracteres):",
-    process.env.MP_ACCESS_TOKEN.slice(0, 5),
+    MP_TOKEN.slice(0, 5),
     "..."
   );
+  mercadopago.configurations.setAccessToken(MP_TOKEN);
 }
-
-mercadopago.configurations.setAccessToken(process.env.MP_ACCESS_TOKEN);
 
 export default async function handler(req, res) {
   console.log("📥 Llamada entrante a crear-preferencia");
+
+  if (!MP_TOKEN) {
+    console.error("❌ MP_ACCESS_TOKEN no definido - abortando petición");
+    return res
+      .status(500)
+      .json({ error: "MP_ACCESS_TOKEN no definido en el servidor" });
+  }
 
   if (req.method !== "POST") {
     console.warn(`Método no permitido: ${req.method}`);

@@ -1,32 +1,12 @@
 {
-  "name": "app-para-bares",
+  "name": "appbar",
   "version": "1.0.0",
-  "description": "Aplicación para venta de entradas con MercadoPago y Firebase",
-  "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js",
-    "dev": "vercel dev",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "vercel dev"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ParamigosApps/appbar.git"
-  },
-  "keywords": [
-    "firebase",
-    "mercadopago",
-    "vercel",
-    "entradas"
-  ],
-  "author": "Iván Ruiz",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ParamigosApps/appbar/issues"
-  },
-  "homepage": "https://github.com/ParamigosApps/appbar#readme",
   "dependencies": {
-    "firebase": "^12.5.0",
-    "mercadopago": "^2.10.0"
+    "mercadopago": "^2.10.0",
+    "firebase": "^12.5.0"
   }
 }

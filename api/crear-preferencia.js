@@ -1,27 +1,38 @@
-// frontend: cuando el usuario elige Mercado Pago
-async function pagarConMercadoPago(
-  nombreEvento,
-  precio,
-  cantidad,
-  ticketId = null
-) {
+import mercadopago from "mercadopago";
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Método no permitido" });
+  }
+
   try {
-    const res = await fetch("/api/crear-preferencia", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombreEvento, precio, cantidad, ticketId }),
+    mercadopago.configure({
+      access_token: process.env.MP_ACCESS_TOKEN, // ✅ usa variable de entorno segura
     });
 
-    const data = await res.json();
-    if (res.ok && data.init_point) {
-      // redirigir a Mercado Pago
-      window.location.href = data.init_point;
-    } else {
-      console.error("Error backend:", data);
-      Swal.fire("Error", "No se pudo generar el link de pago.", "error");
-    }
-  } catch (err) {
-    console.error(err);
-    Swal.fire("Error", "No se pudo conectar con el servidor.", "error");
+    const { nombreEvento, precio, cantidad } = req.body;
+
+    const preference = {
+      items: [
+        {
+          title: nombreEvento,
+          unit_price: Number(precio),
+          quantity: Number(cantidad),
+          currency_id: "ARS",
+        },
+      ],
+      back_urls: {
+        success: `${req.headers.origin}/success.html`,
+        failure: `${req.headers.origin}/failure.html`,
+        pending: `${req.headers.origin}/pending.html`,
+      },
+      auto_return: "approved",
+    };
+
+    const response = await mercadopago.preferences.create(preference);
+    res.status(200).json({ init_point: response.body.init_point });
+  } catch (error) {
+    console.error("Error al crear preferencia:", error);
+    res.status(500).json({ error: "Error al crear la preferencia" });
   }
 }

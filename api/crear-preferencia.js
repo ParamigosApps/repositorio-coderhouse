@@ -12,6 +12,10 @@ if (!process.env.MP_ACCESS_TOKEN) {
     "..."
   );
 }
+console.log(
+  "MP_ACCESS_TOKEN:",
+  process.env.MP_ACCESS_TOKEN ? "✅ definido" : "❌ no definido"
+);
 
 mercadopago.configurations.setAccessToken(process.env.MP_ACCESS_TOKEN);
 
@@ -107,3 +111,9 @@ export default async function handler(req, res) {
       .json({ error: "Error interno al crear preferencia" });
   }
 }
+
+console.log("Validando datos:", {
+  nombreEvento,
+  precio: Number(precio),
+  cantidad: Number(cantidad),
+});

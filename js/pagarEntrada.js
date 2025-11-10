@@ -12,9 +12,9 @@ export async function pagarEntrada(nombreEvento, precio, cantidad) {
     }
 
     const data = await response.json();
-    window.location.href = data.init_point; // Redirige a MercadoPago
+    window.location.href = data.init_point;
   } catch (error) {
-    console.error("Error al pagar la entrada:", error);
-    alert("Ocurrió un error al procesar el pago: " + error.message);
+    console.error("Error al pagar:", error);
+    alert("Ocurrió un error: " + error.message);
   }
 }

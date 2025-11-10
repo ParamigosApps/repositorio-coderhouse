@@ -1,24 +1,29 @@
 const mercadopago = require("mercadopago");
 
-// Configuración del Access Token desde Vercel
+// Configuración del Access Token
 if (!process.env.MP_ACCESS_TOKEN) {
-  console.error("❌ No se encontró MP_ACCESS_TOKEN en Vercel");
+  console.error("❌ MP_ACCESS_TOKEN no definido en entorno");
 } else {
-  mercadopago.configurations = { access_token: process.env.MP_ACCESS_TOKEN };
+  console.log("✅ MP_ACCESS_TOKEN cargado correctamente");
 }
+mercadopago.configurations = { access_token: process.env.MP_ACCESS_TOKEN };
 
 module.exports = async function handler(req, res) {
+  console.log("➡️ Método recibido:", req.method);
+
   if (req.method !== "POST") {
+    console.warn("⚠️ Método no permitido");
     return res.status(405).json({ error: "Método no permitido" });
   }
 
   try {
+    console.log("📦 req.body recibido:", req.body);
+
     const { nombreEvento, precio, cantidad } = req.body;
     if (!nombreEvento || !precio || !cantidad) {
+      console.warn("❌ Faltan datos obligatorios:", req.body);
       return res.status(400).json({ error: "Faltan datos obligatorios" });
     }
-
-    console.log("Creando preferencia:", { nombreEvento, precio, cantidad });
 
     const preference = {
       items: [
@@ -37,14 +42,16 @@ module.exports = async function handler(req, res) {
       auto_return: "approved",
     };
 
+    console.log("💳 Creando preferencia:", preference);
+
     const response = await mercadopago.preferences.create(preference);
 
-    console.log("Preferencia creada:", response.body.init_point);
+    console.log("✅ Preferencia creada:", response.body.init_point);
     return res.status(200).json({ init_point: response.body.init_point });
   } catch (error) {
-    console.error("Error al crear preferencia:", error);
+    console.error("❌ Error al crear preferencia:", error);
     return res
       .status(500)
-      .json({ error: "Ocurrió un error al crear la preferencia." });
+      .json({ error: "Error interno al crear preferencia" });
   }
 };

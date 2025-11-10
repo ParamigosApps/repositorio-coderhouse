@@ -36,7 +36,6 @@ export class Producto {
     </div>
     <img src="${this.imgSrc}" alt="${this.titulo}" />
   `;
-
     if (sinStock) div.classList.add("producto-sin-stock");
     return div;
   }

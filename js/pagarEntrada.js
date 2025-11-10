@@ -6,12 +6,19 @@ export async function pagarEntrada(nombreEvento, precio, cantidad) {
       body: JSON.stringify({ nombreEvento, precio, cantidad }),
     });
 
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error || "Error desconocido");
+    let data;
+    const text = await response.text(); // <-- leemos como texto primero
+
+    try {
+      data = JSON.parse(text); // intentamos parsear a JSON
+    } catch {
+      data = { error: text }; // si no es JSON, usamos el texto como error
     }
 
-    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || "Error desconocido");
+    }
+
     window.location.href = data.init_point;
   } catch (error) {
     console.error("Error al pagar:", error);

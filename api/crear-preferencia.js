@@ -1,5 +1,6 @@
 const mercadopago = require("mercadopago");
 
+console.log("MP_ACCESS_TOKEN definido?", !!process.env.MP_ACCESS_TOKEN);
 // ✅ Configuración del token
 if (!process.env.MP_ACCESS_TOKEN) {
   console.error(

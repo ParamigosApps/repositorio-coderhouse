@@ -1,3 +1,4 @@
+/*
 import mercadopago from "mercadopago";
 
 // Configurá tu access token de MercadoPago aquí
@@ -34,4 +35,4 @@ export default async function handler(req, res) {
     console.error("Error al crear preferencia:", error);
     return res.status(500).json({ error: error.message });
   }
-}
+}*/

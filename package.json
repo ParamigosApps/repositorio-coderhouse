@@ -1,0 +1,17 @@
+{
+  "name": "todovaper",
+  "version": "1.0.0",
+  "description": "Proyecto de catálogo y entradas para Todovaper",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "live-server"
+  },
+  "keywords": [],
+  "author": "Iván Ruiz",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}

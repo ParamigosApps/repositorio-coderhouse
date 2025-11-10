@@ -6,22 +6,26 @@ export async function pagarEntrada(nombreEvento, precio, cantidad) {
       body: JSON.stringify({ nombreEvento, precio, cantidad }),
     });
 
-    let data;
-    const text = await response.text(); // <-- leemos como texto primero
+    // Leer siempre como texto primero
+    const text = await response.text();
 
+    // Intentar parsear a JSON, si falla usamos el texto como error
+    let data;
     try {
-      data = JSON.parse(text); // intentamos parsear a JSON
+      data = JSON.parse(text);
     } catch {
-      data = { error: text }; // si no es JSON, usamos el texto como error
+      data = { error: text };
     }
 
     if (!response.ok) {
+      console.error("🔹 Respuesta no OK del API:", data);
       throw new Error(data.error || "Error desconocido");
     }
 
+    console.log("🔹 Redirigiendo a MercadoPago:", data.init_point);
     window.location.href = data.init_point;
   } catch (error) {
-    console.error("Error al pagar:", error);
+    console.error("❌ Error al pagar:", error);
     alert("Ocurrió un error: " + error.message);
   }
 }

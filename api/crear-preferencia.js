@@ -26,7 +26,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Faltan datos obligatorios" });
     }
 
-    // ⚠️ Cambia esta URL por tu URL pública de ngrok
+    // ⚠️ Cambia esta URL por tu URL pública de ngrok o tu dominio
     const NGROK_URL = "https://abcd1234.ngrok.io";
 
     const preference = {
@@ -48,20 +48,22 @@ export default async function handler(req, res) {
 
     console.log("🔹 Objeto de preferencia creado:", preference);
 
+    // Crear preferencia en MercadoPago
     let response;
     try {
       response = await mercadopago.preferences.create(preference);
     } catch (mpErr) {
-      console.error("❌ Error interno de MercadoPago:", mpErr);
+      console.error("❌ Error MercadoPago:", mpErr);
       if (mpErr.response && mpErr.response.body) {
-        console.error("🔸 Detalles de MercadoPago:", mpErr.response.body);
+        console.error("🔸 Detalles MercadoPago:", mpErr.response.body);
+        return res.status(mpErr.status || 500).json({
+          error: mpErr.response.body.message || "Error de MercadoPago",
+          raw: mpErr.response.body,
+        });
       }
-      return res
-        .status(500)
-        .json({ error: "Error de MercadoPago al crear preferencia" });
+      return res.status(500).json({ error: "Error de MercadoPago" });
     }
 
-    // Verificamos si la respuesta tiene body
     if (!response || !response.body) {
       console.error("❌ Respuesta inesperada de MercadoPago:", response);
       return res

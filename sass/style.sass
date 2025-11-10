@@ -341,15 +341,23 @@ header
 // ------------------------------ FOOTER ------------------------------- //
 .footer
   background-color: #313131
-  color: #555
+  color: #fff
   text-align: center
   padding: 0.8rem
   font-size: 0.9rem
   width: 100%
-  position: fixed
-  bottom: 0
-  left: 0
   border-top: 1px solid #ddd
+  margin-top: auto
+
+// Make body a column flex container so footer can stick to bottom when content is short
+body
+  display: flex
+  flex-direction: column
+  min-height: 100vh
+
+// Ensure the main/content area grows to fill available space
+main, .main, #main, .content, .page-content, .main-content, .main-content-checkout, .content-products
+  flex: 1
 
 // ------------------------------ WHATSAPP FLOAT ------------------------------- //
 #chat 
@@ -611,6 +619,7 @@ header
   padding: 24px
   text-align: center
   background: #f9f9f9
+  background-color: #f9f9f9
   width: 340px
 
 

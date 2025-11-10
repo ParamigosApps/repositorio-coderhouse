@@ -1,55 +1,42 @@
-const evento = {
-  nombre: "Fiesta en la terraza",
-  precio: 1500, // 0 si es gratis
-  maxEntradasPorUsuario: 2,
-};
+import mercadopago from "mercadopago";
 
-document
-  .getElementById("btnConseguirEntrada")
-  .addEventListener("click", async () => {
-    const { nombre, precio, maxEntradasPorUsuario } = evento;
+mercadopago.configure({
+  access_token: "APP_USR-ddfad398-7b28-4cf3-bd6c-53eaead9f307", // tu token real
+});
 
-    // Si es gratis
-    if (precio === 0) {
-      alert(`Entrada gratuita para "${nombre}" confirmada ✅`);
-      // acá podés guardar en tu base de datos o mostrar el QR directamente
-      return;
-    }
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Método no permitido" });
+  }
 
-    // Si hay que pagar
-    const cantidad = prompt(
-      `¿Cuántas entradas querés? (Máx: ${maxEntradasPorUsuario})`,
-      1
-    );
+  try {
+    const { nombreEvento, precio, cantidad } = req.body;
 
-    // Validar cantidad
-    if (
-      !cantidad ||
-      isNaN(cantidad) ||
-      cantidad < 1 ||
-      cantidad > maxEntradasPorUsuario
-    ) {
-      alert("Cantidad inválida.");
-      return;
-    }
+    console.log("Datos recibidos:", nombreEvento, precio, cantidad);
 
-    try {
-      const response = await fetch("/api/crear-preferencia", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombreEvento: nombre, precio, cantidad }),
-      });
+    const preference = {
+      items: [
+        {
+          title: nombreEvento,
+          quantity: Number(cantidad),
+          currency_id: "ARS",
+          unit_price: Number(precio),
+        },
+      ],
+      back_urls: {
+        success: "https://appbar.vercel.app/success.html",
+        failure: "https://appbar.vercel.app/failure.html",
+        pending: "https://appbar.vercel.app/pending.html",
+      },
+      auto_return: "approved",
+    };
 
-      const data = await response.json();
+    const response = await mercadopago.preferences.create(preference);
+    console.log("Preferencia creada:", response.body.id);
 
-      if (data.init_point) {
-        // Redirige a la página de pago de Mercado Pago
-        window.location.href = data.init_point;
-      } else {
-        alert("Error al generar el pago.");
-      }
-    } catch (error) {
-      console.error("Error al conectar con Mercado Pago:", error);
-      alert("Hubo un problema al iniciar el pago.");
-    }
-  });
+    return res.status(200).json({ init_point: response.body.init_point });
+  } catch (error) {
+    console.error("Error al crear preferencia:", error);
+    return res.status(500).json({ error: error.message });
+  }
+}

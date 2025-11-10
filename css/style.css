@@ -376,15 +376,23 @@ header .logoimg {
 
 .footer {
   background-color: #313131;
-  color: #555;
+  color: #fff;
   text-align: center;
   padding: 0.8rem;
   font-size: 0.9rem;
   width: 100%;
-  position: fixed;
-  bottom: 0;
-  left: 0;
   border-top: 1px solid #ddd;
+  margin-top: auto;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main, .main, #main, .content, .page-content, .main-content, .main-content-checkout, .content-products {
+  flex: 1;
 }
 
 #chat {
@@ -601,6 +609,9 @@ header .logoimg {
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   display: inline-block;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
 /* Info del ticket */
@@ -613,11 +624,6 @@ header .logoimg {
 /* Botón descargar QR */
 #downloadQr {
   font-weight: 500;
-}
-
-/* Ajuste del modal */
-.modal-content {
-  background-color: #f9f9f9;
 }
 
 .modal-header, .modal-footer {
@@ -671,6 +677,8 @@ header .logoimg {
   padding: 24px;
   text-align: center;
   background: #f9f9f9;
+  background-color: #f9f9f9;
+  width: 340px;
 }
 
 #qrModal h5 {

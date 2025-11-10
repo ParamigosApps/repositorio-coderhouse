@@ -10,6 +10,8 @@ if (!process.env.MP_ACCESS_TOKEN) {
 mercadopago.configurations.setAccessToken(process.env.MP_ACCESS_TOKEN);
 
 export default async function handler(req, res) {
+  console.log("📥 Llamada entrante a crear-preferencia");
+
   if (req.method !== "POST") {
     console.warn(`Método no permitido: ${req.method}`);
     return res.status(405).json({ error: "Método no permitido" });
@@ -17,6 +19,7 @@ export default async function handler(req, res) {
 
   try {
     const { nombreEvento, precio, cantidad } = req.body;
+    console.log("📝 Datos recibidos:", req.body);
 
     if (!nombreEvento || !precio || !cantidad) {
       console.warn("Faltan datos obligatorios:", req.body);
@@ -45,18 +48,32 @@ export default async function handler(req, res) {
 
     console.log("🔹 Objeto de preferencia creado:", preference);
 
-    const response = await mercadopago.preferences.create(preference);
+    let response;
+    try {
+      response = await mercadopago.preferences.create(preference);
+    } catch (mpErr) {
+      console.error("❌ Error interno de MercadoPago:", mpErr);
+      if (mpErr.response && mpErr.response.body) {
+        console.error("🔸 Detalles de MercadoPago:", mpErr.response.body);
+      }
+      return res
+        .status(500)
+        .json({ error: "Error de MercadoPago al crear preferencia" });
+    }
 
-    console.log("✅ Preferencia creada:", response.body);
+    // Verificamos si la respuesta tiene body
+    if (!response || !response.body) {
+      console.error("❌ Respuesta inesperada de MercadoPago:", response);
+      return res
+        .status(500)
+        .json({ error: "Respuesta inesperada de MercadoPago" });
+    }
+
+    console.log("✅ Preferencia creada correctamente:", response.body);
 
     return res.status(200).json({ init_point: response.body.init_point });
   } catch (err) {
-    console.error("❌ Error al crear preferencia:", err);
-
-    if (err.response && err.response.body) {
-      console.error("🔸 Detalles del error MercadoPago:", err.response.body);
-    }
-
+    console.error("❌ Error general en handler:", err);
     return res
       .status(500)
       .json({ error: "Error interno al crear preferencia" });

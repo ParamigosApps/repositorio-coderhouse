@@ -1,0 +1,110 @@
+[
+  {
+    "id": "1",
+    "imgSrc": "/Assets/vapers/vaper (1).webp",
+    "titulo": "Fernet",
+    "descripcion": "Fernet Branca + Coca Cola. Viene en presentación de 500ml.",
+    "precio": "$8.000",
+    "categoria": "Tragos",
+    "destacado": false
+  },
+  {
+    "id": "2",
+    "imgSrc": "/Assets/vapers/vaper (2).jpg",
+    "titulo": "Peach Lemonade - Nasty 5K",
+    "descripcion": "Este producto esta disponible",
+    "precio": "$17.999",
+    "categoria": "Tragos",
+    "destacado": false
+  },
+  {
+    "id": "3",
+    "imgSrc": "/Assets/img/botella-skyconspeed.jpg",
+    "titulo": "Sky Vodka + 2u de Speed",
+    "descripcion": "Skyy Vodka 750cc + 2u Speed 225ml c/u",
+    "precio": "$70.000",
+    "categoria": "Botellas",
+    "destacado": false
+  },
+  {
+    "id": "4",
+    "imgSrc": "/Assets/vapers/vaper (4).webp",
+    "titulo": "Frutilla - Elfbar 40K",
+    "descripcion": "Este producto esta disponible",
+    "precio": "$49.999",
+    "categoria": "Combos",
+    "destacado": false
+  },
+  {
+    "id": "5",
+    "imgSrc": "/Assets/vapers/vaper (6).jpg",
+    "titulo": "Mango Strawberry - Nasty 5K",
+    "descripcion": "Este producto esta disponible",
+    "precio": "$17.999",
+    "categoria": "Combos",
+    "destacado": false
+  },
+  {
+    "id": "6",
+    "imgSrc": "/Assets/vapers/vaper (7).webp",
+    "titulo": "Orange Strawberry - Losty Mary 30K",
+    "descripcion": "Este producto esta disponible",
+    "precio": "$30.000",
+    "categoria": "Tragos",
+    "destacado": false
+  },
+  {
+    "id": "7",
+    "imgSrc": "/Assets/vapers/vaper (8).jpg",
+    "titulo": "Gin Tonic - Gordon's",
+    "descripcion": "Gin Tanqueray + Tonic. Viene en presentación de 500ml.",
+    "precio": "$7.999",
+    "categoria": "Tragos",
+    "destacado": false
+  },
+  {
+    "id": "8",
+    "imgSrc": "/Assets/vapers/vaper (10).webp",
+    "titulo": "Grape - ELFBAR 40K",
+    "descripcion": "Este producto esta disponible",
+    "precio": "$32.999",
+    "categoria": "Tragos",
+    "destacado": false
+  },
+  {
+    "id": "9",
+    "imgSrc": "/Assets/vapers/vaper09.PNG",
+    "titulo": "Paradise OG - Torch 7.5",
+    "descripcion": "Este producto esta disponible",
+    "precio": "$75.000",
+    "categoria": "Tragos",
+    "destacado": false
+  },
+  {
+    "id": "10",
+    "imgSrc": "/Assets/vapers/vaper10.png",
+    "titulo": "Green Apple - Torch 5.0",
+    "descripcion": "Este producto esta disponible",
+    "precio": "$60.000",
+    "categoria": "Combos",
+    "destacado": false
+  },
+  {
+    "id": "11",
+    "imgSrc": "/Assets/img/botella-gingordonytonica.webp",
+    "titulo": "Gin Tonic - Gordon's  + Tonica ",
+    "descripcion": "Gin Gordon's + Tonic 2.25Lts",
+    "precio": "$85.000",
+    "categoria": "Botellas",
+    "destacado": false
+  },
+  {
+    "id": "12",
+    "imgSrc": "/Assets/img/fernet+coca.jpg",
+    "titulo": "Fernet + Coca Cola",
+    "descripcion": "Fernet 750cc + Coca Cola 2.25Lts",
+    "precio": "$90.000",
+    "categoria": "Botellas",
+    "destacado": false
+  }
+]

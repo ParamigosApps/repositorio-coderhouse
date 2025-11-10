@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light only" />
+    <meta name="theme-color" content="#f7f7f7" />
+    <meta name="supported-color-schemes" content="light" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="white" />
+
+    <link rel="stylesheet" href="/css/style.css" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="/Assets/Document_files/favicon.png" />
+    <title>Eventos - todovaper.</title>
+
+    <!-- Librería QR (qrcodejs) -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+    <!-- Modal para mostrar QR -->
+    <div class="modal fade" id="qrModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h6 class="modal-title">Tu entrada (QR)</h6>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Cerrar"
+            ></button>
+          </div>
+          <div class="modal-body text-center">
+            <div id="qrcode" style="margin: 0 auto"></div>
+            <p id="ticketInfo" class="small text-muted mt-2"></p>
+            <a
+              id="downloadQr"
+              class="btn btn-outline-dark btn-sm mt-2"
+              download="entrada.png"
+              >Descargar QR</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </head>
+  <body>
+    <header>
+      <a class="navbar-brand" href="/index.html">
+        <img src="/Assets/img/logo.png" alt="Logo" class="logoimg" />
+      </a>
+    </header>
+
+    <main class="catalogo">
+      <h1>🎟️ Eventos disponibles</h1>
+
+      <!-- 🔹 Contenedor donde se cargan los eventos -->
+      <section
+        id="listaEventos"
+        class="d-flex flex-wrap justify-content-center gap-3 mt-4"
+      ></section>
+      <p id="aviso-derechoAdmision" class="mt-4 text-muted small px-3">
+        La adquisición de la entrada no garantiza el ingreso al establecimiento.
+        La casa se reserva el derecho de admisión.
+      </p>
+      <button class="btn-volver" onclick="window.location.href='/index.html'">
+        ← Volver al menú
+      </button>
+    </main>
+
+    <div id="chat">
+      <a href="https://wa.me/5491121894427" target="_blank" rel="noopener">
+        <img
+          src="/Assets/img/whatsapp.png"
+          alt="WhatsApp"
+          style="width: 36px; height: 36px"
+        />
+      </a>
+    </div>
+
+    <footer class="footer">
+      <p>
+        &copy;2024 - Tienda creada por todovaper&reg - Todos los derechos
+        reservados.
+      </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="/js/cargarEventos.js"></script>
+  </body>
+</html>

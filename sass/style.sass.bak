@@ -1,0 +1,704 @@
+*
+  box-sizing: border-box
+  margin: 0
+  padding: 0
+
+$img-footer-size: 32px
+$img-menu-size: 32px
+$img-menu-minsize: 36px
+$principal-color: #f7f7f7 
+$boton-color: #0d0d0d
+
+body
+  font-family: "Arial", sans-serif
+  color: #f2f2f2
+
+.main-content, .main-content-productos, .main-content-contacto
+  min-height: 90vh
+  background-color: $principal-color 
+
+//LOGO, IMAGENES, ICONOS
+.logoimg
+  max-width: 180px
+  transition: max-width 0.3s ease, transform 0.3s ease
+.img-footer-size
+    max-height: $img-footer-size
+.img-menu-size
+    max-height: $img-menu-size
+.img-producto-carrito
+  width: 64px
+  height: 64px
+#img-carrito
+  transition: transform 2.9s ease, filter 2.6s ease
+
+  &.con-productos 
+    animation: Brillo 1s infinite alternate
+  
+.img-footer-size
+        transition: transform 0.3s ease
+
+        &:hover
+            transform: scale(1.10) rotate(+6deg)
+
+        &:active
+            transform: scale(0.95) rotate(2deg)
+
+#img-ver-producto
+  max-width: 400px
+  border-radius: 8px
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18)
+  transition: transform 0.3s ease
+
+  &:hover
+      transform: scale(1.10) 
+
+  &:active
+      transform: scale(0.95) 
+  
+@keyframes Brillo 
+  0% 
+    transform: scale(1)
+    filter: brightness(1)
+
+  50% 
+    transform: scale(1.3)
+    filter: brightness(.5)
+
+  100% 
+    transform: scale(1)
+    filter: brightness(1)
+
+// ------------------------------DETALLE PRODUCTO ------------------------------- //
+#contenedor-detalleproducto
+  display: flex
+  align-items: center
+  justify-content: center
+  flex-wrap: wrap
+#img-contenedor-productodetalles
+  width: 50%
+  border: 1px solid #ed3838
+
+// ------------------------------ PAGINA PRODUCTOS - CONTENEDOR Y BARRA LATERAL ------------------------------- //
+#contenedor-barrayproductos
+  display: grid
+  grid-template-columns: 20% 1fr
+  height: auto
+
+#productos-container
+  display: grid
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
+  gap: 16px
+
+#barra-lateral-productos
+  background-color: #ffffff
+  box-shadow: 2px 0 5px rgba(0,0,0,0.05)
+  padding: 16px
+  border-radius: 8px 0 0 0px
+  overflow-y: auto
+  min-width: 0
+  
+  position: sticky
+
+#barra-lateral-productos:hover
+  box-shadow: 4px 0 10px rgba(0,0,0,0.1)
+  background-color: #f1f3f5
+
+#barra-superior-productos
+  background-color: #ffffff
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1)
+  padding: 12px 16px
+  border-bottom: 2px solid #e0e0e0
+
+
+#img-detalleproducto
+  img
+    height: 400px
+    width: 400px
+
+// ------------------------------BUSCADOR ------------------------------- //
+#aviso-buscador
+  display: none
+  margin: 8px 0px
+  font-size: 1.0rem
+  color: #ff0000
+  text-align: center
+
+.filtros-container
+  display: flex
+  flex-direction: column
+  gap: 8px
+  width: 100%
+
+
+#orden-precio
+  align-self: flex-end
+  width: 170px
+  margin-right: 12px
+
+.form-buscador
+  display: flex
+  justify-content: center
+
+#buscador
+  width: 50%
+  max-width: 100%
+
+.categorias
+  margin-top: 175px
+
+// ------------------------------WHATSAPP BOTON FLOTANTE ------------------------------- //
+#chat 
+  position: fixed
+  bottom: 56px
+  right: 8px
+  margin-bottom: 8px
+  z-index: 1000
+  background-color: rgba(255, 255, 255, 0.163)
+  border-radius: 50%
+  padding: 16px
+  box-shadow: 0 4px 16px rgba(64, 63, 63, 0.948)
+  transition: transform 0.2s, right 0.6s
+
+  &:hover
+    right: 16px
+    transform: scale(1.24)
+ 
+.titulos-productos
+  padding: 16px 0 12px 0px
+  font-size: 2.0rem
+  
+#detalle-producto
+  display: flex
+  justify-content: center
+  min-height: 90vh
+  background-color: $principal-color
+  border: 1px solid #d3d3d3
+  padding: 16px 120px
+
+.producto-info
+  padding: 16px 32px
+  h3
+    margin-bottom: 40px
+  h4
+    margin-top: 24px
+  
+  
+// ------------------------------ MENU HEADER - NAV ------------------------------- //
+.menu-header
+  width: 100%
+  top: 0
+  background-color: $principal-color
+  padding: 4px 8px 8px 4px
+
+  nav
+    display: flex
+    justify-content: space-between
+    align-items: center
+    list-style: none
+    gap: 8px
+    
+    .img-menu-size
+      max-height: $img-menu-size
+      transition: transform 0.3s ease
+
+      &:active
+          transform: scale(0.95) rotate(2deg)
+
+      &:hover
+        transform: scale(1.25) rotate(-6deg)
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18)
+        border-radius: 8px
+        background: $principal-color
+      a
+        text-decoration: none
+
+
+// ------------------------------ TEXTOS H2 ------------------------------- //
+@mixin h2-navegador() 
+  &:hover
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3)
+    transform: scale(1.1)
+    transition: transform 0.3s ease, text-shadow 0.3s ease
+
+  &:active
+    transform: scale(0.95)
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2)
+    transition: transform 0.2s ease, text-shadow 0.2s ease
+
+.h2-nav
+  @include h2-navegador()
+  font-size: 1.1rem
+.h2-nav-inicio-sesion
+  @include h2-navegador()
+  font-size: 1.1rem
+
+// ------------------------------ P - MENSAJES DE ERROR AL INICIAR/REGISTRAR ------------------------------- //
+#p-texto-primario
+  margin: 8px 0px 0px 0px
+  color: red
+  font: 1em sans-serif
+#p-texto-secundario
+  font: 1em sans-serif
+
+  
+// ------------------------------ SEPARADORES SUP-INF DE PRODUCTOS ------------------------------- //
+.separador-contenedor-sup, .separador-contenedor-inf
+  display: flex
+  align-items: center
+  justify-content: center
+  padding: 8px
+.separador-contenedor-sup
+    border-top: 1px solid #ffffff
+.separador-contenedor-inf
+    border-bottom: 1px solid #ffffff
+// ------------------------------ CONTENEDORES MARCAS ------------------------------- //
+.content-brands
+  display: flex
+  align-items: center
+  justify-content: center
+  flex-wrap: wrap
+  min-height: 120px
+  width: 100%
+  padding: 8px 0px
+  gap: 40px
+  transition: box-shadow 0.3s, background 0.3s, transform 0.3s
+
+  &:hover
+    background: linear-gradient(90deg, #f7f7f7 60%, #e0e7ff 100%)
+    box-shadow: 0 8px 32px rgba(32,35,52,0.12)
+    transform: scale(1.01)
+
+.brand-card
+    display: flex
+    align-items: center
+    justify-content: center
+    height: 60px
+    min-width: 100px
+    border-radius: 8px
+    background: #f5f6fa
+    box-shadow: 0 2px 8px rgba(32,35,52,0.07)
+    transition: box-shadow 0.2s, transform 0.2s
+
+    &:hover
+        box-shadow: 0 6px 18px rgba(32,35,52,0.18)
+        transform: translateY(-4px) scale(1.04)
+
+
+
+// ------------------------------ CONTENEDOR PRODUCTOS Y PRODUCT CARD ------------------------------- //
+.content-products
+  gap: 20px
+  justify-items: center
+  padding: 12px 80px
+  background: #f7f7f7
+
+#productos-container, #container-destacados
+  gap: 0px
+
+.product-card
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: space-between
+  width: 230px
+  height: 370px
+  background: #fff
+  border-radius: 12px
+  padding: 4px 16px
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06)
+  transition: transform 0.2s, box-shadow 0.2s
+  margin: 4px
+  a 
+    text-decoration: none 
+    color: inherit 
+  
+  &:active
+    transform: translateY(-6px) scale(1.03)
+    box-shadow: 0 8px 24px rgba(0,0,0,0.16)
+
+  h3
+    height: 60px
+  img
+    height: 200px
+    width: 99%
+    object-fit: cover
+    border-radius: 6px
+    background: #fff
+    
+
+.product-description-title
+  font-size: 1.1rem
+  color: #222
+  text-align: center
+  font-weight: bold
+  letter-spacing: 0.5px
+  text-transform: uppercase
+
+.product-price
+  display: flex
+  align-items: center
+  justify-content: center
+  margin: 0px
+  font-size: 1.6rem
+  font-weight: bold
+  margin-bottom: 10px
+  border-radius: 10px
+  box-shadow: 0 4px 16px rgba(34,34,34,0.08)
+  letter-spacing: 1.2px
+  border: 1px solid #ffffff
+
+
+
+
+// ------------------------------ BOTONES ------------------------------- //
+@mixin boton($boton-color) 
+  text-align: center
+  text-decoration: none
+  font-size: 1.0rem
+  padding: 8px 16px
+  margin: 20px 0 56px 0
+  border-radius: 8px
+  border: 1px solid $boton-color
+  background: $boton-color
+  color: #fff
+  cursor: pointer
+  transition: background 0.2s
+  transition: transform 0.3s
+  box-shadow: 0 4px 16px rgba(17, 40, 75, 0.505)
+
+  &:hover 
+    transform: scale(1.1)
+    box-shadow: 0 8px 32px rgba(22, 108, 194, 0.731)
+    transition: transform 0#2b95ec66s ease, box-shadow 0.3s ease
+
+.btn-primary
+  @include boton($boton-color)
+
+#btn-cerrarsesion
+  @include boton($boton-color)
+  background: #d80808
+  border: 1px solid #f1d3d3
+  &:hover 
+    box-shadow: 0 8px 32px rgba(228, 9, 9, 0.731)
+
+.btn-ingresar
+  @include boton($boton-color)
+  background: #28da18
+  border: 1px solid #22bd27
+  font-size: 0.9rem
+  &:hover 
+    box-shadow: 0 8px 32px rgba(66, 222, 55, 0.731)
+
+.btn-agregar
+  @include boton($boton-color)
+  width: 145px
+  background-color: #87ceeb
+  border: 2px solid #5abcf5
+  font-size: 0.8rem
+  margin: 0px 0px 6px 0px
+  box-shadow: 0 4px 4px rgba(118, 198, 229, 0.4)
+  display: flex
+  justify-content: center
+  align-items: center
+
+  &:hover
+    background-color: #5bb8e6
+  i
+    font-size: 1.0rem
+
+#boton-enviar-form
+  @include boton($boton-color)
+  background-color: #14a8e2
+  font-size: 1.2rem
+
+  &:hover 
+      border: 2px solid #235f77
+      background-color: #6bd5ff
+      transform: scale(1.08)
+
+#btn-finalizarcompra
+  width: 230px
+  height: 60px
+  background-color: #2dbe4f      
+  border: 2px solid #218838
+  font-size: 1.4rem
+  margin: 20px 0 0 0
+  box-shadow: 0 6px 8px rgba(99, 230, 129, 0.539)
+  color: #fff
+  font-weight: bold
+  border-radius: 12px
+  transition: all 0.3s ease
+
+  &:hover
+    background-color: #41ec66    
+    transform: scale(1.12)
+    box-shadow: 0 10px 15px rgba(76, 205, 104, 0.728)
+
+// ------------------------------ METODOS DE PAGO, ENVIOS, REDES Y CONTACTO ------------------------------- //
+.content-info-main
+  min-height: 150px
+  width: 100%
+  background-color: #858bab
+  margin-bottom: 16px
+  padding: 0 24px
+
+.content-info
+  background-color: #eae7e7
+  width: 100%
+  display: flex
+  justify-content: space-between
+  align-items: center
+  gap: 24px
+  padding: 12px 0
+  
+.info-card
+  display: flex
+  justify-content: center
+  flex-direction: column
+  align-items: center
+  width: 250px
+  height: 160px
+  border-right: 1px solid #aeaeae
+  border-left: 1px solid #aeaeae
+  img
+    max-height: 80px
+    max-width: 80px
+    object-fit: contain
+    margin-bottom: 16px
+  
+.content-info2,.info-box-pagoyenvios
+  display: flex
+  flex-wrap: wrap
+
+.content-info2
+  gap: 16px
+  padding: 36px 64px
+  border-top: 1px solid #aeaeae
+
+
+.info-box-pagoyenvios, #info-box-redes, #info-box-
+  display: flex
+  justify-content: flex-start
+  flex-direction: column
+  align-items: start
+
+.info-box-pagoyenvios
+  width: 60%
+  min-height: 60px
+  padding: 0 0 32px 0
+  h3
+    font-size: 1.0rem
+    margin: 8px 0
+
+#info-box-redes
+  min-width: 38%
+  min-height: 70px
+  padding: 0 0 32px 0
+  h3
+    font-size: 1.0rem
+    margin: 8px 0
+  div
+    margin-top: 8px
+    display: flex
+    gap : 16px
+
+#info-box-contact
+  min-width: 38%
+  min-height: 70px
+  padding: 0 0 16px 0
+  h3
+    font-size: 1.0rem
+    margin: 4px 0
+  div
+    margin-top: 8px
+    display: flex
+    flex-direction: column
+    align-items: flex-start
+    width: 100%
+    height: 100%
+  p
+    font-size: 0.9rem
+    line-height: 0.2rem
+
+// ------------------------------ FOOTER ------------------------------- //
+.footer
+  height: 8vh
+  background-color: #202334
+  color: #f2f2f2
+  display: flex
+  justify-content: start
+  align-items: center
+  p 
+    margin-top: 12px
+    padding-left: 12px
+    font-size: 1.0rem
+
+// ------------------------------ CHECK OUT ------------------------------- //
+.main-content-checkout
+  min-height: 150vh
+  margin: 48px 80px
+
+#form-contenedor
+  margin: 36px
+  display: flex
+  flex-wrap: wrap
+  justify-content: center
+  padding: 24px
+  background: #ffffff
+  border-radius: 12px
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.16)
+  background: linear-gradient(55deg, #00000003 0%, #00000005 50%)
+  transition: transform 0.3s ease, box-shadow 0.3s ease
+
+.box-checkout
+  padding: 20px 24px 36px 24px
+  margin: 12px 32px
+  width: 100%
+  border-radius: 4px
+  background: linear-gradient(25deg, #00000003 0%, #00000001 20%)
+  box-shadow: 0 4px 6px rgba(10, 10, 10, 0.192)
+  transition: all 0.3s ease
+
+  h5
+    font-size: 1.4rem
+    width: 100%
+    text-align: center
+    padding: 0px 0px 24px 0px
+
+// ------------------------------MEDIA QUERIES ------------------------------- //
+@media (max-width: 1800px) 
+  .main-content-checkout
+    margin: 12px 250px
+
+  .content-products
+    padding: 16px 10px
+
+@media (max-width: 1500px) 
+  .content-products
+    padding: 16px 10px
+    margin: 12px 0px
+  .main-content-checkout
+    margin: 12px 250px
+
+// Pantallas medianas
+@media (max-width: 1200px)
+  .content-products
+    padding: 16px 8px
+    margin: 0px 0px
+
+  .main-content-checkout
+    margin: 12px 200px
+
+@media (max-width: 1000px)
+  #contenedor-barrayproductos
+    grid-template-columns: 30% 2fr
+
+@media (max-width: 900px)
+  .img-menu-size
+    height: $img-menu-minsize - 16px
+
+  .h2-nav
+    font-size: 0.8rem
+  .main-content-checkout
+    margin: 12px 0px
+  .h2-nav-inicio-sesion
+    display: none
+  .logoimg
+    max-width: 140px
+    transition: max-height 0.3s ease, max-width 0.3s ease
+
+  .content-products
+    padding: 16px 0px 0px 0px
+
+  .info-box-pagoyenvios,
+  #info-box-contact,
+  #info-box-redes
+    width: 100%
+
+  .info-card
+    img
+      max-height: 40px
+      max-width: 48px
+
+    p
+      font-size: 0.8rem
+      text-align: center
+  
+@media (max-width: 700px)
+  #contenedor-barrayproductos
+    display: block
+
+  .categorias
+    margin-top: 4px
+    
+// Pantallas muy pequeñas
+@media (max-width: 550px)
+  #h2-nav-user
+    display: none
+  #contenedor-barrayproductos
+    display: block
+@media (max-width: 480px)
+  .logoimg
+    max-height: 24px
+
+  .h2-nav
+    font-size: 0.6rem
+
+  #info-box-contact
+    h3
+      font-size: 0.9rem
+    p
+      font-size: 0.6rem
+
+  .content-brands
+    flex-wrap: wrap
+    justify-content: center
+    overflow-x: auto
+    gap: 8px
+    margin: 0px
+
+  .brand-card
+    flex: 0 0 auto
+    max-width: 80px
+    max-height: 50px
+    margin: 0px
+
+    h2
+      font-size: clamp(0.8rem, 2.5vw, 1.1rem)
+
+  #form-contenedor
+      margin: 0px
+
+  .product-card
+    width: 200px
+    height: 370px
+    padding: 4px 14px
+    gap: 4px
+
+@media (max-width: 432px)
+  
+  .product-card
+    width: 180px
+    height: 290px
+    padding: 2px 4px
+    gap: 2px
+
+    img
+      width: 100%
+      height: 84%
+      object-fit: contain
+
+    button
+      height: 40px
+      width: 140px
+
+    .product-description-title
+      font-size: 0.9rem
+      height: 45px
+
+    .product-price
+      height: 35px
+      font-size: 1.2rem
+    
+    a
+      height: 170px

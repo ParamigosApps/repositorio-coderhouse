@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -15,8 +14,13 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
     />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
     <link rel="icon" href="../Assets/Document_files/favicon.png" />
-    <title>todovaper. - Iniciar sesión</title>
+    <title>Iniciar sesion | todovaper.</title>
   </head>
   <body>
     <header class="menu-header">
@@ -24,7 +28,6 @@
         <div class="container-fluid">
           <div class="collapse navbar-collapse bg-white" id="navbarContenido">
             <ul class="navbar-nav me-auto ms-3 mb-2 mb-md-0">
-              <li class="nav-item"></li>
               <li class="nav-item">
                 <a class="nav-link" href="../index.html"
                   ><h2 class="h2-nav">Inicio</h2></a
@@ -64,7 +67,7 @@
             <a
               class="nav-link"
               id="linkSesion"
-              href="../pages/iniciar-sesion.html"
+              href="pages/iniciar-sesion.html"
             >
               <h2 class="h2-nav-inicio-sesion" id="textoSesion">
                 Iniciar sesión
@@ -84,7 +87,7 @@
                 alt="Buscar"
               />
             </a>
-            <a href="../pages/carrito.html">
+            <a href="/pages/carrito.html">
               <img
                 id="img-carrito"
                 class="img-menu-size"
@@ -96,158 +99,155 @@
         </div>
       </nav>
     </header>
-
-    <main class="main-content-inicio-sesion">
-      <section
-        class="container-fluid min-vh-90 d-flex flex-column justify-content-center align-items-center my-5 py-5"
-      >
-        <section
-          id="cerrar-sesion-section"
-          class="text-center mb-4"
-          style="display: none"
-        >
-          <p id="p-texto-cerrar-sesion">Haz click aqui para cerrar tu sesión</p>
-          <button id="btn-cerrarsesion">Cerrar sesión</button>
-        </section>
-        <form class="inicio-sesion">
-          <div class="form-group">
-            <label for="InputUser">Usuario</label>
-            <input
-              type="text"
-              class="form-control"
-              id="InputUser"
-              aria-describedby="userHelp"
-              placeholder="Ingresa tu usuario"
-            />
-          </div>
-          <div class="form-group">
-            <label for="InputPassword">Contraseña</label>
-            <input
-              type="password"
-              class="form-control"
-              id="InputPassword"
-              placeholder="Ingresa tu contraseña"
-            />
-          </div>
-          <div class="form-group form-check">
-            <input
-              type="checkbox"
-              class="form-check-input"
-              id="CheckNuevoUsuario"
-            />
-            <label class="form-check-label" for="CheckNuevoUsuario"
-              >Soy nuevo</label
-            >
-          </div>
-          <button id="submit" type="submit" class="btn btn-primary">
-            Ingresar
-          </button>
-          <br />
-          <p id="p-texto-primario"></p>
-          <p id="p-texto-secundario"></p>
-        </form>
-      </section>
-
-      <section class="content-info2">
-        <div class="info-box-pagoyenvios">
-          <div><h3>MEDIOS DE PAGOS</h3></div>
-          <div>
-            <img
-              class="img-footer-size"
-              src="https://dk0k1i3js6c49.cloudfront.net/iconos-pago/visa.png"
-              alt="visa"
-            />
-            <img
-              class="img-footer-size"
-              src="https://dk0k1i3js6c49.cloudfront.net/iconos-pago/american-express.png"
-              alt="american-express"
-            />
-            <img
-              class="img-footer-size"
-              src="https://dk0k1i3js6c49.cloudfront.net/iconos-pago/mastercard.png"
-              alt="mastercard"
-            />
-            <img
-              class="img-footer-size"
-              src="https://dk0k1i3js6c49.cloudfront.net/iconos-pago/deposito.png"
-              alt="transferencia"
-            />
-            <img
-              class="img-footer-size"
-              src="https://dk0k1i3js6c49.cloudfront.net/iconos-pago/mercadopago.png"
-              alt="mercadopago"
-            />
-            <img
-              class="img-footer-size"
-              src="https://dk0k1i3js6c49.cloudfront.net/iconos-pago/efectivo.png"
-              alt="efectivo"
-            />
+    <main class="main-content-checkout">
+      <form class="form-contenedor">
+        <h3 class="form-title text-center">Ingresá tus datos</h3>
+        <!-------------------------------------- DATOS PERSONALES -------------------------------------->
+        <div class="box-checkout" id="checkout-metodos">
+          <h5>Datos personales</h5>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="nombre" class="form-label"
+                >Nombre y Apellido <span class="text-danger">*</span></label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="nombre"
+                placeholder="Juan Pérez"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="telefono" class="form-label"
+                >Teléfono <span class="text-danger">*</span></label
+              >
+              <input
+                type="tel"
+                class="form-control"
+                id="telefono"
+                placeholder="11 5555-5555"
+                required
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="dni" class="form-label"
+                >DNI <span class="text-danger">*</span></label
+              >
+              <input
+                type="number"
+                class="form-control"
+                id="dni"
+                placeholder="xx.xxx.xxx"
+                required
+              />
+            </div>
           </div>
         </div>
-        <div id="chat">
-          <a href="https://wa.me/5491121894427" target="_blank" rel="noopener">
+
+        <div class="d-flex justify-content-center d-block text-center">
+          <button class="btn-primary" id="btnIniciar">Ingresar</button>
+        </div>
+      </form>
+    </main>
+    <section class="content-info2">
+      <div class="info-box-pagoyenvios">
+        <div><h3>Metodo de pago</h3></div>
+        <div>
+          <img
+            class="img-footer-size"
+            src="https://dk0k1i3js6c49.cloudfront.net/iconos-pago/visa.png"
+            alt="visa"
+          />
+          <img
+            class="img-footer-size"
+            src="https://dk0k1i3js6c49.cloudfront.net/iconos-pago/american-express.png"
+            alt="american-express"
+          />
+          <img
+            class="img-footer-size"
+            src="https://dk0k1i3js6c49.cloudfront.net/iconos-pago/mastercard.png"
+            alt="mastercard"
+          />
+          <img
+            class="img-footer-size"
+            src="https://dk0k1i3js6c49.cloudfront.net/iconos-pago/deposito.png"
+            alt="transferencia"
+          />
+          <img
+            class="img-footer-size"
+            src="https://dk0k1i3js6c49.cloudfront.net/iconos-pago/mercadopago.png"
+            alt="mercadopago"
+          />
+          <img
+            class="img-footer-size"
+            src="https://dk0k1i3js6c49.cloudfront.net/iconos-pago/efectivo.png"
+            alt="efectivo"
+          />
+        </div>
+      </div>
+      <div id="chat">
+        <a href="https://wa.me/5491121894427" target="_blank" rel="noopener">
+          <img
+            src="../Assets/img/whatsapp.png"
+            alt="WhatsApp"
+            style="width: 36px; height: 36px"
+          />
+        </a>
+      </div>
+      <div id="info-box-redes">
+        <h3>REDES SOCIALES</h3>
+        <div>
+          <a href="https://www.instagram.com/" target="_blank" rel="noopener">
             <img
-              src="../Assets/img/whatsapp.png"
-              alt="WhatsApp"
-              style="width: 36px; height: 36px"
+              class="img-footer-size"
+              src="../Assets/img/ig.png"
+              alt="Instagram"
+            />
+          </a>
+          <a href="https://www.facebook.com/" target="_blank" rel="noopener">
+            <img
+              class="img-footer-size"
+              src="../Assets/img/fb.png"
+              alt="Facebook"
             />
           </a>
         </div>
-        <div id="info-box-redes">
-          <h3>REDES SOCIALES</h3>
-          <div>
-            <a href="https://www.instagram.com/" target="_blank" rel="noopener">
-              <img
-                class="img-footer-size"
-                src="../Assets/img/ig.png"
-                alt="Instagram"
-              />
-            </a>
-            <a href="https://www.facebook.com/" target="_blank" rel="noopener">
-              <img
-                class="img-footer-size"
-                src="../Assets/img/fb.png"
-                alt="Facebook"
-              />
-            </a>
-          </div>
+      </div>
+      <div class="info-box-pagoyenvios">
+        <div><h3>MEDIOS DE ENVÍOS</h3></div>
+        <div>
+          <img
+            class="img-footer-size"
+            src="https://dk0k1i3js6c49.cloudfront.net/iconos-envio/correo-argentino.png"
+            alt="correo-argentino"
+          />
+          <img
+            class="img-footer-size"
+            src="https://dk0k1i3js6c49.cloudfront.net/iconos-envio/personalizado.png"
+            alt="personalizado"
+          />
+          <img
+            class="img-footer-size"
+            src="https://dk0k1i3js6c49.cloudfront.net/iconos-envio/acordar.png"
+            alt="acordar"
+          />
+          <img
+            class="img-footer-size"
+            src="https://dk0k1i3js6c49.cloudfront.net/iconos-envio/retiro-local.png"
+            alt="retiro-local"
+          />
         </div>
-
-        <div class="info-box-pagoyenvios">
-          <div><h3>MEDIOS DE ENVÍOS</h3></div>
-          <div>
-            <img
-              class="img-footer-size"
-              src="https://dk0k1i3js6c49.cloudfront.net/iconos-envio/correo-argentino.png"
-              alt="correo-argentino"
-            />
-            <img
-              class="img-footer-size"
-              src="https://dk0k1i3js6c49.cloudfront.net/iconos-envio/personalizado.png"
-              alt="personalizado"
-            />
-            <img
-              class="img-footer-size"
-              src="https://dk0k1i3js6c49.cloudfront.net/iconos-envio/acordar.png"
-              alt="acordar"
-            />
-            <img
-              class="img-footer-size"
-              src="https://dk0k1i3js6c49.cloudfront.net/iconos-envio/retiro-local.png"
-              alt="retiro-local"
-            />
-          </div>
+      </div>
+      <div id="info-box-contact">
+        <h3>CONTACTO</h3>
+        <div id="datos-contacto">
+          <p><b>MAIL:</b> ivangabrielruiz1@gmail.com</p>
+          <p><b>TELÉFONO:</b> +54 9 11 2189-4427</p>
+          <p><b>HORARIO:</b> Lunes a Viernes de 10 a 18hs</p>
         </div>
-        <div id="info-box-contact">
-          <h3>CONTACTO</h3>
-          <div id="datos-contacto">
-            <p><b>MAIL:</b> ivangabrielruiz1@gmail.com</p>
-            <p><b>TELÉFONO:</b> +54 9 11 2189-4427</p>
-            <p><b>HORARIO:</b> Lunes a Viernes de 10 a 18hs</p>
-          </div>
-        </div>
-      </section>
-    </main>
+      </div>
+    </section>
     <footer class="footer">
       <p>
         &copy;2024 - Tienda creada por todovaper&reg - Todos los derechos
@@ -260,7 +260,11 @@
       crossorigin="anonymous"
     ></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="/js/iniciar-sesion.js"></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/toastify-js"
+    ></script>
     <script src="/js/main.js"></script>
+    <script src="/js/cliente.js"></script>
   </body>
 </html>

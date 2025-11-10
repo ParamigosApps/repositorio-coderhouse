@@ -1,5 +1,24 @@
 {
   "dependencies": {
-    "firebase": "^12.5.0"
-  }
+    "firebase": "^12.5.0",
+    "mercadopago": "^2.10.0"
+  },
+  "name": "app-para-bares",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ParamigosApps/appbar.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ParamigosApps/appbar/issues"
+  },
+  "homepage": "https://github.com/ParamigosApps/appbar#readme"
 }

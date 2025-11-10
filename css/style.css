@@ -1,3 +1,4 @@
+@charset "UTF-8";
 * {
   box-sizing: border-box;
   margin: 0;
@@ -9,7 +10,7 @@ body {
   color: #f2f2f2;
 }
 
-.main-content, .main-content-productos, .main-content-contacto {
+.main-content, .main-content-productos, .main-content-contacto, .main-content-admin {
   min-height: 90vh;
   background-color: #f7f7f7;
 }
@@ -88,7 +89,7 @@ body {
   border: 1px solid #ed3838;
 }
 
-#contenedor-barrayproductos {
+#contenedor-barrayproductos, #contenedor-adminpanel {
   display: grid;
   grid-template-columns: 20% 1fr;
   height: auto;
@@ -662,7 +663,7 @@ body {
   margin: 48px 80px;
 }
 
-#form-contenedor {
+#form-contenedor, #form-añadirproducto {
   margin: 36px;
   display: flex;
   flex-wrap: wrap;
@@ -675,7 +676,7 @@ body {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.box-checkout {
+.box-checkout, .box-añadirproductos {
   padding: 20px 24px 36px 24px;
   margin: 12px 32px;
   width: 100%;
@@ -684,7 +685,7 @@ body {
   box-shadow: 0 4px 6px rgba(10, 10, 10, 0.192);
   transition: all 0.3s ease;
 }
-.box-checkout h5 {
+.box-checkout h5, .box-añadirproductos h5 {
   font-size: 1.4rem;
   width: 100%;
   text-align: center;

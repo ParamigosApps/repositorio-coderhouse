@@ -13,7 +13,7 @@ body
   font-family: "Arial", sans-serif
   color: #f2f2f2
 
-.main-content, .main-content-productos, .main-content-contacto
+.main-content, .main-content-productos, .main-content-contacto, .main-content-admin
   min-height: 90vh
   background-color: $principal-color 
 
@@ -79,7 +79,7 @@ body
   border: 1px solid #ed3838
 
 // ------------------------------ PAGINA PRODUCTOS - CONTENEDOR Y BARRA LATERAL ------------------------------- //
-#contenedor-barrayproductos
+#contenedor-barrayproductos, #contenedor-adminpanel
   display: grid
   grid-template-columns: 20% 1fr
   height: auto
@@ -538,7 +538,7 @@ body
   min-height: 150vh
   margin: 48px 80px
 
-#form-contenedor
+#form-contenedor, #form-añadirproducto
   margin: 36px
   display: flex
   flex-wrap: wrap
@@ -550,7 +550,7 @@ body
   background: linear-gradient(55deg, #00000003 0%, #00000005 50%)
   transition: transform 0.3s ease, box-shadow 0.3s ease
 
-.box-checkout
+.box-checkout, .box-añadirproductos
   padding: 20px 24px 36px 24px
   margin: 12px 32px
   width: 100%

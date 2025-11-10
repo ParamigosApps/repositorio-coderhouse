@@ -385,16 +385,6 @@ header .logoimg {
   margin-top: auto;
 }
 
-body {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-main, .main, #main, .content, .page-content, .main-content, .main-content-checkout, .content-products {
-  flex: 1;
-}
-
 #chat {
   position: fixed;
   bottom: 56px;

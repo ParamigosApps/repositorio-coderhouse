@@ -1,11 +1,8 @@
-// Función para crear la preferencia y redirigir a MercadoPago
 export async function pagarEntrada(nombreEvento, precio, cantidad) {
   try {
     const response = await fetch("/api/crear-preferencia", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombreEvento, precio, cantidad }),
     });
 
@@ -15,8 +12,7 @@ export async function pagarEntrada(nombreEvento, precio, cantidad) {
     }
 
     const data = await response.json();
-    // Redirigir al init_point de MercadoPago
-    window.location.href = data.init_point;
+    window.location.href = data.init_point; // Redirige a MercadoPago
   } catch (error) {
     console.error("Error al pagar la entrada:", error);
     alert("Ocurrió un error al procesar el pago: " + error.message);

@@ -3,6 +3,14 @@ import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.e
 import { db } from "/js/firebase.js";
 import { renderizarCatalogo } from "/js/cargarCatalogo.js";
 import { cargarEventos, cargarMisEntradas } from "/js/entradas.js";
+import { pagarEntrada } from "./pagarEntrada.js";
+
+document.getElementById("btnPagar").addEventListener("click", () => {
+  const nombre = "Concierto";
+  const precio = 1000;
+  const cantidad = 2;
+  pagarEntrada(nombre, precio, cantidad);
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   // Botones y contenedores

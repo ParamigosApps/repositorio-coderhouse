@@ -55,3 +55,24 @@ module.exports = async function handler(req, res) {
       .json({ error: "Error interno al crear preferencia" });
   }
 };
+
+export default async function handler(req, res) {
+  try {
+    if (req.method !== "POST")
+      return res.status(405).json({ error: "Método no permitido" });
+
+    // lógica para crear la preferencia
+    const preference = await mercadopago.preferences.create({
+      items: [
+        /* tus items */
+      ],
+    });
+
+    return res.status(200).json(preference);
+  } catch (err) {
+    console.error("Error creando preferencia:", err); // esto va a aparecer en logs
+    return res
+      .status(500)
+      .json({ error: "Error interno al crear preferencia" });
+  }
+}

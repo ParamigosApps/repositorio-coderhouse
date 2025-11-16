@@ -4,10 +4,7 @@ import { db } from "/js/firebase.js";
 import { formatearFecha } from "./utils.js";
 import {
   collection,
-  getDocs,
   addDoc,
-  query,
-  where,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
 // =======================================================
@@ -62,69 +59,131 @@ export function generarQr(ticketId, entradaData) {
 export async function pedirEntrada(eventoId, e) {
   console.log("🎟 Iniciando pedido de entrada para:", eventoId, e);
 
-  const payload = {
-    nombreEvento: e.nombre,
-    precio: e.precio,
-    cantidad: 1,
-  };
-
-  console.log("📦 Enviando payload a crear-preferencia:", payload);
-
   try {
-    const resp = await fetch("http://127.0.0.1:5503/api/crear-preferencia", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    // Abrir SweetAlert para seleccionar cantidad y método de pago
+    const { value: metodo } = await Swal.fire({
+      title: `${e.nombre}`,
+      html: `
+        <p>Precio por entrada: $${e.precio}</p>
+        <label for="swal-cantidad">Cantidad de entradas:</label>
+        <input type="number" id="swal-cantidad" class="swal2-input" min="1" value="1">
+        <p>Total a pagar: $<span id="swal-total">${e.precio}</span></p>
+      `,
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonText: "Mercado Pago",
+      denyButtonText: "Transferencia",
+      cancelButtonText: "Cancelar",
+      didOpen: () => {
+        const cantidadInput = document.getElementById("swal-cantidad");
+        const totalSpan = document.getElementById("swal-total");
+
+        cantidadInput.addEventListener("input", () => {
+          const cantidad = parseInt(cantidadInput.value) || 1;
+          totalSpan.textContent = cantidad * e.precio;
+        });
       },
-      body: JSON.stringify(payload),
     });
 
-    console.log("📡 Respuesta de MP:", resp.status, resp.statusText);
-
-    const text = await resp.text();
-    console.log("📨 Raw respuesta:", text);
-
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch (err) {
-      console.error("❌ No se pudo parsear JSON correctamente:", err);
-      return Swal.fire("Error", "Respuesta inválida del servidor.", "error");
+    if (metodo === null) {
+      console.log("❌ Usuario canceló la operación");
+      return;
     }
 
-    console.log("📄 JSON parseado correctamente:", data);
+    // Obtener cantidad final seleccionada
+    const cantidadInput = document.getElementById("swal-cantidad");
+    const cantidad = parseInt(cantidadInput.value) || 1;
 
-    if (!data.init_point) {
-      console.error("❌ No vino init_point en la respuesta:", data);
-      return Swal.fire(
-        "Error",
-        "MercadoPago no devolvió un link de pago.",
-        "error"
-      );
+    const payload = {
+      nombre: e.nombre,
+      precio: e.precio,
+      cantidad,
+    };
+
+    if (metodo === true) {
+      // Mercado Pago
+      console.log("📦 Payload a enviar a MP:", payload);
+
+      const resp = await fetch("/api/crear-preferencia", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      console.log("📡 Respuesta del servidor:", resp.status, resp.statusText);
+
+      const text = await resp.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (err) {
+        console.error("❌ No se pudo parsear JSON:", err);
+        return Swal.fire("Error", "Respuesta inválida del servidor.", "error");
+      }
+
+      if (!data.init_point) {
+        console.error("❌ init_point no recibido:", data);
+        return Swal.fire(
+          "Error",
+          "MercadoPago no devolvió un link de pago.",
+          "error"
+        );
+      }
+
+      console.log("🔗 Abriendo link de pago:", data.init_point);
+      window.open(data.init_point, "_blank");
+    } else if (metodo === false) {
+      // Transferencia: mostrar datos y botones adicionales
+      const cuenta = "Banco XYZ\nCBU: 1234567890123456789012\nAlias: MI_ALIAS";
+      const monto = cantidad * e.precio;
+      await Swal.fire({
+        title: "Transferencia",
+        html: `
+          <p>Debe transferir <strong>$${monto}</strong> a la siguiente cuenta:</p>
+          <pre style="background:#f2f2f2; padding:10px; border-radius:5px;">${cuenta}</pre>
+          <p>Enviár comprobante por Whatsapp para recibir los Qr para el ingreso.</p>
+        `,
+        showCancelButton: true,
+        showDenyButton: true,
+        showConfirmButton: true,
+        confirmButtonText: "Enviar comprobante por WhatsApp",
+        cancelButtonText: "Salir",
+        focusConfirm: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire("Gracias", "Tu pago será verificado.", "success");
+          // Aquí podés agregar lógica para avisar a tu backend que ya pagó
+        } else if (result.isDenied) {
+          const mensaje = encodeURIComponent(
+            `Hola, ya realicé la transferencia de $${monto} para el evento "${e.nombre}".`
+          );
+          window.open(`https://wa.me/5491123456789?text=${mensaje}`, "_blank");
+        }
+        // Cancelar solo cierra el popup automáticamente
+      });
     }
-
-    console.log("🔗 Abriendo link de pago:", data.init_point);
-    window.open(data.init_point, "_blank");
-  } catch (error) {
-    console.error("💥 Error general al procesar pedido:", error);
-    Swal.fire("Error", "Error de conexión con MercadoPago", "error");
+  } catch (err) {
+    console.error("❌ Error en pedirEntrada:", err);
+    Swal.fire("Error", "Ocurrió un error al procesar el pago.", "error");
   }
 }
 
 // =======================================================
 // CREAR ENTRADA + MOSTRAR QR
 // =======================================================
-async function crearEntrada(eventoId, entradaData) {
-  console.log("🟨 crearEntrada() ejecutado:", eventoId, entradaData);
+export async function crearEntrada(eventoId, entradaData) {
+  try {
+    const docRef = await addDoc(collection(db, "entradas"), {
+      eventoId,
+      ...entradaData,
+      creadaEn: new Date().toISOString(),
+      usado: false,
+    });
 
-  const docRef = await addDoc(collection(db, "entradas"), {
-    eventoId,
-    ...entradaData,
-    creadaEn: new Date().toISOString(),
-    usado: false,
-  });
-
-  console.log("🧾 Entrada creada con ID:", docRef.id);
-
-  generarQr(docRef.id, entradaData);
+    console.log("🧾 Entrada creada con ID:", docRef.id);
+    generarQr(docRef.id, entradaData);
+  } catch (err) {
+    console.error("❌ Error creando entrada en Firestore:", err);
+    Swal.fire("Error", "No se pudo guardar la entrada.", "error");
+  }
 }

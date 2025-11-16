@@ -6,8 +6,6 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
 export async function cargarEventos() {
-  console.log("📥 Iniciando carga de eventos...");
-
   const listaEventos = document.getElementById("listaEventos");
   if (!listaEventos) {
     console.error("❌ listaEventos no encontrado en el DOM");
@@ -64,15 +62,11 @@ export async function cargarEventos() {
 
       // CLICK DEL BOTÓN COMPRAR
       div.querySelector(".btnComprar").addEventListener("click", () => {
-        console.log(`🛒 Botón comprar presionado — Evento ID: ${id}`);
-        console.log("📦 Datos del evento usado en pedirEntrada:", e);
-
         import("/js/entradas.js")
           .then((module) => {
             console.log("📥 Archivo entradas.js importado:", module);
 
             if (typeof module.pedirEntrada === "function") {
-              console.log("🚀 Ejecutando pedirEntrada()");
               module.pedirEntrada(id, e);
             } else {
               console.error(
@@ -86,7 +80,6 @@ export async function cargarEventos() {
       });
     });
   } catch (error) {
-    console.error("❌ Error al cargar eventos:", error);
     listaEventos.innerHTML = `<p class="text-danger text-center mt-3">Error al cargar eventos.</p>`;
   }
 }

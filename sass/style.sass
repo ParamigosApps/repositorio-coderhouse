@@ -209,11 +209,12 @@ $boton-color: #0d0d0d
 
 // ------------------------------ CHECK OUT ------------------------------- //
 .main-content-checkout
+  flex: 1
   min-height: 150vh
   margin: 48px 80px
 
 .form-contenedor, .form-admin
-  margin: 36px
+  margin: 36pxs
   display: flex
   flex-wrap: wrap
   justify-content: center
@@ -275,6 +276,13 @@ body
   font-family: "Arial", sans-serif
   background-color: #fff
   color: #212529
+  display: flex
+  flex-direction: column
+
+html, body
+  height: 100%
+  margin: 0
+
 
 // ------------------------------ HEADER ------------------------------- //
 header
@@ -783,3 +791,8 @@ header
     background: #d2636e
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.2)
     transform: translateY(0)
+
+  //------- MEDIA QUERY
+@media (min-width: 992px)
+  main
+    //padding: 200px 600px

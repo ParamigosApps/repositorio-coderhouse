@@ -1,291 +1,62 @@
-
-$img-footer-size: 32px
-$img-menu-size: 32px
-$img-menu-minsize: 36px
-$principal-color: #f7f7f7 
-$boton-color: #0d0d0d
-
-//LOGO, IMAGENES, ICONOS
-.logoimg
-  max-width: 180px
-  transition: max-width 0.3s ease, transform 0.3s ease
-.img-footer-size
-    max-height: $img-footer-size
-.img-menu-size
-    max-height: $img-menu-size
-.img-producto-carrito
-  width: 64px
-  height: 64px
-#img-carrito
-  transition: transform 2.9s ease, filter 2.6s ease
-
-  &.con-productos 
-    animation: Brillo 1s infinite alternate
-  
-.img-footer-size
-        transition: transform 0.3s ease
-
-        &:hover
-            transform: scale(1.10) rotate(+6deg)
-
-        &:active
-            transform: scale(0.95) rotate(2deg)
-
-
-// ------------------------------BUSCADOR ------------------------------- //
-#aviso-buscador
-  display: none
-  margin: 8px 0px
-  font-size: 1.0rem
-  color: #ff0000
-  text-align: center
-
-.filtros-container
-  display: flex
-  flex-direction: column
-  gap: 8px
-  width: 100%
-
-
-#orden-precio
-  align-self: flex-end
-  width: 170px
-  margin-right: 12px
-
-.form-buscador
-  display: flex
-  justify-content: center
-
-#buscador
-  width: 50%
-  max-width: 100%
-
-.categorias
-  margin-top: 175px
- 
-.titulos-productos
-  padding: 16px 0 12px 0px
-  font-size: 2.0rem
-
-.titulos-form
-  font-size: 2.0rem
-  margin: 4px 0 12px 0
-
-
-
-#detalle-producto
-  display: flex
-  justify-content: center
-  min-height: 90vh
-  background-color: $principal-color
-  border: 1px solid #d3d3d3
-  padding: 16px 120px
-
-.producto-info
-  padding: 16px 32px
-  h3
-    margin-bottom: 40px
-  h4
-    margin-top: 24px
-  
-
-// ------------------------------ P - MENSAJES DE ERROR AL INICIAR/REGISTRAR ------------------------------- //
-#p-texto-primario
-  margin: 8px 0px 0px 0px
-  color: red
-  font: 1em sans-serif
-#p-texto-secundario
-  font: 1em sans-serif
-
-// ------------------------------ CONTENEDOR PRODUCTOS Y PRODUCT CARD ------------------------------- //
-.content-products
-  gap: 20px
-  justify-items: center
-  padding: 12px 80px
-  background: #f7f7f7
-
-#productos-container, #container-destacados
-  display: flex
-  justify-content: center
-  flex-wrap: wrap
-  gap: 4px
-
-
-    
-
-.product-description-title
-  font-size: 1.1rem
-  color: #222
-  text-align: center
-  font-weight: bold
-  letter-spacing: 0.5px
-  text-transform: uppercase
-
-.product-price
-  display: flex
-  align-items: center
-  justify-content: center
-  margin: 0px
-  font-size: 1.6rem
-  font-weight: bold
-  margin-bottom: 10px
-  border-radius: 10px
-  box-shadow: 0 4px 16px rgba(34,34,34,0.08)
-  letter-spacing: 1.2px
-  border: 1px solid #ffffff
-
-
-
-
-// ------------------------------ BOTONES ------------------------------- //
-@mixin boton($boton-color) 
-  text-align: center
-  text-decoration: none
-  font-size: 1.0rem
-  padding: 8px 16px
-  margin: 20px 0 56px 0
-  border-radius: 8px
-  border: 1px solid $boton-color
-  background: $boton-color
-  color: #fff
-  cursor: pointer
-  transition: background 0.2s
-  transition: transform 0.3s
-  box-shadow: 0 4px 16px rgba(17, 40, 75, 0.505)
-
-  &:hover 
-    transform: scale(1.1)
-    box-shadow: 0 8px 32px rgba(22, 108, 194, 0.731)
-    transition: transform 0#2b95ec66s ease, box-shadow 0.3s ease
-
-.btn-primary
-  @include boton($boton-color)
-
-#btn-cerrarsesion
-  @include boton($boton-color)
-  background: #d80808
-  border: 1px solid #f1d3d3
-  &:hover 
-    box-shadow: 0 8px 32px rgba(228, 9, 9, 0.731)
-
-.btn-ingresar
-  @include boton($boton-color)
-  background: #28da18
-  border: 1px solid #22bd27
-  font-size: 0.9rem
-  &:hover 
-    box-shadow: 0 8px 32px rgba(66, 222, 55, 0.731)
-
-
-#boton-enviar-form
-  @include boton($boton-color)
-  background-color: #14a8e2
-  font-size: 1.2rem
-
-  &:hover 
-      border: 2px solid #235f77
-      background-color: #6bd5ff
-      transform: scale(1.08)
-
-#btn-finalizarcompra
-  width: 230px
-  height: 60px
-  background-color: #2dbe4f      
-  border: 2px solid #218838
-  font-size: 1.4rem
-  margin: 20px 0 0 0
-  box-shadow: 0 6px 8px rgba(99, 230, 129, 0.539)
-  color: #fff
-  font-weight: bold
-  border-radius: 12px
-  transition: all 0.3s ease
-
-  &:hover
-    background-color: #41ec66    
-    transform: scale(1.12)
-    box-shadow: 0 10px 15px rgba(76, 205, 104, 0.728)
-
-
-
-// ------------------------------ CHECK OUT ------------------------------- //
-.main-content-checkout
-  flex: 1
-  min-height: 150vh
-  margin: 48px 80px
-
-.form-contenedor, .form-admin
-  margin: 36pxs
-  display: flex
-  flex-wrap: wrap
-  justify-content: center
-  padding: 24px
-  background: #ffffff
-  border-radius: 12px
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.16)
-  background: linear-gradient(55deg, #00000003 0%, #00000005 50%)
-  transition: transform 0.3s ease, box-shadow 0.3s ease
-
-.box-checkout, .box-form
-  padding: 20px 24px 36px 24px
-  margin: 12px 32px
-  width: 100%
-  border-radius: 4px
-  background: linear-gradient(25deg, #00000003 0%, #00000001 20%)
-  box-shadow: 0 4px 6px rgba(10, 10, 10, 0.192)
-  transition: all 0.3s ease
-
-  h5
-    font-size: 1.4rem
-    width: 100%
-    text-align: center
-    padding: 0px 0px 24px 0px
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ------------------------------ VARIABLES ------------------------------- //
 $principal-color: #f7f7f7
 $color-primario: #343a40
 $color-primario-hover: #0c1d31
 $color-texto-boton: #fff
+$boton-color: #0d0d0d
+
+$img-footer-size: 32px
+$img-menu-size: 32px
+$img-menu-minsize: 36px
 
 // ------------------------------ RESETEO GLOBAL ------------------------------- //
-*
+* 
   box-sizing: border-box
   margin: 0
   padding: 0
 
-body
-  min-height: 100vh
-  font-family: "Arial", sans-serif
-  background-color: #fff
-  color: #212529
+html, body 
+  height: 100%
+
+body 
   display: flex
   flex-direction: column
+  min-height: 100vh
 
-html, body
-  height: 100%
-  margin: 0
+main 
+  flex-grow: 1
 
+// ------------------------------ LOGOS E IMÁGENES ------------------------------- //
+.logoimg 
+  max-width: 180px
+  max-height: 60px
+  transition: max-width 0.3s ease, transform 0.3s ease
+
+.img-footer-size 
+  max-height: $img-footer-size
+  transition: transform 0.3s ease
+
+  &:hover 
+    transform: scale(1.1) rotate(6deg)
+  
+  &:active 
+    transform: scale(0.95) rotate(2deg)
+
+.img-menu-size 
+  max-height: $img-menu-size
+
+.img-producto-carrito 
+  width: 64px
+  height: 64px
+
+#img-carrito 
+  transition: transform 2.9s ease, filter 2.6s ease
+
+  &.con-productos 
+    animation: Brillo 1s infinite alternate
 
 // ------------------------------ HEADER ------------------------------- //
-header
+header 
   display: flex
   justify-content: center
   align-items: center
@@ -294,60 +65,61 @@ header
   background-color: $principal-color
   padding: 8px
 
-  .logoimg
-    max-height: 60px
-    width: auto
+  .logoimg 
     display: block
+    width: auto
 
-// ------------------------------ MENÚ DESPLEGABLE ------------------------------- //
-.menu-desplegable
-  width: 520px
-  margin: 3rem auto
-  background-color: $principal-color
-  padding: 1rem 0.5rem
+// ------------------------------ BOTONES ------------------------------- //
+@mixin boton($boton-color) 
+  text-align: center
+  text-decoration: none
+  font-size: 1rem
+  padding: 8px 16px
+  margin: 20px 0 56px
   border-radius: 8px
+  border: 1px solid $boton-color
+  background: $boton-color
+  color: #fff
+  cursor: pointer
+  transition: transform 0.3s, box-shadow 0.3s
+  box-shadow: 0 4px 16px rgba(17, 40, 75, 0.505)
 
-  .accordion
-    width: 500px
-    border-radius: 1rem
-    overflow: hidden
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05)
+  &:hover 
+    transform: scale(1.1)
+    box-shadow: 0 8px 32px rgba(22, 108, 194, 0.731)
 
-  .accordion-button
-    background-color: #f9fafb
-    font-weight: 600
-    font-size: 1.1rem
-    color: #212529
-    transition: background 0.3s ease
+.btn-primary  
+  @include boton($boton-color) 
 
-    &:not(.collapsed)
-      color: #fff
-      background-color: #212529
+#btn-cerrarsesion 
+  @include boton($boton-color)
+  background: #d80808
+  border: 1px solid #f1d3d3
 
-  .accordion-item
-    border: none
-    border-bottom: 1px solid #e9ecef
+  &:hover 
+    box-shadow: 0 8px 32px rgba(228, 9, 9, 0.731)
 
+.btn-ingresar 
+  @include boton($boton-color)
+  background: #28da18
+  border: 1px solid #22bd27
+  font-size: 0.9rem
 
-  .accordion-body
-    background: #ffffff
-    padding: 1.2rem
+  &:hover 
+    box-shadow: 0 8px 32px rgba(66, 222, 55, 0.731)
 
-  .btn
-    border-radius: 0.6rem
-    font-weight: 500
-    transition: all 0.3s ease
+#boton-enviar-form 
+  @include boton($boton-color)
+  background-color: #14a8e2
+  font-size: 1.2rem
 
-  .btn-outline-dark
-    border-color: #343a40
-    color: #343a40
-
-    &:hover
-      background-color: #343a40
-      color: #fff
+  &:hover 
+    border: 2px solid #235f77
+    background-color: #6bd5ff
+    transform: scale(1.08)
 
 // ------------------------------ FOOTER ------------------------------- //
-.footer
+.footer 
   background-color: #313131
   color: #fff
   text-align: center
@@ -357,132 +129,91 @@ header
   border-top: 1px solid #ddd
   margin-top: auto
 
-// ------------------------------ WHATSAPP FLOAT ------------------------------- //
-#chat 
-  position: fixed
-  bottom: 56px
-  right: 8px
-  margin-bottom: 8px
-  z-index: 1000
-  background-color: rgba(255, 255, 255, 0.163)
-  border-radius: 50%
-  padding: 16px
-  box-shadow: 0 4px 16px rgba(64, 63, 63, 0.948)
-  transition: transform 0.2s, right 0.6s
+// ------------------------------ MENÚ DESPLEGABLE ------------------------------- //
+.menu-desplegable 
+  padding: 1rem
+  box-sizing: border-box
 
-  &:hover
-    right: 16px
-    transform: scale(1.24)
+  .accordion 
+    width: 100%
+    border-radius: 1rem
+    overflow: hidden
+    box-shadow: 0 0 10px rgba(0,0,0,0.05)
+  
+  .accordion-button 
+    background-color: #f9fafb
+    font-weight: 600
+    font-size: 1.1rem
+    color: #212529
+    transition: background 0.3s ease
+
+    &:not(.collapsed) 
+      color: #fff
+      background-color: #212529
+
+  .accordion-item 
+    border: none
+    border-bottom: 1px solid #e9ecef
+
+  .accordion-body 
+    background: #fff
+    padding: 1.2rem
+
+  .btn 
+    border-radius: 0.6rem
+    font-weight: 500
+    transition: all 0.3s ease
+
+  .btn-outline-dark 
+    border-color: #343a40
+    color: #343a40
+
+    &:hover 
+      background-color: #343a40
+      color: #fff
+
+  @media (min-width: 992px) 
+    padding: 3rem 8rem
 
 // ------------------------------ RESPONSIVE ------------------------------- //
-@media (max-width: 576px)
-  header
-    .logoimg
-      max-height: 50px
+@media (max-width: 576px) 
+  header .logoimg  
+    max-height: 50px 
 
-  .menu-desplegable
+  .menu-desplegable 
     margin: 1rem
     padding: 0.5rem
 
-    .accordion-button
+    .accordion-button  
       font-size: 1rem
-      padding: 0.9rem
+      padding: 0.9rem 
 
-    .accordion-body
-      padding: 1rem
+    .accordion-body  
+      padding: 1rem 
 
-    .btn
+    .btn  
       font-size: 0.95rem
-      padding: 0.6rem
+      padding: 0.6rem 
 
-// ------------------------------ CATÁLOGO ------------------------------- //
-.catalogo
-  width: 100%
-  max-width: 520px
-  margin: 3rem auto
-  background-color: $principal-color
-  padding: 1rem
-  border-radius: 8px
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05)
-  display: flex
-  flex-wrap: wrap
-  
-
-.categoria-titulo
-  font-size: 2rem
-  padding: 2rem 0 0 0
-  margin-top: 2rem
-  color: #212529
-  font-weight: 600
-  border-top: 2px solid #e9ecef
-  text-align: center
-
-.productos-grid
-  display: grid
-  gap: 1.5rem
-  justify-items: center
-  width: 100%
-
-
-@media (max-width: 576px)
-  .catalogo
+  .catalogo  
     max-width: 100%
     margin: 1rem
-    padding: 0.8rem
+    padding: 0.8rem 
 
-// ------------------------------ MIXIN GENERAL DE BOTONES ------------------------------- //
-@mixin boton-general($bg: $color-primario, $color: $color-texto-boton, $bg-hover: $color-primario-hover, $shadow: 0.1)
-  display: inline-block
-  background-color: $bg
-  color: $color
-  font-weight: 600
-  font-size: 1rem
-  padding: 0.8rem 1.8rem
-  border: none
-  border-radius: 12px
-  cursor: pointer
-  text-transform: uppercase
-  letter-spacing: 0.5px
-  box-shadow: 0 4px 12px rgba(0, 0, 0, $shadow)
-  transition: all 0.3s ease
-  text-align: center
-  text-decoration: none
-
-  &:hover
-    background-color: $bg-hover
-    transform: translateY(-2px) scale(1.03)
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15)
-
-  &:active
-    transform: translateY(0)
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1)
-
-// ------------------------------ BOTÓNES ------------------------------- //
-.btn-volver
-  @include boton-general
-  margin: 1rem auto 1rem auto
-  display: block
-
-.btn-agregar
-  @include boton-general
-  display: block
-  height: 50px
-  padding: 0 0.6rem
-  font-size: 1rem
-  margin-bottom: 0.5rem
-
-@media (max-width: 576px)
-  .btn-volver
+  .btn-volver  
     width: 100%
     font-size: 0.95rem
-    padding: 0.9rem
+    padding: 0.9rem 
 
+  .btn-categoria  
+    font-size: 0.9rem
+    padding: 0.4rem 0 
 
-//PRODUCTOS CARTA
-.product-card
+// ------------------------------ PRODUCTOS ------------------------------- //
+.product-card 
   display: flex
-  align-items: center
   justify-content: space-between
+  align-items: flex-start
   width: 100%
   height: 150px
   background: #fff
@@ -490,245 +221,53 @@ header
   padding: 4px 8px
   box-shadow: 0 2px 12px rgba(0,0,0,0.06)
   transition: transform 0.2s, box-shadow 0.2s
+  cursor: pointer
 
-  a 
-    text-decoration: none 
-    color: inherit 
-  
-  &:active
-    transform: translateY(-6px) scale(1.03)
-    box-shadow: 0 8px 24px rgba(0,0,0,0.16)
+  img 
+    width: 120px
+    height: 100%
+    object-fit: cover
+    border-radius: 6px
+    margin: 4px
 
-  h3
+  &:hover 
+    transform: scale(1.03)
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2)
+
+  h3  
     font-size: 1.2rem
     font-weight: bold
     padding-top: 12px
     height: 30px
-    
-  img
-    height: 100%
-    width: 30%
-    object-fit: cover
-    border-radius: 6px
-    background: #fff
 
-// ------------------------------ SUB MENU CREAR EVENTOs ------------------------------- //
-
-.menu-eventos 
-  position: relative
-  display: inline-block
-
-
-.submenu 
-  display: none
-  flex-direction: column
-  gap: 8px
-  position: absolute
-  top: 105%
-  left: 0
-  background: #ffffff
-  border: 1px solid #ccc
-  padding: 10px
-  border-radius: 10px
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15)
-  z-index: 10
-
-
-.submenu button 
-  width: 180px
-
-
-.submenu.visible 
-  display: flex
-
-// ------------------------------ CARD DE EVENTOS------------------------------- //
-.eventos-card
-  width: 100%
-  min-height: 180px
-// ------------------------------ CONTENEDOR QR ------------------------------- //
-#qrcode
-  background: #ffffff
-  padding: 20px
-  border-radius: 16px
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1)
-  display: inline-block
-  justify-content: center
-  align-items: center
-  text-align: center
-
-/* Info del ticket */
-#ticketInfo
-  font-size: 1rem
-  color: #333
-  margin-top: 8px
-
-/* Botón descargar QR */
-#downloadQr
-  font-weight: 500
-
-
-.modal-header, .modal-footer
-  border: none
-
-  /* ---------------------- Mis Entradas ---------------------- */
-#listaEntradas .card 
-  border-radius: 12px
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1)
-  padding: 16px
-  transition: transform 0.2s, box-shadow 0.2s
-  background: #ffffff
-
-
-#listaEntradas .card:hover 
-  transform: translateY(-3px)
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15)
-
-
-#listaEntradas h6 
-  font-weight: 600
-  margin-bottom: 4px
-  font-size: 1rem
-  color: #333333
-
-
-#listaEntradas small 
-  color: #777777
-
-
-#listaEntradas p 
-  margin: 0
-  color: #555555
-
-
-#listaEntradas .btn-ver-qr 
-  background: #000000
-  color: #ffffff
-  border: none
-  transition: background 0.2s
-
-
-#listaEntradas .btn-ver-qr:hover 
-  background: #222222
-
-
-/* ---------------------- Modal QR ---------------------- */
-#qrModal .modal-content 
-  border-radius: 16px
-  padding: 24px
-  text-align: center
-  background: #f9f9f9
-  background-color: #f9f9f9
-  width: 340px
-
-
-#qrModal h5 
-  font-weight: 700
-  margin-bottom: 16px
-  color: #222222
-
-
-#qrcode 
-  margin: 0 auto
-  width: 240px
-  height: 240px
-
-
-#ticketInfo 
-  font-weight: 600
-  margin-top: 12px
-  color: #333333
-
-
-#downloadQr 
-  margin-top: 12px
-  display: inline-block
-  padding: 8px 16px
-  border-radius: 8px
-  background: #28a745
-  color: #ffffff !important
-  text-decoration: none
-  transition: background 0.2s
-
-
-#downloadQr:hover 
-  background: #218838
-
-
-
-/* Botones de categorías */
-.btn-categoria 
-  border-radius: 12px
-  padding: 0.5rem 0
-  font-weight: 600
-  transition: all 0.2s
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1)
-
-
-.btn-categoria:hover 
-  background-color: #343a40
-  color: #fff
-  transform: translateY(-2px)
-
-
-@media (max-width: 576px) 
-  .btn-categoria 
-    font-size: 0.9rem
-    padding: 0.4rem 0
-  
-//------------------------------ Efectos hover en tarjetas de productos ------------------------------- //
-.product-card
-  display: flex
-  justify-content: space-between
-  align-items: flex-start
-  border: 1px solid #ddd
-  border-radius: 8px
-  background-color: #fff
-  cursor: pointer
-  transition: transform 0.2s, box-shadow 0.2s
-
-.product-card:hover
-  transform: scale(1.03)
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2)
-
-.product-info
+.product-info 
   display: flex
   flex-direction: column
   justify-content: space-between
-  flex: 1 /* ocupa todo el espacio disponible */
+  flex: 1
 
-.product-info h3
-  text-align: left
-  align-self: flex-start
-  padding-left: 4px
-  font-size: 1.1rem
-  font-weight: 600
-  height: 48px
+  h3  
+    font-size: 1.1rem
+    font-weight: 600
+    height: 48px
+    padding-left: 4px 
 
-.product-info p
-  font-size: 0.95rem
-  color: #555
-  height: 36px
-  padding-left: 4px
+  p   
+    font-size: 0.95rem
+    color: #555
+    height: 36px
+    padding-left: 4px 
 
-.product-info h5
-  font-size: 1rem
-  font-weight: 500
-  color: #222
-  height: 32px
-  width: 80%
+  h5  
+    font-size: 1rem
+    font-weight: 500
+    color: #222
+    height: 32px
+    width: 80% 
 
-.product-card img
-  width: 120px /* ajusta según necesites */
-  height: 100%
-  border-radius: 6px
-  object-fit: cover
-  margin: 4px
-  padding: 4px
-    
-
-.producto-sin-stock 
+.producto-sin-stock  
   opacity: 0.5
-  pointer-events: none
+  pointer-events: none 
 
 .sin-stock 
   position: absolute
@@ -740,59 +279,73 @@ header
   border-radius: 4px
   font-size: 0.8rem
 
-// BOTON GOOGLE
-
-.google-btn
+// ------------------------------ BOTÓN GOOGLE ------------------------------- //
+.google-btn 
   display: flex
   align-items: center
   justify-content: center
   width: 75%
-  padding: 8px 8px
+  padding: 8px
   border-radius: 8px
   font-weight: 600
   cursor: pointer
   border: 1px solid #dadce0
-  background: linear-gradient(145deg, #ffffff, #f1f3f4)
+  background: linear-gradient(145deg, #fff, #f1f3f4)
   color: #202124
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1)
   font-family: 'Roboto', sans-serif
   transition: all 0.25s ease
 
-  img
+  img  
     height: 24px
     width: 24px
-    margin: 0 12px
+    margin: 0 12px 
 
-  span
+  span  
     flex: 1
     text-align: center
-    font-size: 1.1rem
+    font-size: 1.1rem 
 
-  &:hover
+  &:hover  
     background: linear-gradient(145deg, #f1f3f4, #e8eaed)
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15)
-    transform: translateY(-2px)
+    transform: translateY(-2px) 
 
-  &:active
+  &:active  
     background: linear-gradient(145deg, #e0e0e0, #d6d6d6)
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1)
-    transform: translateY(0)
+    transform: translateY(0) 
 
-.google-btn.logout
-  width: 13rem
-  border-color: #dc3545
+  &.logout 
+    width: 13rem
+    border-color: #dc3545
 
-  &:hover
-    background: #dc3545
-    box-shadow: 0 6px 12px rgba(0,0,0,0.2)
-    transform: translateY(-2px)
+    &:hover  
+      background: #dc3545
+      transform: translateY(-2px) 
 
-  &:active
-    background: #d2636e
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2)
-    transform: translateY(0)
+    &:active  
+      background: #d2636e
+      transform: translateY(0)
 
-  //------- MEDIA QUERY
-@media (min-width: 992px)
-  main
-    //padding: 200px 600px
+// ------------------------------ CATALOGO ------------------------------- //
+.catalogo 
+  width: 100%
+  max-width: 520px
+  margin: 3rem auto
+  background-color: $principal-color
+  padding: 1rem
+  border-radius: 8px
+  box-shadow: 0 0 10px rgba(0,0,0,0.05)
+  display: flex
+  flex-wrap: wrap
+
+.categoria-titulo 
+  font-size: 2rem
+  padding: 2rem 0 0 0
+  color: #212529
+  font-weight: 600
+  border-top: 2px solid #e9ecef
+  text-align: center
+
+.productos-grid 
+  display: grid
+  gap: 1.5rem
+  justify-items: center

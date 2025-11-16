@@ -11,7 +11,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
 // -----------------------------
-// Cargar eventos (lista principal)
+// Cargar eventos
 // -----------------------------
 export async function cargarEventos() {
   const contenedor = document.getElementById("listaEventos");
@@ -32,36 +32,32 @@ export async function cargarEventos() {
       const e = docSnap.data();
       const id = docSnap.id;
 
-      // mostramos con los campos esperados (nombre, fecha, lugar)
       const htmlNombre = escapeHtml(e.nombre) || "Evento sin nombre";
       const htmlFecha = escapeHtml(e.fecha) || "Sin fecha";
       const htmlLugar = escapeHtml(e.lugar) || "Sin lugar";
-      let htmlPrecio = e.precio;
       const htmlDesc = escapeHtml(e.descripcion) || "Sin descripción";
-
-      htmlPrecio = htmlPrecio === 0 ? "Entrada gratuita" : `$${htmlPrecio}`;
-      const div = document.createElement("div");
-      div.className = "card mb-2 p-3 shadow-sm";
 
       const displayPrecio =
         e.precio === 0 || e.precio === null || e.precio === undefined
           ? "Entrada gratuita"
           : `$${escapeHtml(String(e.precio))}`;
 
+      const div = document.createElement("div");
+      div.className = "card mb-2 p-3 shadow-sm";
+
       div.innerHTML = `
         <h5 class="mb-1">${htmlNombre}</h5>
         <p class="mb-0">📅 Fecha: ${formatearFecha(htmlFecha)}</p>
         <p class="mb-0">📍 Lugar: ${htmlLugar}</p>
-        
         <p class="mb-0">💲 Precio: ${displayPrecio}</p>
         <p class="mb-0">📋 Descripción: ${htmlDesc}</p>
         <br>
-        <button class="btn btn-dark w-75 d-block mx-auto mb-1 btn-pedir-entrada" data-id="${id}" data-nombre="${escapeHtml(
-        e.nombre || ""
-      )}">
+        <button class="btn btn-dark w-75 d-block mx-auto mb-1 btn-pedir-entrada"
+          data-id="${id}" data-nombre="${htmlNombre}">
           Conseguir entrada
         </button>
       `;
+
       contenedor.appendChild(div);
 
       div.querySelector(".btn-pedir-entrada").addEventListener("click", () => {
@@ -75,38 +71,28 @@ export async function cargarEventos() {
 }
 
 // -----------------------------
-// Pedir entrada
+// Pedir entrada (Mercado Pago o Gratis)
 // -----------------------------
 export async function pedirEntrada(eventoId, eventoParam) {
   try {
     const usuarioId = localStorage.getItem("usuarioId") || "Invitado";
-    const esObjeto = eventoParam && typeof eventoParam === "object";
 
-    const nombreEvento = esObjeto
-      ? eventoParam.nombre || "Evento sin nombre"
-      : eventoParam;
-    const fecha = esObjeto ? eventoParam.fecha || null : null;
-    const lugar = esObjeto
-      ? eventoParam.lugar || "Lugar a definir"
-      : "Lugar a definir";
-    const precio = parseFloat(eventoParam?.precio) || 0;
+    const nombreEvento = eventoParam.nombre || "Evento sin nombre";
+    const fecha = eventoParam.fecha || null;
+    const lugar = eventoParam.lugar || "Lugar a definir";
+    const precio = parseFloat(eventoParam.precio) || 0;
     const maxEntradas = eventoParam?.maxEntradasPorUsuario || 2;
 
-    // ⚙️ 1️⃣ Si el evento es gratuito
+    // 🎟️ Evento gratuito
     if (precio === 0) {
       const { value: cantidad } = await Swal.fire({
         title: "Entradas gratuitas 🎟️",
         text: `Podés obtener hasta ${maxEntradas} entradas.`,
         input: "number",
-        inputAttributes: {
-          min: 1,
-          max: maxEntradas,
-          step: 1,
-        },
+        inputAttributes: { min: 1, max: maxEntradas, step: 1 },
         inputValue: 1,
         confirmButtonText: "Conseguir",
         showCancelButton: true,
-        cancelButtonText: "Cancelar",
       });
 
       if (!cantidad) return;
@@ -118,7 +104,7 @@ export async function pedirEntrada(eventoId, eventoParam) {
           fecha,
           lugar,
           precio: "Entrada gratuita",
-          descripcion: eventoParam?.descripcion || "Sin descripción disponible",
+          descripcion: eventoParam.descripcion || "Sin descripción",
         });
       }
 
@@ -126,7 +112,7 @@ export async function pedirEntrada(eventoId, eventoParam) {
       return;
     }
 
-    // ⚙️ 2️⃣ Si el evento es pago
+    // 💳 Evento pago
     const { value: metodo } = await Swal.fire({
       title: "Seleccioná método de pago 💳",
       input: "radio",
@@ -134,7 +120,7 @@ export async function pedirEntrada(eventoId, eventoParam) {
         mp: "Mercado Pago",
         transf: "Transferencia bancaria",
       },
-      inputValidator: (value) => !value && "Elegí un método para continuar",
+      inputValidator: (v) => !v && "Elegí un método de pago",
       confirmButtonText: "Continuar",
       showCancelButton: true,
     });
@@ -142,38 +128,41 @@ export async function pedirEntrada(eventoId, eventoParam) {
     if (!metodo) return;
 
     if (metodo === "mp") {
-      const cantidad = 1; // elegir cantidad de entradas
+      const cantidad = 1;
+
       const response = await fetch("/api/crear-preferencia", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombre: nombreEvento,
-          precio,
-          cantidad,
-        }),
+        body: JSON.stringify({ nombre: nombreEvento, precio, cantidad }),
       });
+
+      if (!response.ok) {
+        throw new Error("No se pudo obtener preferencia Mercado Pago");
+      }
 
       const data = await response.json();
 
       if (data.init_point) {
-        window.location.href = data.init_point; // redirige al checkout
+        window.location.href = data.init_point;
       } else {
         Swal.fire("Error", "No se pudo generar el link de pago.", "error");
       }
-    } else {
-      Swal.fire(
-        "💰 Transferencia",
-        "Datos bancarios:<br>Alias: eventoshoy.mp<br>CBU: 1234567890123456789012<br>Enviá el comprobante al organizador.",
-        "info"
-      );
+
+      return;
     }
+
+    // 💸 Transferencia
+    Swal.fire(
+      "💰 Transferencia",
+      "Alias: eventoshoy.mp<br>CBU: 1234567890123456789012<br>Enviá el comprobante al organizador.",
+      "info"
+    );
   } catch (err) {
-    console.error("Error al procesar entrada:", err);
+    console.error("❌ Error al procesar entrada:", err);
     Swal.fire("Error", "No se pudo procesar la entrada.", "error");
   }
 }
 
-// 🔹 helper para crear la entrada y generar el QR
 async function crearEntrada(eventoId, entradaData) {
   const docRef = await addDoc(collection(db, "entradas"), {
     eventoId,
@@ -185,7 +174,7 @@ async function crearEntrada(eventoId, entradaData) {
 }
 
 // -----------------------------
-// Generar QR y mostrar modal
+// Generador QR
 // -----------------------------
 export function generarQr(ticketId, entradaData) {
   const qrcodeContainer = document.getElementById("qrcode");
@@ -194,135 +183,37 @@ export function generarQr(ticketId, entradaData) {
   const qrModalEl = document.getElementById("qrModal");
 
   if (!qrcodeContainer || !ticketInfo || !downloadLink || !qrModalEl) {
-    console.warn("Faltan elementos del DOM para mostrar QR modal.");
-    return;
+    return console.warn("Faltan elementos del DOM para QR");
   }
 
   qrcodeContainer.innerHTML = "";
 
-  ticketInfo.innerHTML = `Ticket: ${ticketId}<br>Evento: ${
-    entradaData.nombreEvento
-  }<br>
-📅 Fecha: ${formatearFecha(entradaData.fecha)}<br>
-📍 Lugar: ${entradaData.lugar}`;
+  ticketInfo.innerHTML = `
+    Ticket: ${ticketId}<br>
+    Evento: ${entradaData.nombreEvento}<br>
+    📅 Fecha: ${formatearFecha(entradaData.fecha)}<br>
+    📍 Lugar: ${entradaData.lugar}
+  `;
 
-  const qrData = ticketId; // solo ID para evitar overflow
   new QRCode(qrcodeContainer, {
-    text: qrData,
+    text: ticketId,
     width: 200,
     height: 200,
-    colorDark: "#000000",
-    colorLight: "#ffffff",
     correctLevel: QRCode.CorrectLevel.H,
   });
 
   setTimeout(() => {
     const img = qrcodeContainer.querySelector("img");
-    const canvas = qrcodeContainer.querySelector("canvas");
-    let dataUrl = null;
-
-    if (img) dataUrl = img.src;
-    else if (canvas) dataUrl = canvas.toDataURL("image/png");
-
-    if (dataUrl) {
-      downloadLink.href = dataUrl;
-      downloadLink.download = `entrada_${ticketId}.png`;
-      downloadLink.style.display = "inline-block";
-    } else {
-      downloadLink.style.display = "none";
-    }
+    downloadLink.href = img.src;
+    downloadLink.download = `entrada_${ticketId}.png`;
+    downloadLink.style.display = "inline-block";
   }, 500);
 
   new bootstrap.Modal(qrModalEl).show();
 }
 
-// -----------------------------
-// Mostrar "Mis entradas"
-// -----------------------------
-export async function cargarMisEntradas() {
-  const contenedor = document.getElementById("listaEntradas");
-  if (!contenedor) return;
-
-  contenedor.innerHTML = `<p class="text-center text-secondary mt-3">Cargando tus entradas...</p>`;
-
-  try {
-    const usuarioId = localStorage.getItem("usuarioId") || "Invitado";
-    const q = query(
-      collection(db, "entradas"),
-      where("usuarioId", "==", usuarioId)
-    );
-    const snapshot = await getDocs(q);
-    contenedor.innerHTML = "";
-
-    if (snapshot.empty) {
-      contenedor.innerHTML = `<p class="text-center text-secondary">No tenés entradas todavía.</p>`;
-      return;
-    }
-
-    snapshot.forEach((docSnap) => {
-      const e = docSnap.data();
-      const id = docSnap.id;
-
-      const nombre =
-        e.nombreEvento ||
-        e.eventoNombre ||
-        "No se encontro el nombre del evento";
-      const fechaCarta = e.fecha || "📅 Fecha no disponible";
-      const lugarCarta = e.lugar || "📍 Lugar a definir";
-      const descripcionCarta = e.descripcion || "📋 Sin descripción disponible";
-
-      const div = document.createElement("div");
-      div.className = "card mb-2 p-3 shadow-sm";
-      div.innerHTML = `
-        <h5 class="fw-semibold">   ${escapeHtml(nombre)}</h5>
-        <p class="mb-0"><strong>📅 Fecha:</strong> ${escapeHtml(
-          formatearFecha(fechaCarta)
-        )}</p>
-        <p class="mb-0"><strong>📍 Lugar:</strong> ${escapeHtml(lugarCarta)}</p>
-        <p class="mb-0"><strong>📋 Descripción:</strong> ${escapeHtml(
-          descripcionCarta
-        )}</p>
-        <p class="mb-0"><strong>🎫 Código ID:</strong> ${id}</p>
-        <button class="btn btn-outline-dark w-50 mt-3 btn-ver-qr d-block mx-auto">Ver código QR</button>
-
-      `;
-      contenedor.appendChild(div);
-
-      div.querySelector(".btn-ver-qr").addEventListener("click", () => {
-        const entradaParaQr = {
-          nombreEvento: nombre,
-          usuarioId: e.usuarioId || "Invitado",
-          fecha: formatearFecha(fechaCarta),
-          lugar: lugarCarta,
-          precio: e.precio || "Entrada gratuita",
-          descripcion: e.descripcion || "Sin descripción disponible",
-        };
-        generarQr(id, entradaParaQr);
-      });
-    });
-  } catch (err) {
-    console.error("Error al cargar tus entradas:", err);
-    contenedor.innerHTML = `<p class="text-danger text-center mt-3">Error al cargar tus entradas.</p>`;
-  }
-}
-
-// document.addEventListener("DOMContentLoaded", () => {
-//   const btn = document.getElementById("btnConseguirEntrada");
-//   if (btn) {
-//     btn.addEventListener("click", () => {
-//       const nombre = "Concierto";
-//       const precio = 1000;
-//       const cantidad = 2;
-//       pagarEntrada(nombre, precio, cantidad);
-//     });
-//   }
-// });
-
-// -----------------------------
-// Helpers
-// -----------------------------
+// Helper
 function escapeHtml(str) {
-  if (!str) return "";
   return String(str)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")

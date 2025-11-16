@@ -96,7 +96,6 @@ export function renderizarCatalogo(filtro = null) {
 // Eventos botones
 btnMostrarTodo?.addEventListener("click", () => {
   renderizarCatalogo();
-  //if (catalogoContainer) catalogoContainer.style.display = "block";
 });
 
 botonesCategoria.forEach((btn) => {

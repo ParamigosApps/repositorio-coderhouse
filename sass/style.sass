@@ -131,7 +131,7 @@ header
 
 // ------------------------------ MENÚ DESPLEGABLE ------------------------------- //
 .menu-desplegable 
-  padding: 1rem
+  padding: 0.5rem
   box-sizing: border-box
 
   .accordion 
@@ -175,39 +175,6 @@ header
   @media (min-width: 992px) 
     padding: 3rem 8rem
 
-// ------------------------------ RESPONSIVE ------------------------------- //
-@media (max-width: 576px) 
-  header .logoimg  
-    max-height: 50px 
-
-  .menu-desplegable 
-    margin: 1rem
-    padding: 0.5rem
-
-    .accordion-button  
-      font-size: 1rem
-      padding: 0.9rem 
-
-    .accordion-body  
-      padding: 1rem 
-
-    .btn  
-      font-size: 0.95rem
-      padding: 0.6rem 
-
-  .catalogo  
-    max-width: 100%
-    margin: 1rem
-    padding: 0.8rem 
-
-  .btn-volver  
-    width: 100%
-    font-size: 0.95rem
-    padding: 0.9rem 
-
-  .btn-categoria  
-    font-size: 0.9rem
-    padding: 0.4rem 0 
 
 // ------------------------------ PRODUCTOS ------------------------------- //
 .product-card 
@@ -349,3 +316,61 @@ header
   display: grid
   gap: 1.5rem
   justify-items: center
+
+
+// ------------------------------ RESPONSIVE ------------------------------- //
+@media (max-width: 576px) 
+  header .logoimg  
+    max-height: 50px 
+
+  .menu-desplegable 
+    padding: 0.5rem
+
+    .accordion-button  
+      font-size: 1rem
+      padding: 0.9rem 
+
+    .accordion-body  
+      padding: 1rem 
+
+    .btn  
+      font-size: 0.95rem
+      padding: 0.6rem 
+
+  .catalogo  
+    max-width: 100%
+    margin: 1rem
+    padding: 0.8rem 
+
+  .btn-volver  
+    width: 100%
+    font-size: 0.95rem
+    padding: 0.9rem 
+
+  .btn-categoria  
+    font-size: 0.9rem
+    padding: 0.4rem 0 
+
+.product-info 
+
+  h3  
+    font-size: 0.8rem
+    height: 38px
+    padding-left: 4px 
+
+  p   
+    font-size: 0.65rem
+    height: 26px
+    padding-left: 4px 
+
+  h5  
+    font-size: 1.2rem
+
+.product-card 
+  
+  img 
+    width: 100px
+    height: 100%
+    object-fit: cover
+    border-radius: 6px
+    margin: 0px

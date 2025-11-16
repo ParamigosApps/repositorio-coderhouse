@@ -171,7 +171,7 @@ header .logoimg {
 }
 
 .menu-desplegable {
-  padding: 1rem;
+  padding: 0.5rem;
   box-sizing: border-box;
 }
 .menu-desplegable .accordion {
@@ -218,40 +218,6 @@ header .logoimg {
   }
 }
 
-@media (max-width: 576px) {
-  header .logoimg {
-    max-height: 50px;
-  }
-  .menu-desplegable {
-    margin: 1rem;
-    padding: 0.5rem;
-  }
-  .menu-desplegable .accordion-button {
-    font-size: 1rem;
-    padding: 0.9rem;
-  }
-  .menu-desplegable .accordion-body {
-    padding: 1rem;
-  }
-  .menu-desplegable .btn {
-    font-size: 0.95rem;
-    padding: 0.6rem;
-  }
-  .catalogo {
-    max-width: 100%;
-    margin: 1rem;
-    padding: 0.8rem;
-  }
-  .btn-volver {
-    width: 100%;
-    font-size: 0.95rem;
-    padding: 0.9rem;
-  }
-  .btn-categoria {
-    font-size: 0.9rem;
-    padding: 0.4rem 0;
-  }
-}
 .product-card {
   display: flex;
   justify-content: space-between;
@@ -396,6 +362,61 @@ header .logoimg {
   display: grid;
   gap: 1.5rem;
   justify-items: center;
+}
+
+@media (max-width: 576px) {
+  header .logoimg {
+    max-height: 50px;
+  }
+  .menu-desplegable {
+    padding: 0.5rem;
+  }
+  .menu-desplegable .accordion-button {
+    font-size: 1rem;
+    padding: 0.9rem;
+  }
+  .menu-desplegable .accordion-body {
+    padding: 1rem;
+  }
+  .menu-desplegable .btn {
+    font-size: 0.95rem;
+    padding: 0.6rem;
+  }
+  .catalogo {
+    max-width: 100%;
+    margin: 1rem;
+    padding: 0.8rem;
+  }
+  .btn-volver {
+    width: 100%;
+    font-size: 0.95rem;
+    padding: 0.9rem;
+  }
+  .btn-categoria {
+    font-size: 0.9rem;
+    padding: 0.4rem 0;
+  }
+}
+.product-info h3 {
+  font-size: 0.8rem;
+  height: 38px;
+  padding-left: 4px;
+}
+.product-info p {
+  font-size: 0.65rem;
+  height: 26px;
+  padding-left: 4px;
+}
+.product-info h5 {
+  font-size: 1.2rem;
+}
+
+.product-card img {
+  width: 100px;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+  margin: 0px;
 }
 
 /*# sourceMappingURL=style.css.map */

@@ -98,7 +98,63 @@ export async function pedirEntrada(eventoId, eventoParam) {
       return;
     }
 
-    Swal.fire("💳 Evento pago", "Métodos de pago próximamente.", "info");
+    // EVENTO PAGO
+    const { value: metodo } = await Swal.fire({
+      title: "💳 Evento pago",
+      text: `Entrada: $${precio} ARS`,
+      icon: "info",
+      input: "radio",
+      inputOptions: {
+        mp: "Mercado Pago (tarjeta, débito, transferencia)",
+      },
+      inputValidator: (value) => {
+        if (!value) return "Selecciona un método para continuar";
+      },
+      confirmButtonText: "Continuar",
+      showCancelButton: true,
+      cancelButtonText: "Volver",
+    });
+
+    if (!metodo) return;
+
+    if (metodo === "mp") {
+      console.log("🟦 Opción MercadoPago seleccionada");
+      Swal.fire({
+        title: "Conectando con Mercado Pago...",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
+      try {
+        const response = await fetch("/api/crear-preferencia", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nombreEvento,
+            precio,
+            cantidad: 1,
+          }),
+        });
+
+        const data = await response.json();
+        console.log("📦 Respuesta crear-preferencia:", data);
+
+        Swal.close();
+
+        if (!data.init_point) {
+          Swal.fire("Error", "No se pudo iniciar el pago", "error");
+          return;
+        }
+
+        console.log("🔗 Redirigiendo a:", data.init_point);
+        window.location.href = data.init_point; // ENVÍA A MERCADO PAGO
+        return;
+      } catch (err) {
+        console.error("❌ Error al conectar con MP:", err);
+        Swal.fire("Error", "No fue posible conectar con Mercado Pago", "error");
+        return;
+      }
+    }
   } catch (err) {
     console.error("❌ Error al procesar entrada:", err);
     Swal.fire("Error", "No se pudo procesar la entrada.", "error");

@@ -264,44 +264,6 @@
           </div>
         </div>
       </div>
-      <button id="btnPagar">Pagar ahora (sandbox)</button>
-
-      <script>
-        document
-          .getElementById("btnPagar")
-          .addEventListener("click", async () => {
-            const body = {
-              items: [
-                {
-                  title: "Concierto de prueba",
-                  unit_price: 1000,
-                  quantity: 1,
-                  fecha: "2025-12-01",
-                  lugar: "Estadio X",
-                  imagenEventoUrl: "https://tusitio.com/imagen.jpg",
-                },
-              ],
-              external_reference: "usuario123_evento456",
-              payer: { email: "test_user_123456@testuser.com" }, // obligatorio en sandbox
-            };
-
-            const res = await fetch("/api/crear-preferencia", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(body),
-            });
-
-            const data = await res.json();
-
-            if (data.sandbox_init_point) {
-              // Abrir checkout de prueba
-              window.open(data.sandbox_init_point, "_blank");
-            } else {
-              console.error("Error al generar preferencia sandbox", data);
-              alert("Error al generar preferencia de prueba");
-            }
-          });
-      </script>
     </main>
 
     <footer class="footer">

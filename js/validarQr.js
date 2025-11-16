@@ -41,6 +41,7 @@ navigator.mediaDevices
   });
 
 // Función para escanear QR
+// ...
 async function scanQR() {
   if (video.readyState === video.HAVE_ENOUGH_DATA) {
     canvas.height = video.videoHeight;
@@ -49,14 +50,20 @@ async function scanQR() {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const code = jsQR(imageData.data, imageData.width, imageData.height);
 
-    if (code && escaneando) {
-      escaneando = false; // evitar escanear varias veces
+    if (code) {
       const ticketId = code.data;
-      validarTicket(ticketId);
+
+      if (!ticketsProcesados.has(ticketId)) {
+        // Evita procesar el mismo QR varias veces
+        ticketsProcesados.add(ticketId); // Marcar como procesado temporal
+        validarTicket(ticketId);
+      }
     }
   }
   requestAnimationFrame(scanQR);
 }
+
+const ticketsProcesados = new Set();
 
 // Validar ticket en Firestore
 async function validarTicket(ticketId) {
@@ -66,28 +73,22 @@ async function validarTicket(ticketId) {
 
     if (!ticketSnap.exists()) {
       resultado.textContent = "❌ Ticket inválido";
-      escaneando = true;
-      return;
-    }
-
-    const ticketData = ticketSnap.data();
-
-    if (ticketData.usado) {
-      resultado.textContent = "⚠ Ticket ya usado";
     } else {
-      resultado.textContent = "✅ Ticket válido - Permitido el ingreso";
-
-      // Marcar como usado
-      await updateDoc(ticketRef, { usado: true });
+      const ticketData = ticketSnap.data();
+      if (ticketData.usado) {
+        resultado.textContent = "⚠ Ticket ya usado";
+      } else {
+        resultado.textContent = "✅ Ticket válido - Permitido el ingreso";
+        await updateDoc(ticketRef, { usado: true });
+      }
     }
   } catch (err) {
     console.error(err);
     resultado.textContent = "Error validando ticket";
   }
 
-  // Esperar 3 segundos antes de seguir escaneando
   setTimeout(() => {
     resultado.textContent = "Esperando QR...";
-    escaneando = true;
+    ticketsProcesados.delete(ticketId); // Permite volver a procesar si hace falta
   }, 3000);
 }

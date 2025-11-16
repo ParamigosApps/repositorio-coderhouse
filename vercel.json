@@ -14,8 +14,5 @@
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1.js" },
     { "src": "/(.*)", "dest": "/$1" }
-  ],
-  "env": {
-    "MP_ACCESS_TOKEN": "APP_USR-f4fe9a32-7655-4fd7-a910-dbc8811aaf7a"
-  }
+  ]
 }

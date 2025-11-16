@@ -16,6 +16,7 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
     />
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
     <title>todovaper. - Inicio</title>
   </head>
   <body>
@@ -133,6 +134,14 @@
                     id="listaEntradas"
                     class="d-flex flex-column gap-3"
                   ></div>
+                  <!-- Bricks -->
+                  <h2 class="mb-4">💳 Pagar entrada (modo local)</h2>
+                  <button id="btnMostrarPago" class="btn btn-dark mb-4">
+                    Mostrar Brick
+                  </button>
+                  <!-- Contenedor donde se creará el Brick -->
+                  <div id="cardPaymentBrick_container" class="container"></div>
+
                   <!-- Modal para QR -->
                   <div id="qrModal" class="modal fade">
                     <div class="modal-dialog modal-dialog-centered">
@@ -238,3 +247,4 @@
     <script type="module" src="js/index.js"></script>
   </body>
 </html>
+*/

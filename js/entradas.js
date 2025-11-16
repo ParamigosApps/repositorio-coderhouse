@@ -142,13 +142,24 @@ export async function pedirEntrada(eventoId, eventoParam) {
     if (!metodo) return;
 
     if (metodo === "mp") {
-      Swal.fire(
-        "🔗 Mercado Pago",
-        "Serás redirigido a Mercado Pago para completar el pago.",
-        "info"
-      );
-      // acá podrías abrir un link real de pago con MP (por ejemplo usando una preferencia)
-      window.open("https://www.mercadopago.com.ar/", "_blank");
+      const cantidad = 1; // elegir cantidad de entradas
+      const response = await fetch("/api/crear-preferencia", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: nombreEvento,
+          precio,
+          cantidad,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.init_point) {
+        window.location.href = data.init_point; // redirige al checkout
+      } else {
+        Swal.fire("Error", "No se pudo generar el link de pago.", "error");
+      }
     } else {
       Swal.fire(
         "💰 Transferencia",
@@ -295,19 +306,17 @@ export async function cargarMisEntradas() {
   }
 }
 
-import { pagarEntrada } from "./pagarEntrada.js";
-
-document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("btnConseguirEntrada");
-  if (btn) {
-    btn.addEventListener("click", () => {
-      const nombre = "Concierto";
-      const precio = 1000;
-      const cantidad = 2;
-      pagarEntrada(nombre, precio, cantidad);
-    });
-  }
-});
+// document.addEventListener("DOMContentLoaded", () => {
+//   const btn = document.getElementById("btnConseguirEntrada");
+//   if (btn) {
+//     btn.addEventListener("click", () => {
+//       const nombre = "Concierto";
+//       const precio = 1000;
+//       const cantidad = 2;
+//       pagarEntrada(nombre, precio, cantidad);
+//     });
+//   }
+// });
 
 // -----------------------------
 // Helpers

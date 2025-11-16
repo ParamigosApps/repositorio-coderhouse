@@ -1,8 +1,19 @@
 // /js/entradas.js
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
-import { db, auth } from "/js/firebase.js"; // Usamos tu firebase.js local
 import { formatearFecha } from "/js/utils.js";
-import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
+import { db, auth } from "/js/firebase.js";
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  limit,
+  doc,
+  getDoc,
+} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
 // =======================================================
 // GENERADOR DE QR
@@ -110,9 +121,10 @@ export async function crearEntrada(eventoId, entradaData) {
 }
 
 // =======================================================
-// PEDIR ENTRADA CON MP + TRANSFERENCIA (optimizado)
+// PEDIR ENTRADA CON MP + TRANSFERENCIA
 // =======================================================
-export async function pedirEntrada(eventoId, e, maxEntradasPorUsuario = 5) {
+
+export async function pedirEntrada(eventoId, e) {
   try {
     if (!auth.currentUser) {
       return Swal.fire({
@@ -135,7 +147,16 @@ export async function pedirEntrada(eventoId, e, maxEntradasPorUsuario = 5) {
 
     const usuarioId = auth.currentUser.uid;
 
-    // Contar entradas ya compradas
+    // 🔹 Obtener evento para límite por usuario
+    const eventoRef = doc(db, "eventos", eventoId);
+    const eventoSnap = await getDoc(eventoRef);
+    if (!eventoSnap.exists()) {
+      return Swal.fire("Error", "No se encontró el evento.", "error");
+    }
+
+    const entradasPorUsuario = eventoSnap.data().entradasPorUsuario || 5;
+
+    // 🔹 Contar entradas ya compradas
     const snapshot = await getDocs(
       query(
         collection(db, "entradas"),
@@ -149,15 +170,15 @@ export async function pedirEntrada(eventoId, e, maxEntradasPorUsuario = 5) {
       0
     );
 
-    if (entradasCompradas >= maxEntradasPorUsuario) {
+    if (entradasCompradas >= entradasPorUsuario) {
       return Swal.fire(
         "Límite alcanzado",
-        `Ya compraste el máximo de ${maxEntradasPorUsuario} entradas para este evento.`,
+        `Ya compraste el máximo de ${entradasPorUsuario} entradas para este evento.`,
         "warning"
       );
     }
 
-    // Entrada gratuita
+    // 🔹 Entrada gratuita
     if (e.precio === 0) {
       await crearEntrada(eventoId, {
         nombre: e.nombre,
@@ -173,16 +194,16 @@ export async function pedirEntrada(eventoId, e, maxEntradasPorUsuario = 5) {
       );
     }
 
-    // Pedir cantidad de entradas
+    // 🔹 Pedir cantidad de entradas
     const { value: metodo } = await Swal.fire({
       title: `${e.nombre}`,
       html: `
         <p>Precio por entrada: $${e.precio}</p>
         <label for="swal-cantidad">Cantidad de entradas (máx ${
-          maxEntradasPorUsuario - entradasCompradas
+          entradasPorUsuario - entradasCompradas
         }):</label>
         <input type="number" id="swal-cantidad" class="swal2-input" min="1" max="${
-          maxEntradasPorUsuario - entradasCompradas
+          entradasPorUsuario - entradasCompradas
         }" value="1">
       `,
       showCancelButton: true,
@@ -194,8 +215,11 @@ export async function pedirEntrada(eventoId, e, maxEntradasPorUsuario = 5) {
         const cantidadInput = document.getElementById("swal-cantidad");
         cantidadInput.addEventListener("input", () => {
           let cantidad = parseInt(cantidadInput.value) || 1;
-          if (cantidad > maxEntradasPorUsuario - entradasCompradas)
-            cantidad = maxEntradasPorUsuario - entradasCompradas;
+          if (cantidad > entradasPorUsuario - entradasCompradas) {
+            cantidadInput.value = entradasPorUsuario - entradasCompradas;
+          } else if (cantidad < 1) {
+            cantidadInput.value = 1;
+          }
         });
       },
     });
@@ -213,9 +237,7 @@ export async function pedirEntrada(eventoId, e, maxEntradasPorUsuario = 5) {
       lugar: e.lugar,
     };
 
-    // =============================
-    // MERCADO PAGO
-    // =============================
+    // 🔹 MERCADO PAGO
     if (metodo === true) {
       const prefPayload = {
         items: [
@@ -246,11 +268,26 @@ export async function pedirEntrada(eventoId, e, maxEntradasPorUsuario = 5) {
       if (!data.init_point)
         return Swal.fire("Error", "No se pudo crear el pago.", "error");
 
-      // Abrir checkout en nueva ventana
       const mpWindow = window.open(data.init_point, "_blank");
 
-      // Contador de 5 minutos
-      let tiempo = 300; // segundos
+      const unsubscribe = escucharEntradasPendientes(
+        usuarioId,
+        async (ticketId) => {
+          const docSnap = await getDoc(doc(db, "entradas", ticketId));
+          if (docSnap.exists()) {
+            generarQr(ticketId, docSnap.data());
+            Swal.fire(
+              "¡Pago aprobado!",
+              "Tu entrada ha sido generada.",
+              "success"
+            );
+          }
+          if (mpWindow && !mpWindow.closed) mpWindow.close();
+          unsubscribe();
+        }
+      );
+
+      let tiempo = 300;
       Swal.fire({
         title: "Esperando confirmación...",
         html: `Tienes <strong>5:00</strong> minutos para completar el pago.`,
@@ -281,13 +318,9 @@ export async function pedirEntrada(eventoId, e, maxEntradasPorUsuario = 5) {
         });
         if (mpWindow && !mpWindow.closed) mpWindow.close();
       }, 300000);
-
-      // ❗ Entrada se genera solo desde Webhook de Mercado Pago
     }
 
-    // =============================
-    // TRANSFERENCIA
-    // =============================
+    // 🔹 TRANSFERENCIA
     else if (metodo === false) {
       const cuenta = "Banco XYZ\nCBU: 1234567890123456789012\nAlias: MI_ALIAS";
       const monto = cantidad * e.precio;
@@ -318,4 +351,27 @@ export async function pedirEntrada(eventoId, e, maxEntradasPorUsuario = 5) {
     console.error("❌ Error en pedirEntrada:", err);
     Swal.fire("Error", "Ocurrió un error al procesar el pago.", "error");
   }
+}
+
+// =======================================================
+// ESCUCHAR ENTRADAS PENDIENTES (pagosProcesados)
+// =======================================================
+export function escucharEntradasPendientes(usuarioId, callback) {
+  const q = query(
+    collection(db, "pagosProcesados"),
+    where("usuarioId", "==", usuarioId),
+    orderBy("creadoEn", "desc"),
+    limit(1)
+  );
+
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    snapshot.docChanges().forEach((change) => {
+      if (change.type === "added") {
+        const data = change.doc.data();
+        callback(data.ticketId);
+      }
+    });
+  });
+
+  return unsubscribe; // permite cancelar listener
 }

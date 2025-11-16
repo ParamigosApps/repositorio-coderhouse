@@ -1,68 +1,71 @@
-import { generarQr } from "./generarQr.js";
-import { mostrarMensaje } from "/js/utils.js";
+// /js/misEntradas.js
 import { db } from "/js/firebase.js";
+import { formatearFecha } from "./utils.js";
 import {
-  getDocs,
   collection,
+  getDocs,
+  query,
+  where,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
-const btnMisEntradas = document.getElementById("btnMisEntradas");
-const containerEntradas = document.getElementById("containerEntradas");
-const listaEntradas = document.getElementById("listaEntradas");
-const qrModal = new bootstrap.Modal(document.getElementById("qrModal"));
+export async function cargarEntradas() {
+  const contenedor = document.getElementById("listaEntradas");
+  if (!contenedor) return console.warn("⚠ listaEntradas no encontrado");
 
-btnMisEntradas?.addEventListener("click", async () => {
-  containerEntradas.style.display = "block";
-  listaEntradas.innerHTML = `<p class="text-center text-muted">Cargando tus entradas...</p>`;
+  contenedor.innerHTML = `<p class="text-center text-secondary mt-3">Cargando entradas...</p>`;
 
   try {
-    const snapshot = await getDocs(collection(db, "entradas"));
-    listaEntradas.innerHTML = "";
+    const usuarioId = localStorage.getItem("usuarioId") || "Invitado";
+    console.log("👤 usuarioId:", usuarioId);
+
+    const q = query(
+      collection(db, "entradas"),
+      where("usuarioId", "==", usuarioId)
+    );
+    const snapshot = await getDocs(q);
+
+    console.log("📦 Entradas encontradas:", snapshot.size);
+
+    snapshot.forEach((docSnap) =>
+      console.log("🧾 Entrada:", docSnap.id, docSnap.data())
+    );
+
+    contenedor.innerHTML = "";
 
     if (snapshot.empty) {
-      listaEntradas.innerHTML = `<p class="text-center text-muted">Aún no tenés entradas registradas.</p>`;
-      return;
+      return (contenedor.innerHTML = `<p class="text-center text-secondary">Todavía no generaste entradas.</p>`);
     }
 
-    snapshot.forEach((doc) => {
-      const entrada = doc.data();
+    snapshot.forEach((docSnap) => {
+      const entrada = docSnap.data();
+      const ticketId = docSnap.id;
 
-      const card = document.createElement("div");
-      card.classList.add("card", "shadow-sm", "mb-3", "p-3", "border-0");
+      const div = document.createElement("div");
+      div.className = "card mb-2 p-3 shadow-sm";
 
-      card.innerHTML = `
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <h5 class="fw-bold mb-1">${entrada.evento}</h5>
-            <p class="text-muted mb-1">${entrada.fecha}</p>
-            <p class="text-muted mb-2"><i class="bi bi-geo-alt"></i> ${
-              entrada.lugar
-            }</p>
-            ${entrada.precio ? `<p class="mb-1">💲 $${entrada.precio}</p>` : ""}
-            ${
-              entrada.descripcion ? `<small>${entrada.descripcion}</small>` : ""
-            }
-            <br>
-            <small class="text-secondary">Código: ${entrada.codigo}</small>
-          </div>
-          <button class="btn btn-outline-dark btn-sm ver-qr">Ver QR</button>
-        </div>
+      div.innerHTML = `
+        <h5 class="mb-1">${entrada.nombreEvento}</h5>
+        <p class="mb-0">📅 ${formatearFecha(entrada.fecha) || "Sin fecha"}</p>
+        <p class="mb-0">📍 ${entrada.lugar}</p>
+        <p class="mb-0">💲 ${entrada.precio}</p><br>
+        <button class="btn btn-dark w-75 d-block mx-auto btn-ver-qr"
+          data-id="${ticketId}">
+          Ver QR
+        </button>
       `;
 
-      card.querySelector(".ver-qr").addEventListener("click", () => {
-        generarQr(
-          entrada.codigo,
-          entrada.evento,
-          entrada.usuario || "Invitado",
-          entrada.fecha,
-          entrada.lugar
-        );
-      });
+      contenedor.appendChild(div);
 
-      listaEntradas.appendChild(card);
+      div.querySelector(".btn-ver-qr").addEventListener("click", () => {
+        console.log("📲 Ver QR:", ticketId);
+
+        import("/js/entradas.js").then((m) => {
+          m.generarQr(ticketId, entrada);
+        });
+      });
     });
   } catch (err) {
-    console.error("Error cargando entradas:", err);
-    mostrarMensaje("Error al cargar las entradas", "error");
+    console.error("❌ Error en cargarEntradas():", err);
+    contenedor.innerHTML = `<p class="text-danger text-center mt-3">Error al cargar entradas.</p>`;
   }
-});
+}

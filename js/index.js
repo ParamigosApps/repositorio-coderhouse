@@ -1,8 +1,14 @@
-// index.js
-import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
-import { db } from "/js/firebase.js";
-import { renderizarCatalogo } from "/js/cargarCatalogo.js";
-import { cargarEventos } from "/js/entradas.js";
+//index.js
+import { cargarEventos } from "/js/cargarEventos.js";
+import { cargarEntradas } from "/js/misEntradas.js";
+
+const listaEventos = document.getElementById("listaEventos");
+const listaEntradas = document.getElementById("listaEntradas");
+const userId = localStorage.getItem("userId");
+
+// Cargar secciones
+cargarEventos(listaEventos);
+cargarEntradas(listaEntradas, userId);
 
 document.addEventListener("DOMContentLoaded", () => {
   // Botones y contenedores
@@ -44,6 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btnMisEntradas.addEventListener("click", () => {
       containerEntradas.classList.toggle("d-none");
       //CARGAR ENTRADAS
+      cargarEntradas();
     });
   }
 

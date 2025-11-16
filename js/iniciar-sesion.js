@@ -56,12 +56,6 @@ async function loginWithGoogle() {
     // Guardar en localStorage y mostrar usuario
     localStorage.setItem("userName", user.displayName || user.email);
     mostrarUsuario(user.displayName || user.email);
-
-    Swal.fire(
-      "Bienvenido",
-      `Hola ${user.displayName || user.email}`,
-      "success"
-    );
   } catch (err) {
     console.error(err);
     Swal.fire("Error", err.message, "error");
@@ -75,7 +69,6 @@ async function logout() {
     await signOut(auth);
     localStorage.removeItem("userName");
     mostrarUsuario(null);
-    Swal.fire("Sesión cerrada", "Has cerrado sesión correctamente", "info");
   } catch (err) {
     console.error(err);
     Swal.fire("Error", "No se pudo cerrar sesión", "error");

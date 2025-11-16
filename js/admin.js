@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "entradasPorUsuarioEvento"
     );
     const entradasPorUsuario =
-      parseInt(entradasPorUsuarioInput.value.trim()) || 2;
+      parseInt(entradasPorUsuarioInput.value.trim()) || 4;
 
     // 🔍 Validación
     mensajeError.style.display = "none";

@@ -1,8 +1,7 @@
 // eventos.js
-import { escapeHtml } from "./utils.js";
-import { pedirEntrada } from "/js/entradas.js";
+import { pedirEntrada } from "./entradas.js";
 import { db } from "./firebase.js";
-import { formatearFecha } from "./utils.js";
+import { escapeHtml, formatearFecha } from "./utils.js";
 import {
   getDocs,
   collection,
@@ -27,8 +26,6 @@ export async function cargarEventos() {
       const e = docSnap.data();
       const id = docSnap.id;
 
-      console.log("Evento Firestore:", id, e);
-
       const div = document.createElement("div");
       div.className = "card mb-3 p-3 shadow-sm";
 
@@ -48,7 +45,7 @@ export async function cargarEventos() {
         <p class="mb-0">📍 ${escapeHtml(e.lugar) || "Lugar a definir"}</p>
 
         <p class="mb-0">💲 ${
-          e.precio === 0 || e.precio == null
+          e.precio === 0 || e.precio == 0 || e.precio == null
             ? "Entrada gratuita"
             : `$ ${e.precio}`
         }</p>

@@ -1,4 +1,5 @@
 // cargarEventos.js
+import { escapeHtml, formatearFecha } from "./utils.js";
 import { db } from "/js/firebase.js";
 import {
   collection,
@@ -32,15 +33,13 @@ export async function cargarEventos() {
       const e = docSnap.data();
       const id = docSnap.id;
 
-      console.log(`📍 Procesando evento ID: ${id}`, e);
-
       const div = document.createElement("div");
       div.className = "card mb-3 shadow-sm p-3";
 
       div.innerHTML = `
         <h4 class="fw-bold">${e.nombre || "Sin nombre"}</h4>
         <p class="mb-0">📅 <strong>${
-          e.fecha || "Fecha a confirmar"
+          escapeHtml(formatearFecha(e.fecha)) || "Fecha a confirmar"
         }</strong></p>
         <p class="mb-0">📍 ${e.lugar || "Sin lugar"}</p>
         <p class="mb-0">🎟 Máx por usuario: ${e.entradasPorUsuario ?? "-"}</p>

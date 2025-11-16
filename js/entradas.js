@@ -59,105 +59,55 @@ export function generarQr(ticketId, entradaData) {
 // =======================================================
 // PEDIR ENTRADA
 // =======================================================
-export async function pedirEntrada(eventoId, eventoParam) {
+export async function pedirEntrada(eventoId, e) {
+  console.log("🎟 Iniciando pedido de entrada para:", eventoId, e);
+
+  const payload = {
+    nombreEvento: e.nombre,
+    precio: e.precio,
+    cantidad: 1,
+  };
+
+  console.log("📦 Enviando payload a crear-preferencia:", payload);
+
   try {
-    console.log("📥 pedirEntrada() evento:", eventoId, eventoParam);
-
-    const usuarioId = localStorage.getItem("usuarioId") || "Invitado";
-    const nombreEvento = eventoParam.nombre || "Evento sin nombre";
-    const fecha = eventoParam.fecha || null;
-    const lugar = eventoParam.lugar || "Lugar a definir";
-    const precio = parseFloat(eventoParam.precio) || 0;
-    const maxEntradas = eventoParam?.maxEntradasPorUsuario || 2;
-
-    if (precio === 0) {
-      const { value: cantidad } = await Swal.fire({
-        title: "🎟 Entradas gratuitas",
-        text: `Podés obtener hasta ${maxEntradas} entradas.`,
-        input: "number",
-        inputAttributes: { min: 1, max: maxEntradas, step: 1 },
-        inputValue: 1,
-        showCancelButton: true,
-        confirmButtonText: "Conseguir",
-      });
-
-      if (!cantidad) return;
-
-      for (let i = 0; i < cantidad; i++) {
-        await crearEntrada(eventoId, {
-          usuarioId,
-          nombreEvento,
-          fecha,
-          lugar,
-          precio: "Gratis",
-          descripcion: eventoParam.descripcion || "",
-        });
-      }
-
-      Swal.fire("👌 Listo", `Generaste ${cantidad} entrada(s).`, "success");
-      return;
-    }
-
-    // EVENTO PAGO
-    const { value: metodo } = await Swal.fire({
-      title: "💳 Evento pago",
-      text: `Entrada: $${precio} ARS`,
-      icon: "info",
-      input: "radio",
-      inputOptions: {
-        mp: "Mercado Pago (tarjeta, débito, transferencia)",
+    const resp = await fetch("http://127.0.0.1:5503/api/crear-preferencia", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-      inputValidator: (value) => {
-        if (!value) return "Selecciona un método para continuar";
-      },
-      confirmButtonText: "Continuar",
-      showCancelButton: true,
-      cancelButtonText: "Volver",
+      body: JSON.stringify(payload),
     });
 
-    if (!metodo) return;
+    console.log("📡 Respuesta de MP:", resp.status, resp.statusText);
 
-    if (metodo === "mp") {
-      console.log("🟦 Opción MercadoPago seleccionada");
-      Swal.fire({
-        title: "Conectando con Mercado Pago...",
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading(),
-      });
+    const text = await resp.text();
+    console.log("📨 Raw respuesta:", text);
 
-      try {
-        const response = await fetch("/api/crear-preferencia", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            nombreEvento,
-            precio,
-            cantidad: 1,
-          }),
-        });
-
-        const data = await response.json();
-        console.log("📦 Respuesta crear-preferencia:", data);
-
-        Swal.close();
-
-        if (!data.init_point) {
-          Swal.fire("Error", "No se pudo iniciar el pago", "error");
-          return;
-        }
-
-        console.log("🔗 Redirigiendo a:", data.init_point);
-        window.location.href = data.init_point; // ENVÍA A MERCADO PAGO
-        return;
-      } catch (err) {
-        console.error("❌ Error al conectar con MP:", err);
-        Swal.fire("Error", "No fue posible conectar con Mercado Pago", "error");
-        return;
-      }
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (err) {
+      console.error("❌ No se pudo parsear JSON correctamente:", err);
+      return Swal.fire("Error", "Respuesta inválida del servidor.", "error");
     }
-  } catch (err) {
-    console.error("❌ Error al procesar entrada:", err);
-    Swal.fire("Error", "No se pudo procesar la entrada.", "error");
+
+    console.log("📄 JSON parseado correctamente:", data);
+
+    if (!data.init_point) {
+      console.error("❌ No vino init_point en la respuesta:", data);
+      return Swal.fire(
+        "Error",
+        "MercadoPago no devolvió un link de pago.",
+        "error"
+      );
+    }
+
+    console.log("🔗 Abriendo link de pago:", data.init_point);
+    window.open(data.init_point, "_blank");
+  } catch (error) {
+    console.error("💥 Error general al procesar pedido:", error);
+    Swal.fire("Error", "Error de conexión con MercadoPago", "error");
   }
 }
 

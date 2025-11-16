@@ -1,12 +1,14 @@
 import mercadopago from "mercadopago";
 
 export default async function handler(req, res) {
+  console.log("📩 Llamada recibida en /api/crear-preferencia", req.method);
+
   if (req.method !== "POST") {
+    console.log("❌ Método no permitido:", req.method);
     return res.status(405).json({ error: "Método no permitido" });
   }
 
-  console.log("📩 Request recibido en crear-preferencia");
-
+  console.log("📝 Datos recibidos:", req.body);
   try {
     if (!process.env.MP_ACCESS_TOKEN) {
       console.error("❌ MP_ACCESS_TOKEN no definido");

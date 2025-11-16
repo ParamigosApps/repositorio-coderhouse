@@ -2,7 +2,7 @@
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
 import { db } from "/js/firebase.js";
 import { renderizarCatalogo } from "/js/cargarCatalogo.js";
-import { cargarEventos, cargarMisEntradas } from "/js/entradas.js";
+import { cargarEventos } from "/js/entradas.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   // Botones y contenedores
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnMisEntradas && containerEntradas) {
     btnMisEntradas.addEventListener("click", () => {
       containerEntradas.classList.toggle("d-none");
-      cargarMisEntradas();
+      //CARGAR ENTRADAS
     });
   }
 

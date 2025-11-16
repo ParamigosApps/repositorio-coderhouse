@@ -5,6 +5,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-analytics.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js"; // <-- NUEVO
 
 const firebaseConfig = {
   apiKey: "AIzaSyDkQEN7UMAVQQvOmWZjABmVYgVMMC4g9g0",
@@ -21,5 +22,6 @@ const app =
   getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 const db = getFirestore(app);
 const analytics = getAnalytics(app);
+const auth = getAuth(app); // <-- NUEVO
 
-export { app, db, analytics };
+export { app, db, analytics, auth };

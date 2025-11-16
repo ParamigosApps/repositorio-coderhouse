@@ -131,14 +131,6 @@
                     id="listaEntradas"
                     class="d-flex flex-column gap-3"
                   ></div>
-                  <!-- Bricks -->
-                  <h2 class="mb-4">💳 Pagar entrada (modo local)</h2>
-                  <button id="btnMostrarPago" class="btn btn-dark mb-4">
-                    Mostrar Brick
-                  </button>
-                  <!-- Contenedor donde se creará el Brick -->
-                  <div id="cardPaymentBrick_container" class="container"></div>
-
                   <!-- Modal para QR -->
                   <div id="qrModal" class="modal fade">
                     <div class="modal-dialog modal-dialog-centered">
@@ -202,12 +194,13 @@
                 class="accordion-button collapsed"
                 type="button"
                 data-bs-toggle="collapse"
-                data-bs-target="#collapseContactoCliente"
+                data-bs-target="#collapseRedes"
               >
                 📞 Redes Sociales
               </button>
             </h2>
             <div
+              id="collapseRedes"
               class="accordion-collapse collapse"
               data-bs-parent="#accordionCliente"
             >
@@ -216,6 +209,56 @@
                 <button class="btn btn-outline-dark">TikTok</button>
                 <button class="btn btn-outline-dark">X</button>
                 <button class="btn btn-outline-dark">Página web</button>
+              </div>
+            </div>
+          </div>
+          <!-- INICIO SESION -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseUsuario"
+              >
+                👤 Login / Usuario
+              </button>
+            </h2>
+
+            <div
+              id="collapseUsuario"
+              class="accordion-collapse collapse"
+              data-bs-parent="#accordionCliente"
+            >
+              <div class="accordion-body text-center">
+                <!-- Estado no logueado -->
+                <div id="noUser">
+                  <p class="mb-2"></p>
+                  <button id="btnGoogle" class="google-btn d-block mx-auto">
+                    <img
+                      src="./Assets/img/google.png"
+                      alt="Google"
+                      style="width: 2rem; height: auto"
+                    />
+                    <span>Iniciar sesión con Google</span>
+                  </button>
+                </div>
+
+                <!-- Estado logueado -->
+                <div id="userInfo" class="d-none">
+                  <p class="mb-2 fw-bold" id="userGreeting">Hola, Usuario</p>
+                  <button
+                    id="btnLogout"
+                    class="google-btn logout d-block mx-auto"
+                  >
+                    <img
+                      src="./Assets/img/google.png"
+                      alt="Google"
+                      style="width: 2rem; height: auto"
+                    />
+                    Cerrar sesión
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -241,6 +284,7 @@
     <script type="module" src="js/utils.js"></script>
     <script type="module" src="js/entradas.js"></script>
     <script type="module" src="js/pagarEntrada.js"></script>
+    <script type="module" src="js/iniciar-sesion.js"></script>
     <script type="module" src="js/index.js"></script>
   </body>
 </html>

@@ -45,7 +45,7 @@ export async function cargarEventos() {
         <p class="mb-0">📍 ${e.lugar || "Sin lugar"}</p>
         <p class="mb-0">🎟 Máx por usuario: ${e.entradasPorUsuario ?? "-"}</p>
         <p class="mb-0">💲 ${e.precio || "Gratis"}</p>
-        <p class="mt-2">${e.descripcion || ""}</p>
+        <p class="mt-2"> 📝 ${e.descripcion || "Sin descripción"}</p>
 
         ${
           e.imagen

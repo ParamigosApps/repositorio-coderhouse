@@ -44,7 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Guardar evento
-  // Guardar evento
   btnGuardarEvento.addEventListener("click", async () => {
     const nombre = document.getElementById("nombreEvento").value.trim();
     const fecha = document.getElementById("fechaEvento").value;

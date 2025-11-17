@@ -36,14 +36,22 @@ export async function cargarEventos() {
       const div = document.createElement("div");
       div.className = "card mb-3 shadow-sm p-3";
 
+      let valorEntrada;
+      if (e.precio == 0 || e.precio < 1 || e.precio == null)
+        valorEntrada = "Gratis";
+      else valorEntrada = `$${e.precio}`;
+
       div.innerHTML = `
         <h4 class="fw-bold">${e.nombre || "Sin nombre"}</h4>
         <p class="mb-0">📅 <strong>${
           escapeHtml(formatearFecha(e.fecha)) || "Fecha a confirmar"
         }</strong></p>
         <p class="mb-0">📍 ${e.lugar || "Sin lugar"}</p>
-        <p class="mb-0">🎟 Máx por usuario: ${e.entradasPorUsuario ?? "-"}</p>
-        <p class="mb-0">💲 ${e.precio || "Gratis"}</p>
+        <p class="mb-0">🕑 ${e.horario || "Sin horario definido"}</p>
+        <p class="mb-0">💲 ${valorEntrada}</p>
+        <p class="mb-0">🎟 Entradas por usuario: ${
+          e.entradasPorUsuario ?? "-"
+        }</p>
         <p class="mt-2"> 📝 ${e.descripcion || "Sin descripción"}</p>
 
         ${

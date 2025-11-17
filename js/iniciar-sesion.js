@@ -10,6 +10,7 @@ import {
   doc,
   setDoc,
   getDoc,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
 const btnGoogle = document.getElementById("btnGoogle");
@@ -49,7 +50,7 @@ async function loginWithGoogle() {
         nombre: user.displayName || "Sin nombre",
         email: user.email,
         uid: user.uid,
-        creadoEn: new Date().toISOString(),
+        creadoEn: serverTimestamp(),
       });
     }
 

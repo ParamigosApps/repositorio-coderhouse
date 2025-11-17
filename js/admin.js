@@ -1,53 +1,87 @@
-// js/admin.js
-import { db } from "./firebase.js";
+// /js/admin.js
+import { db, auth } from "./firebase.js";
 import { formatearFecha } from "./utils.js";
 import {
   addDoc,
   getDocs,
   deleteDoc,
+  updateDoc,
   collection,
   doc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
-import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
 
-// Si querés activar modo admin manualmente en localStorage:
-// localStorage.setItem('esAdmin', 'true')
+import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
+import { crearEntrada } from "./entradas.js";
+
 const esAdmin = localStorage.getItem("esAdmin") === "true";
 
 // -----------------------------
 // DOM Ready
 // -----------------------------
 document.addEventListener("DOMContentLoaded", () => {
+  const contenedorEntradasVendidas = document.getElementById(
+    "containerEntradasVendidas"
+  );
+  const btnEntradasPendientes = document.getElementById(
+    "btnEntradasPendientes"
+  );
+  const contenedorEntradasPendientes = document.getElementById(
+    "contenedorEntradasPendientes"
+  );
   const btnCrearEvento = document.getElementById("btnCrearEvento");
   const formCrearEvento = document.getElementById("form-crear-evento");
   const btnGuardarEvento = document.getElementById("btnGuardarEvento");
   const btnMostrarEventos = document.getElementById("btnMostrarEventos");
   const eventosVigentes = document.getElementById("eventosVigentes");
-  const entradasPorUsuario = document.getElementById(
-    "entradasPorUsuarioEvento"
-  );
   const mensajeError = document.getElementById("mensajeError");
+
   if (!btnCrearEvento || !formCrearEvento || !btnGuardarEvento) {
     console.error("Faltan elementos clave del DOM.");
     return;
   }
 
+  // Toggle entradas pendientes
+  btnEntradasPendientes.addEventListener("click", () => {
+    contenedorEntradasPendientes.style.display =
+      contenedorEntradasPendientes.style.display === "none" ? "block" : "none";
+    eventosVigentes.style.display = "none";
+    formCrearEvento.style.display = "none";
+    contenedorEntradasVendidas.style.display = "none";
+  });
+
+  // Toggle crear evento
   btnCrearEvento.addEventListener("click", () => {
     formCrearEvento.style.display =
       formCrearEvento.style.display === "none" ? "block" : "none";
+    contenedorEntradasPendientes.style.display = "none";
+    eventosVigentes.style.display = "none";
+    contenedorEntradasVendidas.style.display = "none";
   });
 
-  // Mostrar u ocultar lista de eventos
+  // Toggle eventos vigentes
   btnMostrarEventos.addEventListener("click", () => {
     eventosVigentes.style.display =
       eventosVigentes.style.display === "none" ? "block" : "none";
+    contenedorEntradasPendientes.style.display = "none";
+    formCrearEvento.style.display = "none";
+    contenedorEntradasVendidas.style.display = "none";
   });
 
-  // Guardar evento
   btnGuardarEvento.addEventListener("click", async () => {
     const nombre = document.getElementById("nombreEvento").value.trim();
     const fecha = document.getElementById("fechaEvento").value;
     const lugar = document.getElementById("lugarEvento").value.trim();
+    const horarioDesde = document
+      .getElementById("horarioDesdeEvento")
+      .value.trim();
+    const horarioHasta = document
+      .getElementById("hastaDesdeEvento")
+      .value.trim();
+    const horario = `Desde ${horarioDesde}hs hasta ${horarioHasta}hs.`;
     const precio = document.getElementById("precioEvento").value.trim();
     const descripcion = document
       .getElementById("descripcionEvento")
@@ -58,235 +92,225 @@ document.addEventListener("DOMContentLoaded", () => {
     const entradasPorUsuario =
       parseInt(entradasPorUsuarioInput.value.trim()) || 4;
 
-    // 🔍 Validación
     mensajeError.style.display = "none";
-
     if (!nombre || !fecha || !lugar || !descripcion) {
       mensajeError.textContent =
         "⚠️ Por favor completá todos los campos obligatorios.";
       mensajeError.style.display = "block";
       return;
     }
-
     if (descripcion.length > 180) {
       mensajeError.textContent =
-        "⚠️ La descripción no puede superar los 120 caracteres.";
+        "⚠️ La descripción no puede superar los 180 caracteres.";
       mensajeError.style.display = "block";
       return;
     }
 
-    if (
-      isNaN(entradasPorUsuario) ||
-      entradasPorUsuario < 1 ||
-      entradasPorUsuario > 8
-    ) {
-      mensajeError.textContent =
-        "⚠️ La cantidad de entradas debe ser entre 1 y 8.";
-      mensajeError.style.display = "block";
-      return;
-    }
-
-    // ✅ Si pasa la validación, guardar en Firestore
     try {
       await addDoc(collection(db, "eventos"), {
         nombre,
         fecha,
         lugar,
+        horario,
         precio: precio || "Entrada gratuita",
         descripcion,
         entradasPorUsuario,
-        creadoEn: new Date().toISOString(),
+        creadoEn: serverTimestamp(),
       });
 
       Swal.fire(
-        "✅ Evento creado",
-        `El evento "${nombre}" fue creado de manera exitosa.`,
+        "🎉 Evento creado",
+        `El evento "${nombre}" fue creado correctamente.`,
         "success"
       );
-
       formCrearEvento.reset();
-      await cargarEventos();
+      await cargarEventosAdmin();
     } catch (error) {
       console.error("Error al guardar evento:", error);
       Swal.fire("Error", "No se pudo guardar el evento.", "error");
     }
   });
 
-  cargarEventos();
+  cargarEventosAdmin();
 });
 
 // -----------------------------
-// Función: cargarEventos
+// Función: cargarEventosAdmin
 // -----------------------------
-async function cargarEventos() {
+export async function cargarEventosAdmin() {
   const listaEventos = document.getElementById("listaEventos");
   if (!listaEventos) return;
 
   listaEventos.innerHTML = `<p class="text-center text-secondary mt-3">Cargando eventos...</p>`;
 
   try {
-    const querySnapshot = await getDocs(collection(db, "eventos"));
+    const snapshot = await getDocs(collection(db, "eventos"));
+    listaEventos.innerHTML = "";
 
-    if (querySnapshot.empty) {
-      listaEventos.innerHTML = `<p class="text-center text-secondary">No hay eventos guardados.</p>`;
+    if (snapshot.empty) {
+      listaEventos.innerHTML = `<p class="text-center text-secondary mt-3">No hay eventos disponibles.</p>`;
       return;
     }
 
-    listaEventos.innerHTML = "";
+    snapshot.forEach((eDoc) => {
+      const e = eDoc.data();
+      const id = eDoc.id;
 
-    querySnapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      const id = docSnap.id;
+      const div = document.createElement("div");
+      div.className = "card mb-3 shadow-sm p-3";
 
-      const card = document.createElement("div");
-      card.className = "card mb-2 p-3 shadow-sm";
-      card.style.maxWidth = "540px";
+      let valorEntrada = e.precio && e.precio > 0 ? `$${e.precio}` : "Gratis";
 
-      const eliminarBtnHtml = esAdmin
-        ? `<button class="btn btn-sm btn-danger eliminar-evento" data-id="${id}">🗑️</button>`
-        : "";
-
-      card.innerHTML = `
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <h5 class="mb-0">${escapeHtml(data.nombre)}</h5>
-            <small class="text-muted">${formatearFecha(
-              data.fecha
-            )} • ${escapeHtml(data.lugar || "Sin Lugar")}</small>
-          </div>
-          ${eliminarBtnHtml}
-        </div>
-        <p class="mt-2 mb-0">${escapeHtml(
-          data.descripcion || "Sin descripción"
-        )}</p>
-        <button class="btn btn-dark w-100 btn-pedir-entrada mt-2" data-id="${id}" data-nombre="${escapeHtml(
-        data.nombre
-      )}">Conseguir entrada</button>
+      div.innerHTML = `
+        <h4 class="fw-bold">${e.nombre || "Sin nombre"}</h4>
+        <p class="mb-0">📅 <strong>${
+          escapeHtml(formatearFecha(e.fecha)) || "Fecha a confirmar"
+        }</strong></p>
+        <p class="mb-0">📍 ${e.lugar || "Sin lugar"}</p>
+        <p class="mb-0">🕑 ${e.horario || "Sin horario definido"}</p>
+        <p class="mb-0">💲 ${valorEntrada}</p>
+        <p class="mb-0">🎟 Entradas por usuario: ${
+          e.entradasPorUsuario ?? "-"
+        }</p>
+        <p class="mt-2">📝 ${e.descripcion || "Sin descripción"}</p>
+        ${
+          e.imagen
+            ? `<img src="${e.imagen}" class="img-fluid rounded mt-2" style="max-height:180px;object-fit:cover;">`
+            : ""
+        }
+        <button class="btn btn-sm btn-danger mt-1 btnEliminar w-50" data-eventoid="${id}">🗑️ Eliminar</button>
       `;
-      console.log("Fecha recibida de Firestore:", data.fecha);
-      listaEventos.appendChild(card);
 
-      // Listener para generar QR
-      card
-        .querySelector(".btn-pedir-entrada")
-        .addEventListener("click", (e) => {
-          const btn = e.currentTarget;
-          const eventoId = btn.dataset.id;
-          const eventoNombre = btn.dataset.nombre;
-          console.log("Voy a pedir entrada:", eventoId, eventoParam);
-          pedirEntrada(eventoId, eventoNombre);
+      listaEventos.appendChild(div);
+
+      // Botón eliminar
+      div.querySelector(".btnEliminar")?.addEventListener("click", async () => {
+        const confirm = await Swal.fire({
+          title: "¿Eliminar evento?",
+          text: "Esta acción no se puede deshacer.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Sí, eliminar",
+          cancelButtonText: "Cancelar",
         });
-    });
 
-    // Botones eliminar (solo admin)
-    if (esAdmin) {
-      listaEventos.querySelectorAll(".eliminar-evento").forEach((btn) => {
-        btn.addEventListener("click", async () => {
-          const id = btn.dataset.id;
-          const confirm = await Swal.fire({
-            title: "¿Eliminar evento?",
-            text: "Esta acción no se puede deshacer.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Sí, eliminar",
-            cancelButtonText: "Cancelar",
-          });
-
-          if (confirm.isConfirmed) {
+        if (confirm.isConfirmed) {
+          try {
             await deleteDoc(doc(db, "eventos", id));
-            Swal.fire("Eliminado", "El evento fue borrado.", "success");
-            await cargarEventos();
+            Swal.fire("✅ Eliminado", "El evento fue borrado.", "success");
+            cargarEventosAdmin();
+          } catch (err) {
+            console.error("Error al eliminar evento:", err);
+            Swal.fire("Error", "No se pudo eliminar el evento.", "error");
           }
-        });
+        }
       });
-    }
+    });
   } catch (error) {
-    console.error("Error al cargar eventos:", error);
+    console.error("Error al cargar eventos admin:", error);
     listaEventos.innerHTML = `<p class="text-danger text-center mt-3">Error al cargar eventos.</p>`;
   }
 }
 
 // -----------------------------
-// Protección básica XSS
+// Cargar Entradas Pendientes
 // -----------------------------
-function escapeHtml(str) {
-  if (!str) return "";
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
+export function cargarEntradasPendientes() {
+  const contenedor = document.getElementById("contenedorEntradasPendientes");
+  if (!contenedor) return;
 
-//------------------------------ QR para eventos ------------------------------
+  contenedor.innerHTML = `<p class="text-center text-secondary mt-3">Cargando entradas pendientes...</p>`;
 
-// Función para pedir una entrada (llamar desde el botón 'Pedir entrada')
-async function pedirEntrada(eventoId, eventoNombre) {
-  try {
-    // Crear documento de ticket en Firestore
-    const docRef = await addDoc(collection(db, "eventos"), {
-      eventoId: eventoId,
-      eventoNombre: eventoNombre || null,
-      creado: new Date().toISOString(),
-      usado: false,
+  const q = query(
+    collection(db, "entradasPendientes"),
+    orderBy("creadaEn", "desc") // 🔥 orden correcto
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    contenedor.innerHTML = "";
+
+    if (snapshot.empty) {
+      contenedor.innerHTML = `<p class="text-center text-secondary mt-3">No hay entradas pendientes.</p>`;
+      return;
+    }
+
+    snapshot.forEach((docSnap) => {
+      const e = { id: docSnap.id, ...docSnap.data() };
+
+      const div = document.createElement("div");
+      div.className = "card mb-3 shadow-sm p-3";
+
+      div.innerHTML = `
+          <h5 class="fw-bold">${e.usuarioNombre || "Sin nombre"}</h5>
+          <p class="mb-0">Evento: ${e.eventoNombre || "-"}</p>
+          <p class="mb-0">Cantidad: ${e.cantidad || 1}</p>
+          <p class="mb-0">Monto: $${e.monto ?? 0}</p>
+          <p class="mb-0 text-warning">Estado: ${e.estado || "pendiente"}</p>
+
+          <div class="mt-2 d-flex gap-2">
+            <button class="btn btn-success btn-aprobar">Aprobar</button>
+            <button class="btn btn-danger btn-rechazar">Rechazar</button>
+          </div>
+        `;
+
+      // APROBAR
+      div.querySelector(".btn-aprobar")?.addEventListener("click", async () => {
+        try {
+          for (let i = 0; i < (e.cantidad || 1); i++) {
+            await crearEntrada(e.eventoId, {
+              nombre: e.nombre,
+              fecha: e.fecha,
+              lugar: e.lugar,
+              precio: e.precio,
+            });
+          }
+
+          await deleteDoc(doc(db, "entradasPendientes", e.id));
+
+          Swal.fire(
+            "🎉 Aprobado",
+            `Se generaron ${e.cantidad || 1} entrada(s) correctamente.`,
+            "success"
+          );
+        } catch (err) {
+          console.error("Error al aprobar:", err);
+          Swal.fire("❌ Error", "No se pudo aprobar la entrada.", "error");
+        }
+      });
+
+      // RECHAZAR
+      div
+        .querySelector(".btn-rechazar")
+        ?.addEventListener("click", async () => {
+          const confirm = await Swal.fire({
+            title: "¿Rechazar solicitud?",
+            text: "Esta acción eliminará la solicitud permanentemente.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, rechazar",
+            cancelButtonText: "Cancelar",
+          });
+
+          if (!confirm.isConfirmed) return;
+
+          await deleteDoc(doc(db, "entradasPendientes", e.id));
+          Swal.fire("❌ Rechazada", "La solicitud fue eliminada.", "success");
+        });
+
+      contenedor.appendChild(div);
     });
-
-    const ticketId = docRef.id;
-    const validationUrl = `${window.location.origin}/validar?ticket=${ticketId}`;
-
-    // Mostrar modal con QR
-    showQrModal(validationUrl, ticketId, eventoNombre);
-  } catch (err) {
-    console.error("Error al crear entrada:", err);
-    Swal.fire(
-      "Error",
-      "No se pudo generar la entrada. Intentá nuevamente.",
-      "error"
-    );
-  }
-}
-
-// Genera el QR y abre modal
-function showQrModal(qrData, ticketId, eventoNombre) {
-  const qrcodeContainer = document.getElementById("qrcode");
-  qrcodeContainer.innerHTML = "";
-
-  const qrcode = new QRCode(qrcodeContainer, {
-    text: qrData,
-    width: 200,
-    height: 200,
-    colorDark: "#000000",
-    colorLight: "#ffffff",
-    correctLevel: QRCode.CorrectLevel.H,
   });
-
-  const infoEl = document.getElementById("ticketInfo");
-  infoEl.textContent = `Ticket: ${ticketId}${
-    eventoNombre ? " · " + eventoNombre : ""
-  }`;
-
-  const downloadLink = document.getElementById("downloadQr");
-  setTimeout(() => {
-    const img = qrcodeContainer.querySelector("img");
-    const canvas = qrcodeContainer.querySelector("canvas");
-    let dataUrl = null;
-    if (img) {
-      dataUrl = img.src;
-    } else if (canvas) {
-      dataUrl = canvas.toDataURL("image/png");
-    }
-    if (dataUrl) {
-      downloadLink.href = dataUrl;
-      downloadLink.style.display = "inline-block";
-    } else {
-      downloadLink.style.display = "none";
-    }
-  }, 200);
-
-  const qrModalEl = document.getElementById("qrModal");
-  const modal = new bootstrap.Modal(qrModalEl);
-  modal.show();
 }
 
-//------------------------------ Fin QR para eventos ------------------------------
+cargarEntradasPendientes();
+
+function escapeHtml(text) {
+  if (!text) return "";
+  return text
+    .toString()
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}

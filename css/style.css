@@ -364,6 +364,10 @@ header .logoimg {
   justify-items: center;
 }
 
+.horario-container .inputs input {
+  flex: 0 0 25%;
+}
+
 @media (max-width: 576px) {
   header .logoimg {
     max-height: 50px;

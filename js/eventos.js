@@ -45,7 +45,7 @@ export async function cargarEventos() {
         <p class="mb-0">📍 ${escapeHtml(e.lugar) || "Lugar a definir"}</p>
 
         <p class="mb-0">💲 ${
-          e.precio === 0 || e.precio == 0 || e.precio == null
+          e.precio == 0 || e.precio == null
             ? "Entrada gratuita"
             : `$ ${e.precio}`
         }</p>

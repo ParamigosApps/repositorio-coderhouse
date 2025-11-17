@@ -57,6 +57,7 @@ export async function cargarEntradas() {
         <h5 class="mb-1">${entrada.nombre || "Evento sin nombre"}</h5>
         <p class="mb-0">📅 ${formatearFecha(entrada.fecha) || "Sin fecha"}</p>
         <p class="mb-0">📍 ${entrada.lugar || "Lugar a definir"}</p>
+        <p class="mb-0">🕑 ${entrada.horario || "Sin horario definido"}</p>
         <p class="mb-0">💲 ${
           entrada.precio === 0 || entrada.precio == null
             ? "Entrada gratuita"
@@ -82,6 +83,9 @@ export async function cargarEntradas() {
             formatearFecha(entrada.fecha) || "Sin fecha"
           }</p>
           <p><strong>Lugar:</strong> ${entrada.lugar || "Lugar a definir"}</p>
+          <p><strong>Horario:</strong>${
+            entrada.horario || "Sin horario definido"
+          }</p>
           <p><strong>Precio:</strong> ${
             entrada.precio === 0 || entrada.precio == null
               ? "Entrada gratuita"
@@ -146,6 +150,7 @@ export async function cargarEntradas() {
             nombreEvento: entrada.nombre,
             usuario: auth.currentUser.displayName || "Usuario",
             fecha: entrada.fecha,
+            horario: entrada.horario,
             lugar: entrada.lugar,
             precio: entrada.precio ?? 0,
             qrContainer,

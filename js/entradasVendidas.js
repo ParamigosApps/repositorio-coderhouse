@@ -13,22 +13,24 @@ const btnEntradasVendidas = document.getElementById("btnEntradasVendidas");
 const contenedorEntradasVendidas = document.getElementById(
   "containerEntradasVendidas"
 );
-const contenedorEntradasPendientes = document.getElementById(
-  "contenedorEntradasPendientes"
-);
+const ContenedorEntradasPendientes =
+  document.getElementById("EntradasPendientes");
 const eventosVigentes = document.getElementById("eventosVigentes");
 const formCrearEvento = document.getElementById("form-crear-evento");
 let entradasCargadas = false;
-let detallesContainers = []; // Array para manejar todos los detalles
+let detallesContainers = [];
 
-// Toggle global contenedor completo
+// Toggle global contenedor
 btnEntradasVendidas.addEventListener("click", () => {
   if (!contenedorEntradasVendidas) return;
   contenedorEntradasVendidas.style.display =
     contenedorEntradasVendidas.style.display === "none" ? "block" : "none";
-  contenedorEntradasPendientes.style.display = "none";
+
+  ContenedorEntradasPendientes.style.display = "none";
   formCrearEvento.style.display = "none";
   eventosVigentes.style.display = "none";
+
+  mostrarEntradasVendidas();
 });
 
 // Función principal
@@ -36,9 +38,9 @@ export async function mostrarEntradasVendidas() {
   if (!contenedorEntradasVendidas) return;
 
   try {
-    // 🔹 Mostrar mensaje de carga
     contenedorEntradasVendidas.innerHTML = `<p class="text-center text-secondary mt-2">Cargando entradas vendidas...</p>`;
 
+    // Entradas
     const entradasRef = collection(db, "entradas");
     const q = query(entradasRef, orderBy("fecha"), orderBy("nombre"));
     const snapshot = await getDocs(q);
@@ -48,6 +50,11 @@ export async function mostrarEntradasVendidas() {
       ...doc.data(),
     }));
 
+    // 🔥 Traer eventos para completar info
+    const eventosSnap = await getDocs(collection(db, "eventos"));
+    const eventosMap = {};
+    eventosSnap.forEach((d) => (eventosMap[d.id] = { ...d.data(), id: d.id }));
+
     if (!entradasCargadas) {
       const totalVendidas = entradas
         .filter((e) => e.pagado)
@@ -55,50 +62,71 @@ export async function mostrarEntradasVendidas() {
 
       contenedorEntradasVendidas.innerHTML = "";
 
+      // Total general
       const totalHtml = document.createElement("p");
       totalHtml.className = "fw-bold fs-5 mb-3";
       totalHtml.textContent = `🎟️ Total de entradas vendidas: ${totalVendidas}`;
       contenedorEntradasVendidas.appendChild(totalHtml);
 
+      // Agrupación por evento
       const entradasPorEvento = {};
       entradas.forEach((e) => {
-        const key = `${e.nombre}__${e.fecha}`;
+        const key = `${e.eventoId}`;
         if (!entradasPorEvento[key]) entradasPorEvento[key] = [];
         entradasPorEvento[key].push(e);
       });
 
       detallesContainers = [];
 
-      for (const key of Object.keys(entradasPorEvento)) {
-        const [nombreEvento, fechaRaw] = key.split("__");
-        const entradasEvento = entradasPorEvento[key];
-        const fecha = formatearFecha(fechaRaw);
+      for (const eventoId of Object.keys(entradasPorEvento)) {
+        const eventoData = eventosMap[eventoId] || {};
+
+        const entradasEvento = entradasPorEvento[eventoId];
+        const fecha = formatearFecha(eventoData.fecha);
 
         const totalEvento = entradasEvento.reduce(
           (acc, e) => acc + e.cantidad,
           0
         );
 
+        // Contenedor del evento
         const eventoContainer = document.createElement("div");
-        eventoContainer.className = "mb-2 border rounded shadow-sm";
+        eventoContainer.className = "mb-2 border rounded shadow-sm p-2";
 
         const botonEvento = document.createElement("button");
-        botonEvento.textContent = `${nombreEvento} - ${fecha} (${totalEvento} entradas)`;
+        botonEvento.textContent = `${
+          eventoData.nombre || "Sin nombre"
+        } - ${fecha} (${totalEvento} entradas)`;
         botonEvento.className =
           "btn btn-outline-dark w-100 text-center py-2 fw-semibold";
-        botonEvento.style.cursor = "pointer";
         botonEvento.style.fontSize = "0.9rem";
 
         const detalleContainer = document.createElement("div");
         detalleContainer.style.display = "none";
-        detalleContainer.style.padding = "10px";
+        detalleContainer.style.padding = "12px";
         detalleContainer.className = "d-flex flex-column gap-2";
 
         detallesContainers.push(detalleContainer);
 
+        // Info del evento
+        const infoEvento = document.createElement("div");
+        infoEvento.className = "p-2 rounded border bg-light";
+        infoEvento.innerHTML = `
+          <strong>Lugar:</strong> ${eventoData.lugar || "-"}<br>
+          <strong>Horario:</strong> ${eventoData.horario || "-"}<br>
+          <strong>Precio:</strong> ${
+            eventoData.precio > 0 ? "$" + eventoData.precio : "Gratis"
+          }<br>
+          <strong>Descripción:</strong> ${eventoData.descripcion || "-"}
+        `;
+        detalleContainer.appendChild(infoEvento);
+
+        // Entradas por usuario
         const entradasPorUsuario = {};
+
         for (const e of entradasEvento) {
           let nombreUsuario = e.usuarioNombre || e.usuarioId;
+
           if (!e.usuarioNombre) {
             try {
               const usuarioRef = doc(db, "users", e.usuarioId);
@@ -115,21 +143,20 @@ export async function mostrarEntradasVendidas() {
           entradasPorUsuario[nombreUsuario] += e.cantidad;
         }
 
+        // Mostrar datos por usuario
         for (const [nombreUsuario, cantidad] of Object.entries(
           entradasPorUsuario
         )) {
           const entradaDiv = document.createElement("div");
-          entradaDiv.textContent = `${nombreUsuario} - ${cantidad} ${
+          entradaDiv.textContent = `${nombreUsuario} — ${cantidad} ${
             cantidad > 1 ? "entradas" : "entrada"
           }`;
-          entradaDiv.style.padding = "6px 10px";
-          entradaDiv.style.borderRadius = "6px";
+          entradaDiv.className = "p-2 rounded";
           entradaDiv.style.backgroundColor = "#d4edda";
-          entradaDiv.style.fontSize = "0.9rem";
           detalleContainer.appendChild(entradaDiv);
         }
 
-        // Toggle individual
+        // Botón toggle
         botonEvento.addEventListener("click", () => {
           detalleContainer.style.display =
             detalleContainer.style.display === "none" ? "flex" : "none";
@@ -142,20 +169,8 @@ export async function mostrarEntradasVendidas() {
 
       entradasCargadas = true;
     }
-
-    // Toggle global al clickear "Ver entradas vendidas"
-    const anyVisible = detallesContainers.some(
-      (d) => d.style.display === "flex"
-    );
-    detallesContainers.forEach((d) => {
-      d.style.display = anyVisible ? "none" : "flex";
-    });
   } catch (err) {
     console.error("❌ Error al obtener entradas:", err);
     contenedorEntradasVendidas.innerHTML = `<p class="text-danger">Error al cargar las entradas.</p>`;
   }
-}
-
-if (btnEntradasVendidas) {
-  btnEntradasVendidas.addEventListener("click", mostrarEntradasVendidas);
 }

@@ -8,22 +8,26 @@ import {
 
 export async function cargarEventos() {
   const listaEventos = document.getElementById("listaEventos");
+
   if (!listaEventos) {
     console.error("❌ listaEventos no encontrado en el DOM");
     return;
   }
 
-  listaEventos.innerHTML = `<p class="text-center text-secondary mt-3">Cargando eventos...</p>`;
+  listaEventos.innerHTML = `
+    <p class="text-center text-secondary mt-3">Cargando eventos...</p>
+  `;
 
   try {
     console.log("🔎 Consultando Firestore: colección 'eventos'");
     const snapshot = await getDocs(collection(db, "eventos"));
-
     listaEventos.innerHTML = "";
 
     if (snapshot.empty) {
       console.warn("⚠ No hay eventos cargados en Firestore.");
-      listaEventos.innerHTML = `<p class="text-center text-secondary mt-3">No hay eventos disponibles.</p>`;
+      listaEventos.innerHTML = `
+        <p class="text-center text-secondary mt-3">No hay eventos disponibles.</p>
+      `;
       return;
     }
 
@@ -36,13 +40,11 @@ export async function cargarEventos() {
       const div = document.createElement("div");
       div.className = "card mb-3 shadow-sm p-3";
 
-      let valorEntrada;
-      if (e.precio == 0 || e.precio < 1 || e.precio == null)
-        valorEntrada = "Gratis";
-      else valorEntrada = `$${e.precio}`;
+      let valorEntrada = !e.precio || e.precio < 1 ? "Gratis" : `$${e.precio}`;
 
       div.innerHTML = `
         <h4 class="fw-bold">${e.nombre || "Sin nombre"}</h4>
+
         <p class="mb-0">📅 <strong>${
           escapeHtml(formatearFecha(e.fecha)) || "Fecha a confirmar"
         }</strong></p>
@@ -67,11 +69,11 @@ export async function cargarEventos() {
 
       listaEventos.appendChild(div);
 
-      // CLICK DEL BOTÓN COMPRAR
+      // CLICK COMPRAR
       div.querySelector(".btnComprar").addEventListener("click", () => {
         import("/js/entradas.js")
           .then((module) => {
-            console.log("📥 Archivo entradas.js importado:", module);
+            console.log("📥 Archivo entradas.js importado: ", module);
 
             if (typeof module.pedirEntrada === "function") {
               module.pedirEntrada(id, e);
@@ -87,6 +89,9 @@ export async function cargarEventos() {
       });
     });
   } catch (error) {
-    listaEventos.innerHTML = `<p class="text-danger text-center mt-3">Error al cargar eventos.</p>`;
+    console.error("❌ Error cargando eventos:", error);
+    listaEventos.innerHTML = `
+      <p class="text-danger text-center mt-3">Error al cargar eventos.</p>
+    `;
   }
 }

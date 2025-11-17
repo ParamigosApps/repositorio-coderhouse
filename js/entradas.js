@@ -117,11 +117,13 @@ export async function pedirEntrada(eventoId, e) {
 
     // Si es gratis → directa
     if (!e.precio || e.precio < 1) {
+      const cantidad = 1; // valor por defecto para entradas gratuitas
       return await crearEntrada(eventoId, {
         nombre: e.nombre,
         precio: 0,
         fecha: e.fecha,
         lugar: e.lugar,
+        cantidad: cantidad,
       });
     }
 
@@ -155,13 +157,23 @@ export async function pedirEntrada(eventoId, e) {
 
     const cantidad =
       parseInt(document.getElementById("swal-cantidad").value) || 1;
-
+    // Validar límite elegido manualmente
+    if (cantidad > entradasPorUsuario - entradasCompradas) {
+      return Swal.fire({
+        icon: "warning",
+        title: "Límite superado",
+        text: `Solo puedes solicitar ${
+          entradasPorUsuario - entradasCompradas
+        } entradas.`,
+      });
+    }
     // Base para crear entradas
     const entradaBase = {
       nombre: e.nombre,
       precio: Number(e.precio),
       fecha: e.fecha,
       lugar: e.lugar,
+      cantidad: cantidad,
     };
 
     // Pago por transferencia
@@ -200,7 +212,7 @@ Titular: Juan Pérez
         window.open(`https://wa.me/541121894427?text=${mensaje}`, "_blank");
 
         // Generar solicitud de aprobación
-        await crearSolicitudPendiente(eventoId, usuarioId, e, cantidad);
+        await crearSolicitudPendiente(eventoId, usuarioId, entradaBase);
 
         return Swal.fire(
           "Solicitud enviada",
@@ -233,7 +245,7 @@ Titular: Juan Pérez
           );
           window.open(`https://wa.me/541121894427?text=${mensaje}`, "_blank");
 
-          await crearSolicitudPendiente(eventoId, usuarioId, e, cantidad);
+          await crearSolicitudPendiente(eventoId, usuarioId, entradaBase);
 
           return Swal.fire(
             "Solicitud enviada",
@@ -332,7 +344,7 @@ export async function registrarTransferencia(
     );
   }
 }
-async function crearSolicitudPendiente(eventoId, usuarioId, e, cantidad) {
+async function crearSolicitudPendiente(eventoId, usuarioId, entradaBase) {
   const existentes = await getDocs(
     query(
       collection(db, "entradasPendientes"),
@@ -346,22 +358,23 @@ async function crearSolicitudPendiente(eventoId, usuarioId, e, cantidad) {
       eventoId,
       usuarioId,
       usuarioNombre: auth.currentUser.displayName,
-      eventoNombre: e.nombre,
-      cantidad: cantidad,
-      monto: cantidad * Number(e.precio),
+      eventoNombre: entradaBase.nombre,
+      cantidad: entradaBase.cantidad,
+      monto: entradaBase.cantidad * entradaBase.precio,
       estado: "pendiente",
       creadaEn: new Date().toISOString(),
-      fecha: e.fecha,
-      lugar: e.lugar,
-      precio: e.precio,
+      fecha: entradaBase.fecha,
+      lugar: entradaBase.lugar,
+      precio: entradaBase.precio,
     });
   } else {
     const ref = existentes.docs[0].ref;
     const prev = existentes.docs[0].data().cantidad || 1;
+    const updatedCount = prev + entradaBase.cantidad;
 
     return await updateDoc(ref, {
-      cantidad: prev + cantidad,
-      monto: (prev + cantidad) * Number(e.precio),
+      cantidad: updatedCount,
+      monto: updatedCount * entradaBase.precio,
       actualizadaEn: new Date().toISOString(),
     });
   }

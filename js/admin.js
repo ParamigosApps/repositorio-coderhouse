@@ -113,6 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
         lugar,
         horario,
         precio: precio || "Entrada gratuita",
+        cantidad: Number(cantidad) || 1,
         descripcion,
         entradasPorUsuario,
         creadoEn: serverTimestamp(),
@@ -216,7 +217,7 @@ export async function cargarEventosAdmin() {
 // Cargar Entradas Pendientes
 // -----------------------------
 export function cargarEntradasPendientes() {
-  const contenedor = document.getElementById("contenedorEntradasPendientes");
+  const contenedor = document.getElementById("EntradasPendientes");
   if (!contenedor) return;
 
   contenedor.innerHTML = `<p class="text-center text-secondary mt-3">Cargando entradas pendientes...</p>`;
@@ -241,24 +242,35 @@ export function cargarEntradasPendientes() {
       div.className = "card mb-3 shadow-sm p-3";
 
       div.innerHTML = `
-          <h5 class="fw-bold">${e.usuarioNombre || "Sin nombre"}</h5>
-          <p class="mb-0">Evento: ${e.eventoNombre || "-"}</p>
-          <p class="mb-0">Cantidad: ${e.cantidad || 1}</p>
-          <p class="mb-0">Monto: $${e.monto ?? 0}</p>
-          <p class="mb-0 text-warning">Estado: ${e.estado || "pendiente"}</p>
+          <h5 class="fw-bold">${e.usuarioNombre || "Sin nombre"}</strong></h5>
+          <h7 class="mb-0">Evento: <strong>${
+            e.eventoNombre || "-"
+          }</strong></h7>
+          <p class="mb-0">Cantidad de entradas: <strong>${
+            e.cantidad
+          }</strong></p>
+          <p class="mb-0">Monto total a recibir: <strong>$${
+            e.precio * e.cantidad || 0
+          }</strong></p>
+          <p class="mb-0 text-warning">Estado: <strong>${
+            e.estado || "pendiente"
+          }</strong></p>
 
-          <div class="mt-2 d-flex gap-2">
-            <button class="btn btn-success btn-aprobar">Aprobar</button>
-            <button class="btn btn-danger btn-rechazar">Rechazar</button>
+         <div class="text-center mt-2">
+        <button class="btn btn-success btn-aprobar"><strong>Aprobar</strong></button>
+        <button class="btn btn-danger btn-rechazar"><strong>Rechazar</strong></button>
           </div>
-        `;
+        </div>
+      `;
 
       // APROBAR
       div.querySelector(".btn-aprobar")?.addEventListener("click", async () => {
         try {
+          const cantidad = Number(e.cantidad) || 1;
+
           for (let i = 0; i < (e.cantidad || 1); i++) {
             await crearEntrada(e.eventoId, {
-              nombre: e.nombre,
+              nombre: e.eventoNombre,
               fecha: e.fecha,
               lugar: e.lugar,
               precio: e.precio,

@@ -215,12 +215,13 @@ export async function pedirEntrada(eventoId, e) {
 
     // --------------------------- PAGO POR TRANSFERENCIA ---------------------------
     if (isDenied) {
+      const datos = await obtenerDatosBancarios();
       const cuentaBancaria = `
-Banco: Banco Ejemplo
-CBU: 1234567890123456789012
-Alias: MI.ALIAS.BANCO
-Titular: Juan Pérez
-      `;
+Banco: ${datos.nombreBanco}
+CBU: ${datos.cbuBanco}
+Alias: ${datos.aliasBanco}
+Titular: ${datos.titularBanco}
+  `;
 
       const result = await Swal.fire({
         title: "Transferencia bancaria",
@@ -583,4 +584,19 @@ export async function cargarEntradas() {
     console.error("❌ Error en cargarEntradas():", err);
     contenedor.innerHTML = `<p class="text-danger text-center mt-3">Error al cargar entradas.</p>`;
   }
+}
+
+export async function obtenerDatosBancarios() {
+  const docRef = doc(db, "configuracion", "datosBancarios");
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) return docSnap.data();
+
+  // Valores por defecto si no están guardados en Firestore
+  return {
+    nombreBanco: "Banco Ejemplo",
+    cbuBanco: "1234567890123456789012",
+    aliasBanco: "MI.ALIAS.BANCO",
+    titularBanco: "Juan Pérez",
+  };
 }

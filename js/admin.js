@@ -3,6 +3,7 @@ import { db, auth } from "./firebase.js";
 import { formatearFecha } from "./utils.js";
 import {
   addDoc,
+  setDoc,
   getDocs,
   deleteDoc,
   collection,
@@ -38,6 +39,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const eventosVigentes = document.getElementById("eventosVigentes");
   const mensajeError = document.getElementById("mensajeError");
 
+  const btnMetodosDePago = document.getElementById("btnMetodosDePago");
+  const formMetodosDePago = document.getElementById("formMetodosDePago");
+  const btnGuardarDatosBancarios = document.getElementById(
+    "btnGuardarDatosBancarios"
+  );
+
   if (!btnCrearEvento || !formCrearEvento || !btnGuardarEvento) {
     console.error("Faltan elementos clave del DOM.");
     return;
@@ -68,6 +75,17 @@ document.addEventListener("DOMContentLoaded", () => {
     contenedorEntradasPendientes.style.display = "none";
     formCrearEvento.style.display = "none";
     contenedorEntradasVendidas.style.display = "none";
+  });
+
+  // Toggle eventos vigentes
+  btnMetodosDePago.addEventListener("click", () => {
+    formMetodosDePago.style.display =
+      formMetodosDePago.style.display === "none" ? "block" : "none";
+  });
+
+  // Toggle entradas pendientes
+  btnGuardarDatosBancarios.addEventListener("click", () => {
+    guardarDatosBancarios();
   });
 
   btnGuardarEvento.addEventListener("click", async () => {
@@ -330,4 +348,21 @@ function escapeHtml(text) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+// --------------------------------- GUARDAR DATOS BANCARIOS ---------------------------------
+async function guardarDatosBancarios() {
+  const nombreBanco = document.getElementById("nombreBanco").value;
+  const cbuBanco = document.getElementById("cbuBanco").value;
+  const aliasBanco = document.getElementById("aliasBanco").value;
+  const titularBanco = document.getElementById("titularBanco").value;
+
+  await setDoc(doc(db, "configuracion", "datosBancarios"), {
+    nombreBanco,
+    cbuBanco,
+    aliasBanco,
+    titularBanco,
+  });
+
+  alert("Datos bancarios guardados ✅");
 }

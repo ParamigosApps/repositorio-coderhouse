@@ -61,34 +61,53 @@ async function scanQR() {
 }
 
 // Validar ticket
+// Validar ticket
 async function validarTicket(ticketId) {
   try {
     const ticketRef = doc(db, "entradas", ticketId);
     const ticketSnap = await getDoc(ticketRef);
 
+    // Limpiar info adicional
+    const infoAdicionalId = "qr-info-adicional";
+    let infoAdicional = document.getElementById(infoAdicionalId);
+    if (infoAdicional) infoAdicional.remove();
+
     if (!ticketSnap.exists()) {
-      resultado.textContent = "❌ Ticket inválido";
-      resultado.className = "invalid";
+      qrResultado.textContent = "❌ Ticket inválido";
+      qrResultado.className = "qr-resultado invalid";
     } else {
       const ticketData = ticketSnap.data();
       if (ticketData.usado) {
-        resultado.textContent = "⚠ Ticket ya usado";
-        resultado.className = "used";
+        qrResultado.textContent = "⚠ Ticket ya usado";
+        qrResultado.className = "qr-resultado used";
       } else {
-        resultado.textContent = "✅ Ticket válido - Permitido el ingreso";
-        resultado.className = "valid";
+        qrResultado.textContent = "✅ Ticket válido - Permitido el ingreso";
+        qrResultado.className = "qr-resultado valid";
         await updateDoc(ticketRef, { usado: true });
       }
+
+      // Mostrar nombre de evento y usuario debajo
+      infoAdicional = document.createElement("div");
+      infoAdicional.id = infoAdicionalId;
+      infoAdicional.style.marginTop = "10px";
+      infoAdicional.style.fontWeight = "500";
+      infoAdicional.style.fontSize = "1rem";
+      infoAdicional.textContent = `Evento: ${
+        ticketData.nombre || "Sin nombre"
+      } | Usuario: ${ticketData.usuarioNombre || "Usuario"}`;
+      qrResultado.insertAdjacentElement("afterend", infoAdicional);
     }
   } catch (err) {
     console.error(err);
-    resultado.textContent = "Error validando ticket";
-    resultado.className = "invalid";
+    qrResultado.textContent = "Error validando ticket";
+    qrResultado.className = "qr-resultado invalid";
   }
 
   setTimeout(() => {
-    resultado.textContent = "Esperando QR...";
-    resultado.className = "";
+    qrResultado.textContent = "Esperando QR...";
+    qrResultado.className = "qr-resultado";
+    const infoAdicional = document.getElementById("qr-info-adicional");
+    if (infoAdicional) infoAdicional.remove();
     ticketsProcesados.delete(ticketId);
   }, 3000);
 }

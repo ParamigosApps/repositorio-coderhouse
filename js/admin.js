@@ -1,6 +1,15 @@
 // /js/admin.js
 import { db, auth } from "./firebase.js";
+import AdminProductos from "./admin-productos.js";
 import { formatearFecha } from "./utils.js";
+import { iniciarCatalogo } from "./cargarCatalogo.js";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js";
+
 import {
   addDoc,
   setDoc,
@@ -32,6 +41,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const contenedorEntradasPendientes = document.getElementById(
     "contenedorEntradasPendientes"
   );
+
+  // PRODUCTOS
+  const btnAnadirProducto = document.getElementById("btnAnadirProducto");
+  const formCrearProducto = document.getElementById("form-crear-producto");
+  const mensajeErrorProducto = document.getElementById("mensajeErrorProducto");
+  const contenedorCatalogo = document.getElementById("contenedorCatalogo");
+
+  // CREAR EVENTOS
   const btnCrearEvento = document.getElementById("btnCrearEvento");
   const formCrearEvento = document.getElementById("form-crear-evento");
   const btnGuardarEvento = document.getElementById("btnGuardarEvento");
@@ -39,17 +56,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const eventosVigentes = document.getElementById("eventosVigentes");
   const mensajeError = document.getElementById("mensajeError");
 
+  // METODOS DE PAGO
   const btnMetodosDePago = document.getElementById("btnMetodosDePago");
   const formMetodosDePago = document.getElementById("formMetodosDePago");
   const btnGuardarDatosBancarios = document.getElementById(
     "btnGuardarDatosBancarios"
   );
 
-  if (!btnCrearEvento || !formCrearEvento || !btnGuardarEvento) {
-    console.error("Faltan elementos clave del DOM.");
-    return;
-  }
-
+  // CATALOGO
+  const btnCatalogoCompleto = document.getElementById("btnCatalogoCompleto");
   // Toggle entradas pendientes
   btnEntradasPendientes.addEventListener("click", () => {
     contenedorEntradasPendientes.style.display =
@@ -88,6 +103,24 @@ document.addEventListener("DOMContentLoaded", () => {
     guardarDatosBancarios();
   });
 
+  btnAnadirProducto.addEventListener("click", () => {
+    formCrearProducto.style.display =
+      formCrearProducto.style.display === "none" ? "block" : "none";
+
+    // oculta contenedores extra (según tus ids reales)
+    formCrearEvento.style.display = "none";
+    eventosVigentes.style.display = "none";
+    contenedorEntradasPendientes.style.display = "none";
+    contenedorEntradasVendidas.style.display = "none";
+  });
+
+  if (btnCatalogoCompleto) {
+    btnCatalogoCompleto.addEventListener("click", () => {
+      renderizarCatalogo();
+    });
+  }
+
+  // GUARDAR EVENTO
   btnGuardarEvento.addEventListener("click", async () => {
     const nombre = document.getElementById("nombreEvento").value.trim();
     const fecha = document.getElementById("fechaEvento").value;
@@ -149,6 +182,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   cargarEventosAdmin();
+  iniciarCatalogo();
+  AdminProductos.initAdminProductos();
 });
 
 // -----------------------------
@@ -336,7 +371,6 @@ export function cargarEntradasPendientes() {
     });
   });
 }
-
 cargarEntradasPendientes();
 
 function escapeHtml(text) {

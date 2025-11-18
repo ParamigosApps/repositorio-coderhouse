@@ -21,18 +21,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const containerEntradas = document.getElementById("containerEntradas");
   const catalogoContainer = document.getElementById("catalogoContainer");
 
-  // -----------------------------
   // Mostrar catálogo al tocar categoría
-  // -----------------------------
   btnCategorias.forEach((btn) =>
     btn.addEventListener("click", () => {
       if (catalogoContainer) catalogoContainer.classList.remove("d-none");
     })
   );
 
-  // -----------------------------
   // Toggle catálogo completo
-  // -----------------------------
   if (btnCatalogoCompleto) {
     btnCatalogoCompleto.addEventListener("click", () => {
       if (!catalogoContainer) return;

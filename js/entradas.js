@@ -227,7 +227,7 @@ Titular: ${datos.titularBanco}
         title: "Transferencia bancaria",
         html: `
           <p>Realiza la transferencia y luego envía el comprobante.</p>
-          <pre style="text-align:left;background:#f0f0f0;padding:10px;border-radius:5px;">${cuentaBancaria}</pre>
+          <pre style="text-align:left;background:#f0f0f0;padding:2px;border-radius:5px;">${cuentaBancaria}</pre>
         `,
         showCancelButton: true,
         showDenyButton: true,

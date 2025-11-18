@@ -21,9 +21,9 @@ const db = getFirestore(app);
 const video = document.getElementById("camara");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-const resultado = document.getElementById("resultado");
+const qrResultado = document.getElementById("qr-resultado");
+const qrInfo = document.getElementById("qr-info-adicional");
 
-let escaneando = true;
 const ticketsProcesados = new Set();
 
 // Acceder a la cámara
@@ -35,12 +35,12 @@ navigator.mediaDevices
   })
   .catch((err) => {
     console.error("Error cámara:", err);
-    resultado.textContent = "No se pudo acceder a la cámara.";
-    resultado.className = "invalid";
+    qrResultado.textContent = "No se pudo acceder a la cámara.";
+    qrResultado.className = "qr-resultado invalid";
   });
 
 // Función para escanear QR
-async function scanQR() {
+function scanQR() {
   if (video.readyState === video.HAVE_ENOUGH_DATA) {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -61,16 +61,13 @@ async function scanQR() {
 }
 
 // Validar ticket
-// Validar ticket
 async function validarTicket(ticketId) {
   try {
     const ticketRef = doc(db, "entradas", ticketId);
     const ticketSnap = await getDoc(ticketRef);
 
-    // Limpiar info adicional
-    const infoAdicionalId = "qr-info-adicional";
-    let infoAdicional = document.getElementById(infoAdicionalId);
-    if (infoAdicional) infoAdicional.remove();
+    // Limpiar info anterior
+    qrInfo.textContent = "";
 
     if (!ticketSnap.exists()) {
       qrResultado.textContent = "❌ Ticket inválido";
@@ -86,16 +83,10 @@ async function validarTicket(ticketId) {
         await updateDoc(ticketRef, { usado: true });
       }
 
-      // Mostrar nombre de evento y usuario debajo
-      infoAdicional = document.createElement("div");
-      infoAdicional.id = infoAdicionalId;
-      infoAdicional.style.marginTop = "10px";
-      infoAdicional.style.fontWeight = "500";
-      infoAdicional.style.fontSize = "1rem";
-      infoAdicional.textContent = `Evento: ${
+      // Mostrar información adicional
+      qrInfo.textContent = `Evento: ${
         ticketData.nombre || "Sin nombre"
-      } | Usuario: ${ticketData.usuarioNombre || "Usuario"}`;
-      qrResultado.insertAdjacentElement("afterend", infoAdicional);
+      } | Usuario: ${ticketData.usuarioNombre || "Desconocido"}`;
     }
   } catch (err) {
     console.error(err);
@@ -106,8 +97,7 @@ async function validarTicket(ticketId) {
   setTimeout(() => {
     qrResultado.textContent = "Esperando QR...";
     qrResultado.className = "qr-resultado";
-    const infoAdicional = document.getElementById("qr-info-adicional");
-    if (infoAdicional) infoAdicional.remove();
+    qrInfo.textContent = "";
     ticketsProcesados.delete(ticketId);
   }, 3000);
 }

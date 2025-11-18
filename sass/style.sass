@@ -399,52 +399,54 @@ $qr-video-border-color: #343a40
 // ------------------ Estilos QR ------------------ //
 .qr-body
   font-family: Arial, sans-serif
-  background: #f8f9fa
+  background: linear-gradient(120deg, #f8f9fa, #e9ecef)
   display: flex
-  flex-direction: column
-  align-items: center
-  justify-content: flex-start
+  justify-content: center
+  align-items: flex-start
   min-height: 100vh
   padding: 20px
   margin: 0
-  text-align: center
+
+.container
+  width: 100%
+  max-width: 480px
 
 .qr-title
-  margin-bottom: 20px
-  font-size: 1.8rem
   color: #343a40
+  font-size: 2rem
+  font-weight: 700
+
+.qr-video-container
+  position: relative
+  display: flex
+  justify-content: center
 
 .qr-video
   width: 100%
-  max-width: 400px
-  border-radius: 12px
-  border: 3px solid #343a40
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2)
+  border-radius: 15px
+  border: 4px solid #343a40
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25)
+
+.qr-canvas
+  display: none
 
 .qr-resultado
   margin-top: 20px
-  font-size: 1.2rem
+  font-size: 1.3rem
   font-weight: 600
-  color: #343a40
   min-height: 2em
 
-  &.valid
-    color: #198754
+.qr-resultado.valid
+  color: #198754
 
-  &.used
-    color: #ffc107
+.qr-resultado.used
+  color: #ffc107
 
-  &.invalid
-    color: #dc3545
+.qr-resultado.invalid
+  color: #dc3545
 
 .qr-info-adicional
   margin-top: 10px
-  font-weight: 500
   font-size: 1rem
-  background: rgba(255, 255, 255, 0.9)
-  padding: 8px 12px
-  border-radius: 8px
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1)
-  color: #343a40
-  max-width: 90%
-  word-wrap: break-word
+  font-weight: 500
+  color: #495057

@@ -5,7 +5,6 @@ import {
   addDoc,
   getDocs,
   deleteDoc,
-  updateDoc,
   collection,
   doc,
   query,
@@ -79,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .getElementById("horarioDesdeEvento")
       .value.trim();
     const horarioHasta = document
-      .getElementById("hastaDesdeEvento")
+      .getElementById("horarioHastaEvento")
       .value.trim();
     const horario = `Desde ${horarioDesde}hs hasta ${horarioHasta}hs.`;
     const precio = document.getElementById("precioEvento").value.trim();
@@ -113,7 +112,6 @@ document.addEventListener("DOMContentLoaded", () => {
         lugar,
         horario,
         precio: precio || "Entrada gratuita",
-        cantidad: Number(cantidad) || 1,
         descripcion,
         entradasPorUsuario,
         creadoEn: serverTimestamp(),
@@ -266,22 +264,29 @@ export function cargarEntradasPendientes() {
       // APROBAR
       div.querySelector(".btn-aprobar")?.addEventListener("click", async () => {
         try {
-          const cantidad = Number(e.cantidad) || 1;
-
           for (let i = 0; i < (e.cantidad || 1); i++) {
-            await crearEntrada(e.eventoId, {
-              nombre: e.eventoNombre,
-              fecha: e.fecha,
-              lugar: e.lugar,
-              precio: e.precio,
-            });
+            await crearEntrada(
+              e.eventoId,
+              {
+                nombre: e.eventoNombre,
+                fecha: e.fecha,
+                lugar: e.lugar,
+                precio: e.precio,
+              },
+              true, // indica que es pagada
+              true // ⚡ modoAdmin -> no genera QR
+            );
           }
 
           await deleteDoc(doc(db, "entradasPendientes", e.id));
 
+          const cantidad = e.cantidad || 1;
+          const nombreUsuario = escapeHtml(e.usuarioNombre || "usuario");
           Swal.fire(
             "🎉 Aprobado",
-            `Se generaron ${e.cantidad || 1} entrada(s) correctamente.`,
+            `Se ${cantidad === 1 ? "aprobó" : "aprobaron"} ${cantidad} entrada${
+              cantidad === 1 ? "" : "s"
+            } para ${nombreUsuario} correctamente.`,
             "success"
           );
         } catch (err) {

@@ -19,7 +19,6 @@ export async function cargarEventos() {
   `;
 
   try {
-    console.log("🔎 Consultando Firestore: colección 'eventos'");
     const snapshot = await getDocs(collection(db, "eventos"));
     listaEventos.innerHTML = "";
 
@@ -73,8 +72,6 @@ export async function cargarEventos() {
       div.querySelector(".btnComprar").addEventListener("click", () => {
         import("/js/entradas.js")
           .then((module) => {
-            console.log("📥 Archivo entradas.js importado: ", module);
-
             if (typeof module.pedirEntrada === "function") {
               module.pedirEntrada(id, e);
             } else {

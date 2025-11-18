@@ -1,6 +1,6 @@
 //index.js
 import { cargarEventos } from "/js/cargarEventos.js";
-import { cargarEntradas } from "/js/misEntradas.js";
+import { cargarEntradas } from "/js/entradas.js";
 
 const listaEventos = document.getElementById("listaEventos");
 const listaEntradas = document.getElementById("listaEntradas");
@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnMisEntradas && containerEntradas) {
     btnMisEntradas.addEventListener("click", () => {
       containerEntradas.classList.toggle("d-none");
-      //CARGAR ENTRADAS
+
       cargarEntradas();
     });
   }
@@ -60,6 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnProximosEventos && containerEventos) {
     btnProximosEventos.addEventListener("click", () => {
       containerEventos.classList.toggle("d-none");
+      containerEntradas.classList.toggle("d-none");
       cargarEventos();
     });
   }

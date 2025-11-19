@@ -8,6 +8,7 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    <!-- Toastify CSS (correcto) -->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
@@ -20,12 +21,48 @@
     <title>todovaper. - Inicio</title>
   </head>
   <body>
-    <header>
+    <header class="header">
       <a class="navbar-brand" href="/index.html">
         <img src="./Assets/img/logo.png" alt="Logo" class="logoimg" />
       </a>
+
+      <!-- ICONO CARRITO EN NAV -->
+      <div id="carritoIcono" class="carrito-icono" role="button" tabindex="0">
+        <img src="/Assets/img/carrito.png" id="img-carrito" alt="carrito" />
+        <span id="carritoContador" class="contadorCarrito">0</span>
+      </div>
     </header>
 
+    <!-- PANEL CARRITO DESLIZABLE (UI principal del carrito) -->
+    <aside id="carritoPanel" class="carrito-panel" aria-hidden="true">
+      <div
+        class="carrito-header d-flex justify-content-between align-items-center p-3 border-bottom"
+      >
+        <h2 class="m-0">Tu Pedido</h2>
+        <button
+          id="cerrarCarrito"
+          class="btn btn-light"
+          aria-label="Cerrar carrito"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div id="carritoItems" class="carrito-items p-3">
+        <!-- items renderizados por js/carrito.js -->
+      </div>
+
+      <div
+        class="carrito-footer p-3 border-top d-flex justify-content-between align-items-center"
+      >
+        <h3 class="m-0">Total: $<span id="totalCarrito">0</span></h3>
+        <button id="btnPagar" class="btn btn-success">Confirmar Pedido</button>
+      </div>
+    </aside>
+
+    <div id="carritoOverlay" class="carrito-overlay" hidden></div>
+
+    <!-- MENU DESPLEGABLE (accordion) -->
     <main class="menu-desplegable flex-grow-1">
       <div class="catalogo my-2">
         <div
@@ -160,7 +197,6 @@
               </div>
             </div>
           </div>
-          <!-- FIN Entradas & Eventos -->
 
           <!-- UBICACION -->
           <div class="accordion-item">
@@ -212,6 +248,7 @@
               </div>
             </div>
           </div>
+
           <!-- INICIO SESION -->
           <div class="accordion-item">
             <h2 class="accordion-header">
@@ -231,7 +268,6 @@
               data-bs-parent="#accordionCliente"
             >
               <div class="accordion-body text-center">
-                <!-- Estado no logueado -->
                 <div id="noUser">
                   <p class="mb-2"></p>
                   <button id="btnGoogle" class="google-btn d-block mx-auto">
@@ -244,7 +280,6 @@
                   </button>
                 </div>
 
-                <!-- Estado logueado -->
                 <div id="userInfo" class="d-none">
                   <p class="mb-2 fw-bold" id="userGreeting">Hola, Usuario</p>
                   <button
@@ -276,13 +311,18 @@
     <!-- Librerías necesarias primero -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-    <!-- Módulos JS después -->
+    <!-- Toastify (script correcto) -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Módulos JS (tu lógica) -->
     <script type="module" src="js/cargarCatalogo.js"></script>
     <script type="module" src="js/cargarEventos.js"></script>
     <script type="module" src="js/utils.js"></script>
     <script type="module" src="js/entradas.js"></script>
+    <script type="module" src="js/carrito.js"></script>
     <script type="module" src="js/iniciar-sesion.js"></script>
     <script type="module" src="js/index.js"></script>
   </body>

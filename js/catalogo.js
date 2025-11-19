@@ -1,10 +1,15 @@
-const catalogoContainer = document.getElementById("catalogo-container");
+import { db } from "./firebase.js";
+import {
+  collection,
+  getDocs,
+} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
+
+const catalogoContainer = document.getElementById("catalogoContainer");
 const paginaActual = window.location.pathname.split("/").pop();
 
 let productos = [];
-let productosPorPaginas = 8;
-if (paginaActual === "index.html") productosPorPaginas = 4;
-
+let productosPorPagina = paginaActual === "index.html" ? 4 : 8;
 let cartelEnCurso = false;
 
 // ------------------------------ CLASE PRODUCTO ------------------------------ //
@@ -39,12 +44,9 @@ class Producto {
     const sinStock = this.stock <= 0;
 
     div.innerHTML = `
-      <a href="../pages/producto.html?id=${this.id}">
-        
-        <h3 class="product-description-title">${this.titulo}</h3>
-        <p class="product-description">${this.descripcion}</p>
-        <h5 class="product-price">${this.precio}</h5>
-      </a>
+      <h3 class="product-description-title">${this.titulo}</h3>
+      <p class="product-description">${this.descripcion}</p>
+      <h5 class="product-price">$${this.precio}</h5>
       <button 
         id="btn-id-${this.id}" 
         class="btn-agregar"
@@ -58,24 +60,29 @@ class Producto {
   }
 }
 
-// ------------------------------ FUNCIONES PRINCIPALES ------------------------------ //
-async function cargarCatalogoJSON() {
-  try {
-    const res = await fetch("/json/catalogo.json");
-    const data = await res.json();
+// ------------------------------ CARGAR CATALOGO DESDE FIREBASE ------------------------------ //
+export async function cargarCatalogo() {
+  if (!catalogoContainer)
+    return console.error("No se encontró #catalogoContainer");
 
-    productos = data.map(
-      (p) =>
-        new Producto(
-          p.id,
-          p.imgSrc,
-          p.titulo,
-          p.descripcion,
-          p.precio,
-          p.categoria,
-          p.destacado
-        )
-    );
+  catalogoContainer.innerHTML = "<p>Cargando productos...</p>";
+
+  try {
+    const snapshot = await getDocs(collection(db, "productos"));
+    catalogoContainer.innerHTML = "";
+
+    productos = snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return new Producto(
+        doc.id,
+        data.imagenURL || data.imagen || "/img/default-product.png",
+        data.titulo,
+        data.descripcion,
+        data.precio,
+        data.categoria,
+        data.destacado
+      );
+    });
 
     renderizarCatalogo();
   } catch (error) {
@@ -85,17 +92,18 @@ async function cargarCatalogoJSON() {
   }
 }
 
+// ------------------------------ RENDER CATALOGO ------------------------------ //
 function renderizarCatalogo() {
   catalogoContainer.innerHTML = "";
 
-  // Agrupamos los productos por categoría
+  // Agrupamos productos por categoría
   const categorias = {};
   productos.forEach((p) => {
     if (!categorias[p.categoria]) categorias[p.categoria] = [];
     categorias[p.categoria].push(p);
   });
 
-  // Creamos una sección para cada categoría
+  // Creamos sección para cada categoría
   Object.keys(categorias).forEach((cat) => {
     const section = document.createElement("section");
     section.className = "categoria-section";
@@ -110,8 +118,30 @@ function renderizarCatalogo() {
     categorias[cat].forEach((producto) => {
       const card = producto.render();
       grid.appendChild(card);
+
+      // Vincular botón de agregar
       const boton = card.querySelector(".btn-agregar");
       vincularBotones(producto, boton);
+
+      // Click en card para mostrar en grande con Swal
+      card.addEventListener("click", (e) => {
+        if (e.target !== boton) {
+          Swal.fire({
+            title: producto.titulo,
+            html: `
+              <img src="${producto.imgSrc}" alt="${producto.titulo}" 
+                style="width: 100%; max-width: 300px; border-radius: 8px; margin-bottom: 10px;">
+              <p>${producto.descripcion}</p>
+              <h5>Precio: $${producto.precio}</h5>
+              <p>Stock: ${producto.stock}</p>
+            `,
+            showCloseButton: true,
+            showConfirmButton: false,
+            width: "350px",
+            background: "#f7f7f7",
+          });
+        }
+      });
     });
 
     section.appendChild(titulo);
@@ -122,7 +152,9 @@ function renderizarCatalogo() {
 
 // ------------------------------ FUNCIONES CARRITO ------------------------------ //
 function vincularBotones(producto, boton) {
-  boton.addEventListener("click", () => {
+  boton.addEventListener("click", (e) => {
+    e.stopPropagation(); // Evita abrir Swal al hacer click en el botón
+
     if (producto.stock <= 0) {
       boton.textContent = "Sin stock";
       boton.style.backgroundColor = "#343a40";
@@ -167,8 +199,8 @@ function vincularBotones(producto, boton) {
 }
 
 function animacionCarrito() {
-  let imgCarrito = document.getElementById("img-carrito");
-  let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+  const imgCarrito = document.getElementById("img-carrito");
+  const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
   if (imgCarrito)
     carrito.length > 0
       ? imgCarrito.classList.add("con-productos")
@@ -184,10 +216,7 @@ function mostrarMensaje(mensaje, color, colorletra) {
     node: toastmsj,
     position: "right",
     gravity: "bottom",
-    style: {
-      background: color,
-      color: colorletra,
-    },
+    style: { background: color, color: colorletra },
     duration: 2500,
   }).showToast();
 }
@@ -195,6 +224,7 @@ function mostrarMensaje(mensaje, color, colorletra) {
 function mostrarIrAlCarrito(mensaje) {
   const toastmsj = document.createElement("div");
   toastmsj.innerHTML = mensaje;
+
   Toastify({
     node: toastmsj,
     duration: 4000,
@@ -213,15 +243,14 @@ function mostrarIrAlCarrito(mensaje) {
       boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
     },
     stopOnFocus: true,
-    onClick: function () {
-      window.location.href = "../pages/carrito.html";
-    },
+    onClick: () => (window.location.href = "../pages/carrito.html"),
   }).showToast();
+
   cartelEnCurso = false;
 }
 
 // ------------------------------ INICIO ------------------------------ //
 document.addEventListener("DOMContentLoaded", () => {
-  cargarCatalogoJSON();
+  cargarCatalogo();
   animacionCarrito();
 });

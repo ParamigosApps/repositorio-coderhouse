@@ -2,7 +2,7 @@
 import { db, auth } from "./firebase.js";
 import AdminProductos from "./admin-productos.js";
 import { formatearFecha } from "./utils.js";
-import { iniciarCatalogo } from "./cargarCatalogo.js";
+import { cargarCatalogo } from "./cargarCatalogo.js";
 import {
   getStorage,
   ref,
@@ -182,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   cargarEventosAdmin();
-  iniciarCatalogo();
+  cargarCatalogo();
   AdminProductos.initAdminProductos();
 });
 

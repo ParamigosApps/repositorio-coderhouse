@@ -1,6 +1,7 @@
 //index.js
 import { cargarEventos } from "/js/cargarEventos.js";
 import { cargarEntradas } from "/js/entradas.js";
+import { initAdminProductos } from "./admin-productos.js";
 
 const listaEventos = document.getElementById("listaEventos");
 const listaEntradas = document.getElementById("listaEntradas");
@@ -34,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!catalogoContainer) return;
       catalogoContainer.classList.toggle("d-none");
       if (!catalogoContainer.classList.contains("d-none")) {
-        renderizarCatalogo();
+        initAdminProductos();
       }
     });
   }

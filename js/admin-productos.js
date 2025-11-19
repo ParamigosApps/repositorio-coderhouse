@@ -34,14 +34,17 @@ const contenedorCatalogo = $("#contenedorCatalogo");
 
 const inputNombre = $("#nombreProducto");
 const inputPrecio = $("#precioProducto");
+const inputDescripcion = $("#descripcionProducto");
 const inputCategoria = $("#categoriaProducto");
 const inputImagen = $("#imagenProducto");
 const inputStock = $("#stockProducto");
 const inputDestacado = $("#destacadoProducto");
+const contadorDescripcion = $("#contadorDescripcion");
 
 // state
 let editingProductId = null;
 let editingProductImagePath = null;
+let actualizarContador = null;
 
 // init
 export function initAdminProductos() {
@@ -64,6 +67,32 @@ export function initAdminProductos() {
 
   btnGuardarProducto.addEventListener("click", guardarProducto);
 
+  // Contador de caracteres para descripción
+  if (inputDescripcion && contadorDescripcion) {
+    actualizarContador = () => {
+      const longitud = inputDescripcion.value.length;
+      const maximo = 120;
+      contadorDescripcion.textContent = `${longitud}/${maximo} caracteres`;
+
+      // Cambiar color si está cerca del límite
+      if (longitud > maximo * 0.9) {
+        contadorDescripcion.classList.remove("text-muted");
+        contadorDescripcion.classList.add("text-warning");
+      } else if (longitud >= maximo) {
+        contadorDescripcion.classList.remove("text-muted", "text-warning");
+        contadorDescripcion.classList.add("text-danger");
+      } else {
+        contadorDescripcion.classList.remove("text-warning", "text-danger");
+        contadorDescripcion.classList.add("text-muted");
+      }
+    };
+
+    inputDescripcion.addEventListener("input", actualizarContador);
+    inputDescripcion.addEventListener("keyup", actualizarContador);
+    formCrearProducto.addEventListener("reset", actualizarContador);
+    actualizarContador(); // Inicializar contador
+  }
+
   escucharProductos();
 }
 
@@ -72,6 +101,7 @@ function validarFormulario() {
   mensajeErrorProducto.style.display = "none";
 
   const nombre = inputNombre.value.trim();
+  const descripcion = inputDescripcion.value.trim();
   const precio = Number(inputPrecio.value);
   const categoria = inputCategoria.value.trim();
   const stock = Number(inputStock.value);
@@ -82,6 +112,7 @@ function validarFormulario() {
     return { ok: false, msg: "Precio inválido" };
   if (!Number.isFinite(stock) || stock < 0)
     return { ok: false, msg: "Stock inválido" };
+
   if (
     !editingProductId &&
     (!inputImagen.files || inputImagen.files.length === 0)
@@ -112,6 +143,7 @@ async function guardarProducto() {
 
     const data = {
       nombre: inputNombre.value.trim(),
+      descripcion: inputDescripcion.value.trim(),
       precio: Number(inputPrecio.value),
       categoria: inputCategoria.value.trim(),
       stock: Number(inputStock.value),
@@ -258,6 +290,7 @@ window.__editProducto = async (id) => {
 
   const p = snap.data();
   inputNombre.value = p.nombre;
+  inputDescripcion.value = p.descripcion;
   inputPrecio.value = p.precio;
   inputCategoria.value = p.categoria;
   inputStock.value = p.stock;
@@ -281,6 +314,10 @@ function setFormCreateMode() {
   btnGuardarProducto.classList.remove("btn-primary");
   btnGuardarProducto.classList.add("btn-success");
   mensajeErrorProducto.style.display = "none";
+  // Actualizar contador después de resetear
+  if (actualizarContador) {
+    actualizarContador();
+  }
 }
 
 export default { initAdminProductos };

@@ -1,217 +1,314 @@
-// cargarCatalogo.js
-/*
-import { Producto } from "./productos.js";
-import { vincularClickProducto } from "./utils.js";
+// /js/cargarCatalogo.js
+import { db } from "./firebase.js";
+import {
+  collection,
+  getDocs,
+} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import { agregarProductoCarrito, mostrarCarrito } from "/js/carrito.js";
+import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
 
 const catalogoContainer = document.getElementById("catalogoContainer");
-const btnMostrarTodo =
-  document.getElementById("btnCatalogoCompleto") ||
-  document.getElementById("btnVerTodoCatalogo");
-const botonesCategoria = document.querySelectorAll(".btn-categoria");
-
 let productos = [];
+let cartelEnCurso = false;
 
-// Iconos por categoría
-const iconosCategorias = {
-  Tragos: "🥃",
-  Botellas: "🍾",
-  Combos: "🎉",
-  Promos: "🏷️",
-  Accesorios: "🧋",
-};
+// ------------------------------ CLASE PRODUCTO ------------------------------ //
+class Producto {
+  constructor(
+    id,
+    imgSrc,
+    nombre,
+    descripcion,
+    precio,
+    categoria,
+    destacado = false
+  ) {
+    this.id = id;
+    this.imgSrc = imgSrc;
+    this.nombre = nombre;
+    this.descripcion = descripcion;
+    this.precio = precio;
+    this.categoria = categoria;
+    this.destacado = destacado;
+    this.enCarrito = 1;
 
-export async function cargarCatalogoJSON() {
-  try {
-    const res = await fetch("/json/catalogo.json");
-    const data = await res.json();
+    const stockGuardado = JSON.parse(localStorage.getItem(`stock-${this.id}`));
+    this.stock = stockGuardado !== null ? stockGuardado : 3;
+    localStorage.setItem(`stock-${this.id}`, JSON.stringify(this.stock));
+  }
 
-    productos = data.map(
-      (p) =>
-        new Producto(
-          p.id,
-          p.imgSrc,
-          p.titulo,
-          p.descripcion,
-          p.precio,
-          p.categoria,
-          p.destacado
-        )
-    );
+  renderCard() {
+    const div = document.createElement("div");
+    div.className = "product-card";
 
-    // Por defecto no mostramos productos hasta que el usuario haga click en "Ver catálogo completo" o seleccione una categoría
-    if (catalogoContainer)
-      catalogoContainer.innerHTML = `<p class="text-center text-secondary">Seleccione "Ver catálogo completo" o una categoría para ver los productos.</p>`;
-  } catch (error) {
-    console.error("Error cargando el catálogo:", error);
-    if (catalogoContainer)
-      catalogoContainer.innerHTML =
-        "<p class='text-center text-danger'>Error al cargar el catálogo.</p>";
+    const sinStock = this.stock <= 0;
+
+    div.innerHTML = `
+    <div class="product-info">
+      <h3 class="product-description-title">${this.nombre}</h3>
+      <p class="product-description">${this.descripcion}</p>
+      <h5 class="product-price">$${this.precio}</h5>
+    </div>
+    <div class="product-image">
+      <img src="${this.imgSrc}" alt="${this.nombre}" />
+      </div> 
+    `;
+
+    if (sinStock) {
+      div.style.backgroundColor = "#d3d3d3";
+      div.style.pointerEvents = "none";
+      div.style.opacity = "0.7";
+    } else {
+      div.style.cursor = "pointer";
+    }
+
+    return div;
   }
 }
 
-export function renderizarCatalogo(filtro = null) {
+// ------------------------------ CARGAR PRODUCTOS ------------------------------ //
+export async function cargarCatalogo() {
   if (!catalogoContainer) return;
+
+  catalogoContainer.innerHTML = "<p>Cargando productos...</p>";
+
+  try {
+    const snapshot = await getDocs(collection(db, "productos"));
+    productos = snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return new Producto(
+        doc.id,
+        data.imagen || "/img/default-product.png",
+        data.nombre || "Sin título",
+        data.descripcion || "Sin descripción",
+        data.precio || 0,
+        data.categoria || "Sin categoría",
+        data.destacado || false
+      );
+    });
+
+    // Mostrar contenedor
+    catalogoContainer.classList.remove("d-none");
+
+    // Render inicial: todo el catálogo
+    renderizarCatalogo("Todos");
+
+    // Vincular botones de categorías
+    const botonesCategorias = document.querySelectorAll(".btnCategorias");
+    botonesCategorias.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const categoria = btn.dataset.categoria;
+        renderizarCatalogo(categoria);
+      });
+    });
+
+    // Botón catálogo completo
+    const btnCatalogoCompleto = document.getElementById("btnCatalogoCompleto");
+    if (btnCatalogoCompleto) {
+      btnCatalogoCompleto.addEventListener("click", () =>
+        renderizarCatalogo("Todos")
+      );
+    }
+  } catch (error) {
+    console.error("Error cargando el catálogo:", error);
+    catalogoContainer.innerHTML =
+      "<p class='text-center text-danger'>Error al cargar el catálogo.</p>";
+  }
+}
+
+// ------------------------------ RENDER CATALOGO ------------------------------ //
+function renderizarCatalogo(filtro = "Todos") {
   catalogoContainer.innerHTML = "";
 
-  let listaFiltrada = productos;
-  if (filtro) listaFiltrada = productos.filter((p) => p.categoria === filtro);
-
-  if (listaFiltrada.length === 0) {
-    catalogoContainer.innerHTML = `<p class="text-center text-secondary">No hay productos${
-      filtro ? " en la categoría " + filtro : ""
-    }.</p>`;
-    return;
-  }
-
   const categorias = {};
-  listaFiltrada.forEach((p) => {
+  productos.forEach((p) => {
     if (!categorias[p.categoria]) categorias[p.categoria] = [];
     categorias[p.categoria].push(p);
   });
 
+  const esAdmin = window.location.pathname.includes("admin.html");
+
   Object.keys(categorias).forEach((cat) => {
+    if (filtro !== "Todos" && cat !== filtro) return;
+
     const section = document.createElement("section");
     section.className = "categoria-section";
 
-    const icono = iconosCategorias[cat] || "";
-
-    section.innerHTML = `
-      <hr class="my-4" />
-      <h5 class="fw-semibold mb-3">${icono} ${cat}</h5>
-    `;
+    const titulo = document.createElement("h2");
+    titulo.className = "categoria-titulo text-center mb-4";
+    titulo.textContent = cat;
 
     const grid = document.createElement("div");
-    grid.className = "productos-grid d-grid gap-3";
+    grid.className = "productos-grid";
 
     categorias[cat].forEach((producto) => {
-      const card = producto.render();
+      const card = producto.renderCard();
       grid.appendChild(card);
-      vincularClickProducto(producto, card);
+
+      if (esAdmin) {
+        const btnEditar = document.createElement("button");
+        btnEditar.textContent = "Editar";
+        btnEditar.className = "btn-editar";
+        btnEditar.addEventListener("click", () => editarProducto(producto));
+
+        const btnEliminar = document.createElement("button");
+        btnEliminar.textContent = "Eliminar";
+        btnEliminar.className = "btn-eliminar";
+        btnEliminar.addEventListener("click", () => eliminarProducto(producto));
+
+        card.appendChild(btnEditar);
+        card.appendChild(btnEliminar);
+      } else {
+        if (producto.stock > 0) card.style.cursor = "pointer";
+
+        card.addEventListener("click", () => {
+          Swal.fire({
+            title: producto.nombre,
+            html: `
+              <div class="product-card-expandida">
+                <img src="${producto.imgSrc}" alt="${
+              producto.nombre
+            }" class="product-card-expandida__img">
+                <p class="product-card-expandida__descripcion">${
+                  producto.descripcion
+                }</p>
+                <h5 class="product-card-expandida__precio">Precio: $${
+                  producto.precio
+                }</h5>
+                <button 
+                  id="swal-btn-agregar" 
+                  class="product-card-expandida__btn" 
+                  ${producto.stock <= 0 ? "disabled" : ""}
+                >
+                  ${producto.stock <= 0 ? "X" : "Agregar"}
+                </button>
+              </div>
+            `,
+            showCloseButton: true,
+            showConfirmButton: false,
+            customClass: {
+              popup: "product-card-popup", // clase para popup
+            },
+          });
+
+          // Botón agregar
+          document
+            .getElementById("swal-btn-agregar")
+            ?.addEventListener("click", () => {
+              if (producto.stock > 0) {
+                agregarProductoCarrito(producto);
+                mostrarCarrito();
+                Swal.close();
+              }
+            });
+        });
+      }
     });
 
+    section.appendChild(titulo);
     section.appendChild(grid);
     catalogoContainer.appendChild(section);
   });
 }
 
-// Eventos botones
-btnMostrarTodo?.addEventListener("click", () => {
-  renderizarCatalogo();
-});
+// ------------------------------ FUNCIONES ADMIN ------------------------------ //
+function editarProducto(producto) {
+  console.log("Editar producto:", producto.id);
+}
 
-botonesCategoria.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const cat = btn.dataset.categoria;
-    renderizarCatalogo(cat);
-    if (catalogoContainer) catalogoContainer.style.display = "block";
-  });
-});
+function eliminarProducto(producto) {
+  console.log("Eliminar producto:", producto.id);
+}
 
-// iniciar carga
-document.addEventListener("DOMContentLoaded", () => {
-  cargarCatalogoJSON();
-});
-*/
+// ------------------------------ FUNCIONES CARRITO ------------------------------ //
+function vincularBotones(producto, boton) {
+  boton.addEventListener("click", (e) => {
+    e.stopPropagation();
 
-// /js/cargarCatalogo.js
-import { db } from "./firebase.js";
-import {
-  collection,
-  onSnapshot,
-  deleteDoc,
-  doc,
-} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
-import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
-
-const contenedorCatalogo = document.getElementById("contenedorCatalogo");
-
-export function iniciarCatalogo() {
-  const q = collection(db, "productos");
-
-  onSnapshot(q, (snapshot) => {
-    contenedorCatalogo.innerHTML = "";
-
-    if (snapshot.empty) {
-      contenedorCatalogo.innerHTML = `<p class="text-center text-secondary mt-3">No hay productos cargados.</p>`;
+    if (producto.stock <= 0) {
+      boton.textContent = "Sin stock";
+      boton.style.backgroundColor = "#343a40";
+      mostrarMensaje("Producto sin stock", "#ff2d03e0", "#ffffffff");
       return;
     }
 
-    snapshot.forEach((docu) => {
-      const producto = { id: docu.id, ...docu.data() };
-      const card = crearCardProducto(producto);
-      contenedorCatalogo.appendChild(card);
-    });
-  });
-}
+    let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+    const existe = carrito.some((item) => item.id === producto.id);
 
-function crearCardProducto(producto) {
-  const urlImagen = producto.imagenURL || "../Assets/img/placeholder.png"; // fallback
-
-  const card = document.createElement("div");
-  card.className = "card shadow-sm rounded-4 p-2 mb-3";
-
-  card.innerHTML = `
-    <img src="${urlImagen}" class="card-img-top rounded-3" style="height:150px;object-fit:cover">
-    <div class="card-body p-2">
-      <h6 class="fw-bold mb-1">${producto.nombre}</h6>
-      <p class="small text-secondary mb-1">Categoría: ${producto.categoria}</p>
-      <p class="fw-semibold mb-1">$${producto.precio}</p>
-      <p class="small">Stock: ${producto.stock}</p>
-    </div>
-
-    <div class="d-flex gap-2 p-2">
-      <button class="btn btn-sm btn-dark w-50" data-id="${producto.id}" data-action="editar">Editar</button>
-      <button class="btn btn-sm btn-outline-danger w-50" data-id="${producto.id}" data-action="eliminar">Eliminar</button>
-    </div>
-  `;
-
-  card.addEventListener("click", (e) => {
-    const accion = e.target.dataset.action;
-    const id = e.target.dataset.id;
-
-    if (accion === "eliminar") eliminarProducto(id);
-    if (accion === "editar") editarProducto(producto);
-  });
-
-  return card;
-}
-
-async function eliminarProducto(id) {
-  const confirm = await Swal.fire({
-    title: "Eliminar producto",
-    text: "¿Seguro que deseas eliminar este producto?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Eliminar",
-    cancelButtonText: "Cancelar",
-  });
-
-  if (confirm.isConfirmed) {
-    await deleteDoc(doc(db, "productos", id));
-    Swal.fire("Eliminado", "Producto eliminado con éxito", "success");
-  }
-}
-
-function editarProducto(producto) {
-  Swal.fire({
-    title: "Editar producto",
-    html: `
-      <input id="editNombre" class="swal2-input" value="${producto.nombre}">
-      <input id="editPrecio" class="swal2-input" type="number" value="${producto.precio}">
-      <input id="editStock" class="swal2-input" type="number" value="${producto.stock}">
-    `,
-    confirmButtonText: "Guardar cambios",
-    showCancelButton: true,
-  }).then((res) => {
-    if (res.isConfirmed) {
-      updateDoc(doc(db, "productos", producto.id), {
-        nombre: document.getElementById("editNombre").value,
-        precio: Number(document.getElementById("editPrecio").value),
-        stock: Number(document.getElementById("editStock").value),
+    if (existe) {
+      carrito = carrito.map((item) => {
+        if (item.id === producto.id) {
+          producto.enCarrito += 1;
+          return { ...item, enCarrito: producto.enCarrito };
+        }
+        return item;
       });
+    } else carrito.push(producto);
+
+    producto.stock -= 1;
+    localStorage.setItem(
+      `stock-${producto.id}`,
+      JSON.stringify(producto.stock)
+    );
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+
+    mostrarMensaje(
+      `Se añadió con éxito: <b>${producto.nombre}</b>`,
+      "#ffffffe9",
+      "#000000fa"
+    );
+
+    if (!cartelEnCurso) {
+      setTimeout(() => {
+        mostrarIrAlCarrito("<b>¿Desea ir al Carrito?</b> ¡Haz Click Aquí!");
+      }, 4000);
+      cartelEnCurso = true;
     }
   });
 }
 
-// Iniciar automáticamente
-document.addEventListener("DOMContentLoaded", iniciarCatalogo);
+// ------------------------------ TOASTIFY ------------------------------ //
+function mostrarMensaje(mensaje, color, colorletra) {
+  const toastmsj = document.createElement("div");
+  toastmsj.innerHTML = mensaje;
+
+  Toastify({
+    node: toastmsj,
+    position: "right",
+    gravity: "bottom",
+    style: { background: color, color: colorletra },
+    duration: 2500,
+  }).showToast();
+}
+
+function mostrarIrAlCarrito(mensaje) {
+  const toastmsj = document.createElement("div");
+  toastmsj.innerHTML = mensaje;
+
+  Toastify({
+    node: toastmsj,
+    duration: 4000,
+    gravity: "top",
+    position: "center",
+    style: {
+      background: "#ffffffda",
+      width: "250px",
+      height: "75px",
+      lineHeight: "25px",
+      textAlign: "center",
+      borderRadius: "4px",
+      fontSize: "1.2rem",
+      fontWeight: "500",
+      color: "#000000fa",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+    },
+    stopOnFocus: true,
+    onClick: () => (window.location.href = "../pages/carrito.html"),
+  }).showToast();
+
+  cartelEnCurso = false;
+}
+
+// ------------------------------ INICIO ------------------------------ //
+document.addEventListener("DOMContentLoaded", () => {
+  cargarCatalogo();
+});

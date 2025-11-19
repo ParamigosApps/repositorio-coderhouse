@@ -11,7 +11,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyDkQEN7UMAVQQvOmWZjABmVYgVMMC4g9g0",
   authDomain: "appbar-24e02.firebaseapp.com",
   projectId: "appbar-24e02",
-  storageBucket: "appbar-24e02.appspot.com",
+  storageBucket: "appbar-24e02.firebasestorage.app",
   messagingSenderId: "339569084121",
   appId: "1:339569084121:web:be83a06de71c21f5bea0c8",
   measurementId: "G-GMHEKEPVJC",

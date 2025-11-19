@@ -850,7 +850,7 @@ header .navbar-brand {
 header .contadorCarrito {
   position: absolute;
   top: -4px;
-  right: -4px;
+  right: -6px;
   width: 18px;
   height: 18px;
   display: flex;
@@ -879,6 +879,51 @@ header .contadorCarrito:empty {
     transform: scale(1);
     opacity: 1;
   }
+}
+.carrito-table td:first-child {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.img-producto-carrito {
+  width: 75px;
+  height: 75px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.producto-info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  word-break: break-word;
+}
+
+.nombre-producto {
+  font-size: 0.9rem;
+}
+
+.cantidad {
+  font-size: 0.9rem;
+}
+
+.precio {
+  font-size: 0.7rem;
+}
+
+.subtotal {
+  font-size: 0.9rem;
+}
+
+#MontoTotalCarrito, .MontoTotalCarritoH2 {
+  font-size: 1.3rem;
+}
+
+.TituloCarrito {
+  font-size: 0.9rem;
+  padding: 4px;
 }
 
 /*# sourceMappingURL=style.css.map */

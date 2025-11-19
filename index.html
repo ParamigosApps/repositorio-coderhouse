@@ -33,12 +33,12 @@
       </div>
     </header>
 
-    <!-- PANEL CARRITO DESLIZABLE (UI principal del carrito) -->
+    <!-- PANEL CARRITO DESLIZABLE -->
     <aside id="carritoPanel" class="carrito-panel" aria-hidden="true">
       <div
         class="carrito-header d-flex justify-content-between align-items-center p-3 border-bottom"
       >
-        <h2 class="m-0">Tu Pedido</h2>
+        <h2 class="m-0">Tu pedido:</h2>
         <button
           id="cerrarCarrito"
           class="btn btn-light"
@@ -48,15 +48,31 @@
         </button>
       </div>
 
-      <div id="carritoItems" class="carrito-items p-3">
-        <!-- items renderizados por js/carrito.js -->
-      </div>
+      <!-- ENCABEZADO DEL CARRITO -->
+      <table class="carrito-table w-100">
+        <thead>
+          <tr>
+            <th class="text-start small">Productos añadidos</th>
+            <th class="TituloCarrito text-center" px-2 py-2>Precio</th>
+            <th class="TituloCarrito text-center" px-4 py-3>Subtotal</th>
+            <th class="TituloCarrito text-center" px-4 py-3>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="carritoItems">
+          <!-- items generados por JS -->
+        </tbody>
+      </table>
 
+      <!-- FOOTER -->
       <div
-        class="carrito-footer p-3 border-top d-flex justify-content-between align-items-center"
+        class="carrito-footer p-1 border-top d-flex justify-content-between align-items-center"
       >
-        <h3 class="m-0">Total: $<span id="totalCarrito">0</span></h3>
-        <button id="btnPagar" class="btn btn-success">Confirmar Pedido</button>
+        <h3 class="MontoTotalCarritoH2 m-0">
+          Total: <span id="MontoTotalCarrito">0</span>
+        </h3>
+        <button id="btnPagarCarrito" class="btn btn-success">
+          Confirmar Pedido
+        </button>
       </div>
     </aside>
 
@@ -320,10 +336,11 @@
     <!-- Módulos JS (tu lógica) -->
     <script type="module" src="js/cargarCatalogo.js"></script>
     <script type="module" src="js/cargarEventos.js"></script>
-    <script type="module" src="js/utils.js"></script>
     <script type="module" src="js/entradas.js"></script>
     <script type="module" src="js/carrito.js"></script>
+    <script type="module" src="js/finalizarCompra.js"></script>
     <script type="module" src="js/iniciar-sesion.js"></script>
+    <script type="module" src="js/utils.js"></script>
     <script type="module" src="js/index.js"></script>
   </body>
 </html>

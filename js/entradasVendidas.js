@@ -174,8 +174,6 @@ export async function mostrarEntradasVendidas() {
       eventoContainer.appendChild(detalleContainer);
       contenedorEntradasVendidas.appendChild(eventoContainer);
     }
-
-    entradasCargadas = true;
   } catch (err) {
     console.error("❌ Error al obtener entradas:", err);
     contenedorEntradasVendidas.innerHTML = `<p class="text-danger">Error al cargar las entradas.</p>`;

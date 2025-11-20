@@ -593,10 +593,5 @@ export async function obtenerDatosBancarios() {
   if (docSnap.exists()) return docSnap.data();
 
   // Valores por defecto si no están guardados en Firestore
-  return {
-    nombreBanco: "Banco Ejemplo",
-    cbuBanco: "1234567890123456789012",
-    aliasBanco: "MI.ALIAS.BANCO",
-    titularBanco: "Juan Pérez",
-  };
+  return {};
 }

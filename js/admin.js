@@ -3,16 +3,11 @@ import { db, auth } from "./firebase.js";
 import AdminProductos from "./admin-productos.js";
 import { formatearFecha } from "./utils.js";
 import { cargarCatalogo } from "./cargarCatalogo.js";
-import {
-  getStorage,
-  ref,
-  uploadBytes,
-  getDownloadURL,
-} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js";
 
 import {
   addDoc,
   setDoc,
+  getDoc,
   getDocs,
   deleteDoc,
   collection,
@@ -45,8 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // PRODUCTOS
   const btnAnadirProducto = document.getElementById("btnAnadirProducto");
   const formCrearProducto = document.getElementById("form-crear-producto");
-  const mensajeErrorProducto = document.getElementById("mensajeErrorProducto");
-  const contenedorCatalogo = document.getElementById("contenedorCatalogo");
 
   // CREAR EVENTOS
   const btnCrearEvento = document.getElementById("btnCrearEvento");
@@ -56,9 +49,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const eventosVigentes = document.getElementById("eventosVigentes");
   const mensajeError = document.getElementById("mensajeError");
 
-  // METODOS DE PAGO
-  const btnMetodosDePago = document.getElementById("btnMetodosDePago");
-  const formMetodosDePago = document.getElementById("formMetodosDePago");
+
+  function ObtenerEntradasPendientes(){
+    
+        const pendientesSnap = await getDocs(
+      query(
+        collection(db, "entradasPendientes"),
+        where("eventoId", "==", eventoId),
+        where("usuarioId", "==", usuarioId)
+      )
+    );
+    const pendientes = pendientesSnap.docs.reduce(
+      (acc, d) => acc + (d.data().cantidad || 1),
+      0
+    );
+  }
+  const contadorEntradasPendientes = document.getElementById(
+    "contadorEntradasPendientes"
+  );
   const btnGuardarDatosBancarios = document.getElementById(
     "btnGuardarDatosBancarios"
   );
@@ -90,12 +98,6 @@ document.addEventListener("DOMContentLoaded", () => {
     contenedorEntradasPendientes.style.display = "none";
     formCrearEvento.style.display = "none";
     contenedorEntradasVendidas.style.display = "none";
-  });
-
-  // Toggle eventos vigentes
-  btnMetodosDePago.addEventListener("click", () => {
-    formMetodosDePago.style.display =
-      formMetodosDePago.style.display === "none" ? "block" : "none";
   });
 
   // Toggle entradas pendientes
@@ -385,12 +387,39 @@ function escapeHtml(text) {
 }
 
 // --------------------------------- GUARDAR DATOS BANCARIOS ---------------------------------
+
+async function MostrarDatosBancariosInput() {
+  const docRef = doc(db, "configuracion", "datosBancarios");
+  const docSnap = await getDoc(docRef);
+
+  if (!docSnap.exists()) return;
+
+  const { nombreBanco, cbuBanco, aliasBanco, titularBanco } = docSnap.data();
+
+  const nombreBancoInput = document.getElementById("nombreBanco");
+  const cbuBancoInput = document.getElementById("cbuBanco");
+  const aliasBancoInput = document.getElementById("aliasBanco");
+  const titularBancoInput = document.getElementById("titularBanco");
+
+  if (nombreBanco) nombreBancoInput.value = nombreBanco;
+  else nombreBancoInput.placeholder = "Banco Ejemplo";
+
+  if (cbuBanco) cbuBancoInput.value = cbuBanco;
+  else cbuBancoInput.placeholder = "1234567890123456789012";
+
+  if (aliasBanco) aliasBancoInput.value = aliasBanco;
+  else aliasBancoInput.placeholder = "MI.ALIAS.BANCO";
+
+  if (titularBanco) titularBancoInput.value = titularBanco;
+  else aliasBancoInput.placeholder = "Juan Pérez";
+}
+
+MostrarDatosBancariosInput();
 async function guardarDatosBancarios() {
   const nombreBanco = document.getElementById("nombreBanco").value;
   const cbuBanco = document.getElementById("cbuBanco").value;
   const aliasBanco = document.getElementById("aliasBanco").value;
   const titularBanco = document.getElementById("titularBanco").value;
-
   await setDoc(doc(db, "configuracion", "datosBancarios"), {
     nombreBanco,
     cbuBanco,
@@ -398,5 +427,17 @@ async function guardarDatosBancarios() {
     titularBanco,
   });
 
-  alert("Datos bancarios guardados ✅");
+  Swal.fire({
+    icon: "success",
+    title: "Datos bancarios guardados",
+    html: `
+      <div style="text-align:left;">
+        <p><strong>Banco:</strong> ${escapeHtml(nombreBanco)}</p>
+        <p><strong>CBU:</strong> ${escapeHtml(cbuBanco)}</p>
+        <p><strong>Alias:</strong> ${escapeHtml(aliasBanco)}</p>
+        <p><strong>Titular:</strong> ${escapeHtml(titularBanco)}</p>
+      </div>
+    `,
+    confirmButtonText: "Aceptar",
+  });
 }

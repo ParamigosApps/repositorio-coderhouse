@@ -1,4 +1,6 @@
 import { auth, db } from "./firebase.js";
+import { cargarEntradas } from "./entradas.js";
+
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
 import {
   GoogleAuthProvider,
@@ -57,6 +59,7 @@ async function loginWithGoogle() {
     // Guardar en localStorage y mostrar usuario
     localStorage.setItem("userName", user.displayName || user.email);
     mostrarUsuario(user.displayName || user.email);
+    cargarEntradas();
   } catch (err) {
     console.error(err);
     Swal.fire("Error", err.message, "error");

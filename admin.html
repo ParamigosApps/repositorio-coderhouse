@@ -55,41 +55,17 @@
             </h2>
             <div id="collapseEntradasAdmin" class="accordion-collapse collapse">
               <div class="accordion-body">
-                <div class="d-grid gap-2 mb-3">
-                  <button class="btn btn-outline-dark" id="btnEntradasVendidas">
-                    Ver entradas vendidas
-                  </button>
-                  <div
-                    id="containerEntradasVendidas"
-                    style="display: none"
-                  ></div>
-
-                  <button
-                    class="btn btn-outline-dark"
-                    id="btnEntradasPendientes"
-                  >
-                    Entradas pendientes de aprobación
-                  </button>
-                  <div id="contenedorEntradasPendientes" style="display: none">
-                    <hr class="my-4" />
-                    <h6 class="fw-semibold mb-1">
-                      Entradas pendientes de aprobación
-                    </h6>
-                    <p class="text-danger mb-3" style="font-size: 0.7rem">
-                      ¡Atención! Una vez que el usuario envíe el comprobante de
-                      pago, el administrador deberá aprobar la entrada.
-                    </p>
-                    <section id="EntradasPendientes"></section>
-                  </div>
-
+                <div class="d-grid gap-2 mb-1">
+                  <!--  Crear eventos -->
                   <button class="btn btn-outline-dark" id="btnCrearEvento">
-                    Crear evento
+                    Nuevo evento
                   </button>
-                  <form id="form-crear-evento" style="display: none">
-                    <hr class="my-4" />
-                    <h6 class="fw-semibold mb-3">Crear evento</h6>
+                  <form id="form-crear-evento" class="collapse">
+                    <h6 class="mb-3 mt-3 text-muted">
+                      Ingresa los datos para el nuevo evento...
+                    </h6>
                     <div class="mb-3">
-                      <label for="nombreEvento" class="form-label"
+                      <label for="nombreEvento" class="form-label fw-semibold"
                         >Nombre del evento
                         <span style="color: red">*</span></label
                       >
@@ -102,7 +78,7 @@
                       />
                     </div>
                     <div class="mb-3">
-                      <label for="fechaEvento" class="form-label"
+                      <label for="fechaEvento" class="form-label fw-semibold"
                         >Fecha <span style="color: red">*</span></label
                       >
                       <input
@@ -113,7 +89,7 @@
                       />
                     </div>
                     <div class="mb-3">
-                      <label for="precioEvento" class="form-label"
+                      <label for="precioEvento" class="form-label fw-semibold"
                         >Valor de la entrada (opcional)</label
                       >
                       <input
@@ -124,7 +100,7 @@
                       />
                     </div>
                     <div class="mb-3">
-                      <label for="lugarEvento" class="form-label"
+                      <label for="lugarEvento" class="form-label fw-semibold"
                         >Lugar <span style="color: red">*</span></label
                       >
                       <input
@@ -136,10 +112,13 @@
                       />
                     </div>
                     <div class="mb-3 horario-container">
-                      <label class="form-label"
+                      <label class="form-label fw-semibold"
                         >Horario <span style="color: red">*</span></label
                       >
-                      <div class="inputs d-flex gap-2">
+                      <div class="inputs d-flex gap-2 align-items-center">
+                        <label for="horarioDesdeEvento" class="form-label mb-0"
+                          >Desde:</label
+                        >
                         <input
                           type="text"
                           id="horarioDesdeEvento"
@@ -147,6 +126,11 @@
                           placeholder="22:00"
                           required
                         />
+                        <label
+                          for="horarioHastaEvento"
+                          class="form-label mb-0 ms-2"
+                          >Hasta:</label
+                        >
                         <input
                           type="text"
                           id="horarioHastaEvento"
@@ -157,7 +141,9 @@
                       </div>
                     </div>
                     <div class="mb-3">
-                      <label for="descripcionEvento" class="form-label"
+                      <label
+                        for="descripcionEvento"
+                        class="form-label fw-semibold"
                         >Descripción <span style="color: red">*</span></label
                       >
                       <textarea
@@ -171,7 +157,9 @@
                       <div class="form-text">Máx. 180 caracteres</div>
                     </div>
                     <div class="mb-3">
-                      <label for="entradasPorUsuarioEvento" class="form-label"
+                      <label
+                        for="entradasPorUsuarioEvento"
+                        class="form-label fw-semibold"
                         >Cantidad de entradas por usuario
                         <span style="color: red">*</span></label
                       >
@@ -199,19 +187,77 @@
                     ></p>
                     <hr class="my-4" />
                   </form>
-
+                  <!--  Eventos existentes -->
                   <button
                     type="button"
                     id="btnMostrarEventos"
                     class="btn btn-outline-dark"
                   >
-                    Ver eventos existentes
+                    Eventos creados
                   </button>
-                  <div id="eventosVigentes" style="display: none">
-                    <hr class="my-4" />
-                    <h6 class="fw-semibold mb-3">Eventos vigentes</h6>
+
+                  <div id="eventosVigentes" class="collapse">
+                    <!-- <hr class="my-4" /> -->
+                    <h6 class="mb-3 mt-3 text-muted">Eventos vigentes</h6>
                     <div id="listaEventos" class="mt-2"></div>
                   </div>
+                  <hr
+                    class="mx-auto my-2 d-block"
+                    style="
+                      width: 90%;
+                      height: 3px;
+                      background: linear-gradient(
+                        90deg,
+                        #ffffff,
+                        #000000,
+                        #ffffff
+                      );
+                      border: none;
+                      border-radius: 6px;
+                      box-shadow: 0 2px 6px rgba(175, 0, 45, 0.15);
+                    "
+                    aria-hidden="true"
+                  />
+                  <!--  Entradas pendientes -->
+
+                  <button
+                    id="btnEntradasPendientes"
+                    class="btn btn-outline-dark position-relative"
+                  >
+                    Entradas pendientes de aprobación
+                    <div
+                      id="iconoEntradasPendientes"
+                      class="position-absolute top-0 end-0 translate-middle p-1 bg-danger rounded-circle"
+                    >
+                      <span id="contadorEntradasPendientes" class="text-white"
+                        >0</span
+                      >
+                    </div>
+                  </button>
+                  <div id="contenedorEntradasPendientes" class="collapse">
+                    <h6 class="fw-semibold mb-3 mt-3">
+                      Entradas pendientes de aprobación...
+                    </h6>
+                    <p
+                      class="text-danger mb-3 text-center"
+                      style="font-size: 0.7rem"
+                    >
+                      ¡Atención! Una vez que el usuario envíe el comprobante de
+                      pago, el administrador deberá aprobar la entrada.
+                    </p>
+                    <section id="EntradasPendientes"></section>
+                  </div>
+                  <!-- Entradas vendidas -->
+                  <button
+                    class="btn btn-outline-dark collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#containerEntradasVendidas"
+                    id="btnEntradasVendidas"
+                  >
+                    Ver entradas vendidas
+                  </button>
+                  <div id="containerEntradasVendidas" class="collapse"></div>
                 </div>
               </div>
             </div>
@@ -238,12 +284,16 @@
                 <button
                   class="btn btn-outline-dark w-100 mb-3"
                   id="btnAnadirProducto"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#form-crear-producto"
                 >
                   Añadir producto
                 </button>
-                <form id="form-crear-producto" style="display: none">
-                  <hr class="my-4" />
-                  <h6 class="fw-semibold mb-3">Nuevo producto</h6>
+
+                <form id="form-crear-producto" class="collapse">
+                  <h6 class="fw-semibold mb-3 mt-3 text-muted">
+                    Ingresa información del nuevo producto..
+                  </h6>
                   <label class="form-label"
                     >Nombre <span style="color: red">*</span></label
                   >
@@ -253,6 +303,7 @@
                     class="form-control mb-3"
                     required
                   />
+
                   <label class="form-label"
                     >Precio <span style="color: red">*</span></label
                   >
@@ -262,6 +313,7 @@
                     class="form-control mb-3"
                     required
                   />
+
                   <label class="form-label"
                     >Descripción <span style="color: red">*</span></label
                   >
@@ -277,6 +329,7 @@
                       >0/120 caracteres</small
                     >
                   </div>
+
                   <label class="form-label"
                     >Stock <span style="color: red">*</span></label
                   >
@@ -287,6 +340,7 @@
                     min="0"
                     required
                   />
+
                   <label class="form-label"
                     >Categoría <span style="color: red">*</span></label
                   >
@@ -302,6 +356,7 @@
                     <option value="Promos">Promos</option>
                     <option value="Accesorios">Accesorios</option>
                   </select>
+
                   <label class="form-label"
                     >Imagen <span style="color: red">*</span></label
                   >
@@ -312,6 +367,7 @@
                     accept="image/*"
                     required
                   />
+
                   <div class="form-check mb-3">
                     <input
                       type="checkbox"
@@ -320,6 +376,7 @@
                     />
                     <label class="form-check-label">Destacado</label>
                   </div>
+
                   <button
                     type="button"
                     id="btnGuardarProducto"
@@ -327,6 +384,7 @@
                   >
                     Guardar producto
                   </button>
+
                   <p
                     id="mensajeErrorProducto"
                     class="text-danger mt-2 fw-semibold"
@@ -335,8 +393,24 @@
                   <hr class="my-4" />
                 </form>
 
-                <h6 class="fw-semibold mt-4 mb-2">Productos cargados</h6>
-                <div id="contenedorCatalogo"></div>
+                <!-- Ver productos cargados -->
+                <button
+                  class="btn btn-outline-dark w-100 mb-3"
+                  id="btnVerProductosCargados"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseProductosCargados"
+                >
+                  Ver productos cargados
+                </button>
+
+                <div class="collapse" id="collapseProductosCargados">
+                  <h6 class="fw-semibold mt-2 mb-4 text-muted">
+                    Productos cargados...
+                  </h6>
+                  <div id="contenedorCatalogo">
+                    <!-- contenido que se carga en JS -->
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -361,12 +435,21 @@
               <div class="accordion-body d-grid gap-2">
                 <button class="btn btn-outline-dark">Usuarios</button>
                 <button class="btn btn-outline-dark">Estadísticas</button>
-                <button class="btn btn-outline-dark" id="btnMetodosDePago">
+                <button
+                  class="btn btn-outline-dark"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#formMetodosDePago"
+                  id="btnMetodosDePago"
+                >
                   Métodos de pago
                 </button>
-                <div id="formMetodosDePago" style="display: none">
-                  <hr class="my-4" />
-                  <label class="form-label small mb-1 mt-2"
+
+                <div id="formMetodosDePago" class="collapse">
+                  <h6 class="mt-3 mb-3 text-muted">
+                    Datos del banco donde recibir...
+                  </h6>
+                  <label class="form-label collapse small mb-1 mt-4"
                     >Banco <span style="color: red">*</span></label
                   >
                   <input

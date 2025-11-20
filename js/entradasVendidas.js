@@ -9,29 +9,11 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { formatearFecha } from "./utils.js";
 
-const btnEntradasVendidas = document.getElementById("btnEntradasVendidas");
 const contenedorEntradasVendidas = document.getElementById(
   "containerEntradasVendidas"
 );
-const EntradasVendidas = document.getElementById("containerEntradasVendidas");
-const ContenedorEntradasPendientes =
-  document.getElementById("EntradasPendientes");
-const eventosVigentes = document.getElementById("eventosVigentes");
-const formCrearEvento = document.getElementById("form-crear-evento");
+
 let detallesContainers = [];
-
-// Toggle global contenedor
-btnEntradasVendidas.addEventListener("click", () => {
-  if (!contenedorEntradasVendidas) return;
-  contenedorEntradasVendidas.style.display =
-    contenedorEntradasVendidas.style.display === "none" ? "block" : "none";
-
-  ContenedorEntradasPendientes.style.display = "none";
-  formCrearEvento.style.display = "none";
-  eventosVigentes.style.display = "none";
-
-  mostrarEntradasVendidas();
-});
 
 // Función principal
 export async function mostrarEntradasVendidas() {
@@ -179,3 +161,5 @@ export async function mostrarEntradasVendidas() {
     contenedorEntradasVendidas.innerHTML = `<p class="text-danger">Error al cargar las entradas.</p>`;
   }
 }
+
+mostrarEntradasVendidas();

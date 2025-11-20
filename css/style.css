@@ -213,7 +213,7 @@ header {
   justify-content: space-between;
   align-items: flex-start;
   width: 100%;
-  height: 120px;
+  height: 130px;
   background: #fff;
   border-radius: 12px;
   padding: 4px;
@@ -233,12 +233,16 @@ header {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 .product-card h3 {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+  color: #080808;
   font-weight: bold;
   padding-top: 12px;
   height: 30px;
 }
 
+/* ===============================
+ * PRODUCT CARD INFORMATION
+ * =============================== */
 .product-info {
   display: flex;
   flex-direction: column;
@@ -252,7 +256,7 @@ header {
   padding-left: 4px;
 }
 .product-info p {
-  font-size: 0.95rem;
+  font-size: 0.6rem;
   color: #555;
   height: 36px;
   padding-left: 4px;
@@ -260,25 +264,33 @@ header {
 .product-info h5 {
   font-size: 1rem;
   font-weight: 500;
-  color: #222;
+  color: #14863c;
   height: 32px;
-  width: 80%;
+  width: 60%;
+  padding-left: 16px;
 }
 
+/* ===============================
+ * PRODUCT STATUS STYLES
+ * =============================== */
 .producto-sin-stock {
-  opacity: 0.5;
+  opacity: 0.45;
   pointer-events: none;
 }
 
+/* Badge "SIN STOCK" */
 .sin-stock {
   position: absolute;
   top: 10px;
   left: 10px;
-  background: rgba(255, 45, 3, 0.8784313725);
+  background-color: rgba(255, 45, 3, 0.88);
   color: #fff;
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .card {
@@ -322,6 +334,14 @@ header {
 .card-body .btn-sm:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+#precio-badge {
+  font-size: 1.2rem;
+  padding: 0.4em 0.6em;
+  margin-bottom: 8px;
+  font-weight: 500;
+  background-color: #242;
 }
 
 div:where(.swal2-container) {
@@ -714,13 +734,17 @@ div:where(.swal2-container) {
   border: 1px solid #ccc;
 }
 
-#iconoEntradasPendientes {
+#iconoEntradasPendientes, #iconoEventosDisponibles {
   width: 20px;
   height: 20px;
   font-size: 12px;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+#iconoEventosDisponibles {
+  left: 315px !important;
 }
 
 /* carrito panel */

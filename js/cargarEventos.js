@@ -30,8 +30,14 @@ export async function cargarEventos() {
       return;
     }
 
+    // ACTUALIZAR CONTADOR DE EVENTOS DISPONIBLES
     console.log(`📦 Eventos encontrados: ${snapshot.size}`);
+    let contadorEventosDisponibles = document.getElementById(
+      "contadorEventosDisponibles"
+    );
+    contadorEventosDisponibles.textContent = snapshot.size;
 
+    console.log(`📦 Eventos: ${contadorEventosDisponibles}`);
     snapshot.forEach((docSnap) => {
       const e = docSnap.data();
       const id = docSnap.id;
@@ -39,7 +45,8 @@ export async function cargarEventos() {
       const div = document.createElement("div");
       div.className = "card mb-3 shadow-sm p-3";
 
-      let valorEntrada = !e.precio || e.precio < 1 ? "Gratis" : `$${e.precio}`;
+      let valorEntrada =
+        !e.precio || e.precio < 1 ? "Entrada gratis" : `$${e.precio}`;
 
       div.innerHTML = `
         <h4 class="fw-bold">${e.nombre || "Sin nombre"}</h4>

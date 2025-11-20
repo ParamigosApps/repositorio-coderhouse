@@ -211,30 +211,45 @@ function renderizarListaProductos(productos) {
 
     col.innerHTML = `
       <div class="card h-100 shadow-sm">
-        <div style="height:160px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#f7f7f7">
-          <img src="${
-            p.imagen || "../Assets/img/placeholder.png"
-          }" style="width:100%;height:100%;object-fit:cover">
-        </div>
-        <div class="card-body d-flex flex-column">
-          ${
-            p.destacado
-              ? `<span class="badge bg-warning text-dark mb-2">DESTACADO</span>`
-              : ""
-          }
-          <h5>${p.nombre}</h5>
-          <p class="small text-muted">${p.categoria} – Stock ${p.stock}</p>
-          <h6>$${p.precio}</h6>
-          <div class="mt-auto d-flex gap-2">
-            <button class="btn btn-outline-primary btn-sm flex-fill" onclick="window.__editProducto('${
-              p.id
-            }')">Editar</button>
-            <button class="btn btn-outline-danger btn-sm flex-fill" onclick="window.__deleteProducto('${
-              p.id
-            }', '${p.nombre}', '${p.imagenPath ?? ""}')">Eliminar</button>
-          </div>
-        </div>
+      <div style="height:160px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#f7f7f7">
+      <img src="${
+        p.imagen || "../Assets/img/placeholder.png"
+      }" style="width:100%;height:100%;object-fit:cover">
       </div>
+      <div class="card-body d-flex flex-column">
+      ${
+        p.destacado
+          ? `<span class="badge bg-warning text-dark mb-2">DESTACADO</span>`
+          : ""
+      }
+      <h5>${p.nombre}</h5>
+      <p class="small text-muted">
+      Categoria: <span class="badge bg-info text-dark">${p.categoria}   </span>
+      - Stock: <span class="badge bg-success text-white">${p.stock}</span>
+      
+      </p>
+      <p class="small text-muted">Descripción: ${
+        p.descripcion || "Sin descripción"
+      }</p>
+      
+      <div class="my-1 text-muted">
+      Precio al público: <span id= "precio-badge" class="badge bg-primary">$${
+        p.precio
+      }</span>
+      </div>
+       
+      
+      <div class="mt-auto d-flex gap-2">
+      <button class="btn btn-outline-primary btn-sm flex-fill" onclick="window.__editProducto('${
+        p.id
+      }')">Editar</button>
+      <button class="btn btn-outline-danger btn-sm flex-fill" onclick="window.__deleteProducto('${
+        p.id
+      }', '${p.nombre}', '${p.imagenPath ?? ""}')">Eliminar</button>
+      </div>
+      </div>
+      </div>
+      
     `;
 
     row.appendChild(col);

@@ -235,6 +235,7 @@ export function cargarEntradasPendientes() {
         </div>
       `;
       actualizarContadorEntradasPendientes();
+
       // APROBAR
       div.querySelector(".btn-aprobar")?.addEventListener("click", async () => {
         try {

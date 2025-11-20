@@ -164,8 +164,18 @@
               data-bs-parent="#accordionCliente"
             >
               <div class="accordion-body d-grid gap-2">
-                <button class="btn btn-outline-dark" id="btnProximosEventos">
+                <button
+                  class="btn btn-outline-dark position-relative"
+                  id="btnProximosEventos"
+                >
                   Ver próximos eventos
+
+                  <span
+                    id="iconoEventosDisponibles"
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                  >
+                    <span id="contadorEventosDisponibles">0</span>
+                  </span>
                 </button>
 
                 <div id="containerEventos" class="container my-3 d-none">

@@ -283,7 +283,11 @@ Titular: ${datos.titularBanco}
             customClass: { confirmButton: "btn btn-dark" },
           });
         }
+      } else if (afterCopy.isDenied) {
+        console.log("cancelo la orden con boton");
+        return;
       }
+
       return Swal.fire("Cancelado", "No se generó ninguna orden.", "info");
     }
 

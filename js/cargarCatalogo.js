@@ -94,19 +94,25 @@ export async function cargarCatalogo() {
     // Render inicial: todo el catálogo
     renderizarCatalogo("Todos");
 
+    // Mensaje: Filtrando por: XXXXX
+    let mensaje = document.getElementById("mensajeFiltro");
     // Vincular botones de categorías
     const botonesCategorias = document.querySelectorAll(".btnCategorias");
     botonesCategorias.forEach((btn) => {
       btn.addEventListener("click", () => {
         const categoria = btn.dataset.categoria;
         renderizarCatalogo(categoria);
+        mensaje.innerHTML = `🔎 Filtrado por: <strong>${categoria}</strong>`;
       });
     });
 
     // Botón catálogo completo
     const btnCatalogoCompleto = document.getElementById("btnCatalogoCompleto");
     if (btnCatalogoCompleto) {
-      btnCatalogoCompleto.addEventListener("click", () =>
+      btnCatalogoCompleto.addEventListener(
+        "click",
+        () =>
+          (mensaje.innerHTML = `🔎 Mostrando: <strong>Catálogo completo</strong>`),
         renderizarCatalogo("Todos")
       );
     }

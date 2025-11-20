@@ -26,7 +26,6 @@ import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.e
 const $ = (sel) => document.querySelector(sel);
 
 // elementos
-const btnMostrarFormProducto = $("#btnAnadirProducto");
 const formCrearProducto = $("#form-crear-producto");
 const btnGuardarProducto = $("#btnGuardarProducto");
 const mensajeErrorProducto = $("#mensajeErrorProducto");
@@ -48,24 +47,8 @@ let actualizarContador = null;
 
 // init
 export function initAdminProductos() {
-  if (
-    !btnMostrarFormProducto ||
-    !formCrearProducto ||
-    !btnGuardarProducto ||
-    !contenedorCatalogo
-  ) {
-    console.warn("Admin Productos: faltan elementos del DOM");
-    return;
-  }
-
-  btnMostrarFormProducto.addEventListener("click", () => {
-    formCrearProducto.style.display =
-      formCrearProducto.style.display === "none" ? "block" : "none";
-    setFormCreateMode();
-    formCrearProducto.scrollIntoView({ behavior: "smooth", block: "center" });
-  });
-
-  btnGuardarProducto.addEventListener("click", guardarProducto);
+  if (btnGuardarProducto)
+    btnGuardarProducto.addEventListener("click", guardarProducto);
 
   // Contador de caracteres para descripción
   if (inputDescripcion && contadorDescripcion) {
@@ -214,6 +197,7 @@ function escucharProductos() {
 
 // render
 function renderizarListaProductos(productos) {
+  if (!contenedorCatalogo) return;
   contenedorCatalogo.innerHTML = "";
   if (!productos.length)
     return (contenedorCatalogo.innerHTML = `<p>No hay productos</p>`);
@@ -309,15 +293,19 @@ window.__editProducto = async (id) => {
 function setFormCreateMode() {
   editingProductId = null;
   editingProductImagePath = null;
-  formCrearProducto.reset();
-  btnGuardarProducto.textContent = "Guardar producto";
-  btnGuardarProducto.classList.remove("btn-primary");
-  btnGuardarProducto.classList.add("btn-success");
-  mensajeErrorProducto.style.display = "none";
-  // Actualizar contador después de resetear
-  if (actualizarContador) {
-    actualizarContador();
+
+  if (formCrearProducto) formCrearProducto.reset();
+  if (btnGuardarProducto) {
+    btnGuardarProducto.textContent = "Guardar producto";
+    btnGuardarProducto.classList.remove("btn-primary");
+    btnGuardarProducto.classList.add("btn-success");
   }
+  if (mensajeErrorProducto) mensajeErrorProducto.style.display = "none";
+
+  if (actualizarContador) actualizarContador();
 }
 
-export default { initAdminProductos };
+document.addEventListener("DOMContentLoaded", () => {
+  setFormCreateMode(); // ahora el formulario ya existe
+  initAdminProductos(); // inicializa listeners y contadores
+});

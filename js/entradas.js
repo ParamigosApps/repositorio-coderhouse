@@ -2,6 +2,7 @@
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
 import { generarQr } from "./generarQr.js";
 import { db, auth } from "./firebase.js";
+
 import { formatearFecha } from "./utils.js";
 import {
   collection,
@@ -18,13 +19,9 @@ import {
   updateDoc,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
-/**
- * Crear entrada en Firestore
- * @param {string} eventoId
- * @param {object} entradaData
- * @param {boolean} [pagado=true] - true = pagado, false = pendiente
- */
+const contadorElem = document.getElementById("contadorEntradasPendientes");
 
+// -------------------------- CREAR ENTRADA --------------------------
 export async function crearEntrada(
   eventoId,
   entradaData,
@@ -81,12 +78,7 @@ export async function crearEntrada(
     Swal.fire("Error", "No se pudo guardar la entrada.", "error");
   }
 }
-
-/**
-//               Pedir entrada (gratuita, Mercado Pago o Transferencia)
- * @param {string} eventoId
- * @param {object} e - datos del evento
- */
+// -------------------------- PEDIR ENTRADA --------------------------
 export async function pedirEntrada(eventoId, e) {
   try {
     // --------------------------- VALIDAR LOGIN ---------------------------
@@ -214,6 +206,9 @@ export async function pedirEntrada(eventoId, e) {
     }
 
     // --------------------------- PAGO POR TRANSFERENCIA ---------------------------
+    const contacto = await ObtenerContacto();
+    let mensaje = "";
+
     if (isDenied) {
       const datos = await obtenerDatosBancarios();
       const cuentaBancaria = `
@@ -242,22 +237,10 @@ Titular: ${datos.titularBanco}
         buttonsStyling: false,
       });
 
-      if (result.isConfirmed) {
-        const mensaje = encodeURIComponent(
-          `¡Hola, soy ${usuarioNombre}! y solicité ${cantidad} entrada(s) del evento "${e.nombre}" a través de la web. Adjunto comprobante de pago.`
-        );
-        window.open(`https://wa.me/541121894427?text=${mensaje}`, "_blank");
-        await crearSolicitudPendiente(eventoId, usuarioId, entradaBase);
-        return Swal.fire(
-          "Solicitud enviada",
-          "Se registró la solicitud y puedes compartir el comprobante ahora.",
-          "success"
-        );
-      }
-
+      let afterCopy;
       if (result.isDenied) {
         await navigator.clipboard.writeText(cuentaBancaria);
-        const afterCopy = await Swal.fire({
+        afterCopy = await Swal.fire({
           title: "Datos copiados ✔️",
           text: "¿Qué deseas hacer ahora?",
           showCancelButton: true,
@@ -270,23 +253,37 @@ Titular: ${datos.titularBanco}
           },
           buttonsStyling: false,
         });
+      }
 
-        if (afterCopy.isConfirmed) {
-          const mensaje = encodeURIComponent(
+      // ENVIAR AL CLIENTE AL WHATSAPP
+      if (result.isConfirmed || afterCopy.isConfirmed) {
+        if (contacto) {
+          mensaje = encodeURIComponent(
             `¡Hola, soy ${usuarioNombre}! y solicité ${cantidad} entrada(s) del evento "${e.nombre}" a través de la web. Adjunto comprobante de pago.`
           );
-          window.open(`https://wa.me/541121894427?text=${mensaje}`, "_blank");
+
+          window.open(
+            `https://wa.me/${contacto.whatsappContacto}?text=${mensaje}`,
+            "_blank"
+          );
+
           await crearSolicitudPendiente(eventoId, usuarioId, entradaBase);
           return Swal.fire(
             "Solicitud enviada",
-            "Ya puedes enviar el comprobante 🙂",
+            "Se registró la solicitud y puedes compartir el comprobante ahora.",
             "success"
           );
+        } else {
+          await crearSolicitudPendiente(eventoId, usuarioId, entradaBase);
+          return Swal.fire({
+            title: "Error al redirigir a Whatsapp",
+            text: "Su pedido fue generado. Comuniquese con un administrador.",
+            showConfirmButton: true,
+            confirmButtonText: "Salir",
+            customClass: { confirmButton: "btn btn-dark" },
+          });
         }
-
-        return Swal.fire("Cancelado", "No se generó ninguna orden.", "info");
       }
-
       return Swal.fire("Cancelado", "No se generó ninguna orden.", "info");
     }
 
@@ -321,7 +318,7 @@ Titular: ${datos.titularBanco}
   }
 }
 
-//                Escuchar pagos pendientes para usuario
+// -------------------------- ESCUCHAR PAGOS PENDIENTES --------------------------
 export function escucharEntradasPendientes(usuarioId, callback) {
   const q = query(
     collection(db, "pagosProcesados"),
@@ -336,7 +333,7 @@ export function escucharEntradasPendientes(usuarioId, callback) {
     });
   });
 }
-//               Crear solicitudes pendientes
+// -------------------------- CREAR SOLICITUDES PENDIENTES --------------------------
 export async function crearSolicitudPendiente(
   eventoId,
   usuarioId,
@@ -381,7 +378,25 @@ export async function crearSolicitudPendiente(
     console.error("Error creando solicitud pendiente:", err);
   }
 }
-//               Registrar transferencia pendiente manualmente
+
+// -------------------------- ACTUALIZAR CONTADOR DE ENTRADAS PENDIENTES DE APROBACION --------------------------
+export async function actualizarContadorEntradasPendientes() {
+  const pendientesSnap = await getDocs(
+    query(collection(db, "entradasPendientes"))
+  );
+
+  const cantidadTotal = pendientesSnap.docs.reduce(
+    (acc, doc) => acc + (doc.data().cantidad || 1),
+    0
+  );
+
+  const contadorElem = document.getElementById("contadorEntradasPendientes");
+
+  if (contadorElem) contadorElem.textContent = cantidadTotal;
+}
+actualizarContadorEntradasPendientes();
+
+// -------------------------- REGISTRAR TRANSFERENCIAS PENDIENTES --------------------------
 export async function registrarTransferencia(
   usuario,
   eventoId,
@@ -594,4 +609,14 @@ export async function obtenerDatosBancarios() {
 
   // Valores por defecto si no están guardados en Firestore
   return {};
+}
+export async function ObtenerContacto() {
+  const docRef = doc(db, "configuracion", "social");
+  const docSnap = await getDoc(docRef);
+
+  if (!docSnap.exists()) return null;
+
+  const { whatsappContacto, instagramContacto, tiktokContacto } =
+    docSnap.data();
+  return { whatsappContacto, instagramContacto, tiktokContacto };
 }

@@ -1,8 +1,9 @@
 // /js/admin.js
 import { db, auth } from "./firebase.js";
-import AdminProductos from "./admin-productos.js";
-import { formatearFecha } from "./utils.js";
+import { initAdminProductos } from "./admin-productos.js";
+import { actualizarContadorEntradasPendientes } from "./entradas.js";
 import { cargarCatalogo } from "./cargarCatalogo.js";
+import { formatearFecha } from "./utils.js";
 
 import {
   addDoc,
@@ -27,94 +28,14 @@ const esAdmin = localStorage.getItem("esAdmin") === "true";
 // DOM Ready
 // -----------------------------
 document.addEventListener("DOMContentLoaded", () => {
-  const contenedorEntradasVendidas = document.getElementById(
-    "containerEntradasVendidas"
-  );
-  const btnEntradasPendientes = document.getElementById(
-    "btnEntradasPendientes"
-  );
-  const contenedorEntradasPendientes = document.getElementById(
-    "contenedorEntradasPendientes"
-  );
-
-  // PRODUCTOS
-  const btnAnadirProducto = document.getElementById("btnAnadirProducto");
-  const formCrearProducto = document.getElementById("form-crear-producto");
-
   // CREAR EVENTOS
-  const btnCrearEvento = document.getElementById("btnCrearEvento");
   const formCrearEvento = document.getElementById("form-crear-evento");
   const btnGuardarEvento = document.getElementById("btnGuardarEvento");
-  const btnMostrarEventos = document.getElementById("btnMostrarEventos");
-  const eventosVigentes = document.getElementById("eventosVigentes");
+
   const mensajeError = document.getElementById("mensajeError");
-
-
-  function ObtenerEntradasPendientes(){
-    
-        const pendientesSnap = await getDocs(
-      query(
-        collection(db, "entradasPendientes"),
-        where("eventoId", "==", eventoId),
-        where("usuarioId", "==", usuarioId)
-      )
-    );
-    const pendientes = pendientesSnap.docs.reduce(
-      (acc, d) => acc + (d.data().cantidad || 1),
-      0
-    );
-  }
-  const contadorEntradasPendientes = document.getElementById(
-    "contadorEntradasPendientes"
-  );
-  const btnGuardarDatosBancarios = document.getElementById(
-    "btnGuardarDatosBancarios"
-  );
 
   // CATALOGO
   const btnCatalogoCompleto = document.getElementById("btnCatalogoCompleto");
-  // Toggle entradas pendientes
-  btnEntradasPendientes.addEventListener("click", () => {
-    contenedorEntradasPendientes.style.display =
-      contenedorEntradasPendientes.style.display === "none" ? "block" : "none";
-    eventosVigentes.style.display = "none";
-    formCrearEvento.style.display = "none";
-    contenedorEntradasVendidas.style.display = "none";
-  });
-
-  // Toggle crear evento
-  btnCrearEvento.addEventListener("click", () => {
-    formCrearEvento.style.display =
-      formCrearEvento.style.display === "none" ? "block" : "none";
-    contenedorEntradasPendientes.style.display = "none";
-    eventosVigentes.style.display = "none";
-    contenedorEntradasVendidas.style.display = "none";
-  });
-
-  // Toggle eventos vigentes
-  btnMostrarEventos.addEventListener("click", () => {
-    eventosVigentes.style.display =
-      eventosVigentes.style.display === "none" ? "block" : "none";
-    contenedorEntradasPendientes.style.display = "none";
-    formCrearEvento.style.display = "none";
-    contenedorEntradasVendidas.style.display = "none";
-  });
-
-  // Toggle entradas pendientes
-  btnGuardarDatosBancarios.addEventListener("click", () => {
-    guardarDatosBancarios();
-  });
-
-  btnAnadirProducto.addEventListener("click", () => {
-    formCrearProducto.style.display =
-      formCrearProducto.style.display === "none" ? "block" : "none";
-
-    // oculta contenedores extra (según tus ids reales)
-    formCrearEvento.style.display = "none";
-    eventosVigentes.style.display = "none";
-    contenedorEntradasPendientes.style.display = "none";
-    contenedorEntradasVendidas.style.display = "none";
-  });
 
   if (btnCatalogoCompleto) {
     btnCatalogoCompleto.addEventListener("click", () => {
@@ -183,14 +104,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  initAdminProductos();
   cargarEventosAdmin();
   cargarCatalogo();
-  AdminProductos.initAdminProductos();
 });
 
-// -----------------------------
 // Función: cargarEventosAdmin
-// -----------------------------
+
 export async function cargarEventosAdmin() {
   const listaEventos = document.getElementById("listaEventos");
   if (!listaEventos) return;
@@ -266,9 +186,7 @@ export async function cargarEventosAdmin() {
   }
 }
 
-// -----------------------------
 // Cargar Entradas Pendientes
-// -----------------------------
 export function cargarEntradasPendientes() {
   const contenedor = document.getElementById("EntradasPendientes");
   if (!contenedor) return;
@@ -291,6 +209,7 @@ export function cargarEntradasPendientes() {
     snapshot.forEach((docSnap) => {
       const e = { id: docSnap.id, ...docSnap.data() };
 
+      console.log("entradas pendientes " + e.length);
       const div = document.createElement("div");
       div.className = "card mb-3 shadow-sm p-3";
 
@@ -315,7 +234,7 @@ export function cargarEntradasPendientes() {
           </div>
         </div>
       `;
-
+      actualizarContadorEntradasPendientes();
       // APROBAR
       div.querySelector(".btn-aprobar")?.addEventListener("click", async () => {
         try {
@@ -344,6 +263,7 @@ export function cargarEntradasPendientes() {
             } para ${nombreUsuario} correctamente.`,
             "success"
           );
+          actualizarContadorEntradasPendientes();
         } catch (err) {
           console.error("Error al aprobar:", err);
           Swal.fire("❌ Error", "No se pudo aprobar la entrada.", "error");
@@ -367,12 +287,14 @@ export function cargarEntradasPendientes() {
 
           await deleteDoc(doc(db, "entradasPendientes", e.id));
           Swal.fire("❌ Rechazada", "La solicitud fue eliminada.", "success");
+          actualizarContadorEntradasPendientes();
         });
 
       contenedor.appendChild(div);
     });
   });
 }
+
 cargarEntradasPendientes();
 
 function escapeHtml(text) {
@@ -385,36 +307,59 @@ function escapeHtml(text) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
+// --------------------------------- DATOS WHATSAPP ---------------------------------
+//const numWhatsapp
+const numWhatsappInput = document.getElementById("numWhatsapp");
+//1121894427
 
-// --------------------------------- GUARDAR DATOS BANCARIOS ---------------------------------
+const btnGuardarContacto = document.getElementById("btnGuardarContacto");
 
-async function MostrarDatosBancariosInput() {
-  const docRef = doc(db, "configuracion", "datosBancarios");
-  const docSnap = await getDoc(docRef);
+btnGuardarContacto.addEventListener("click", () => {
+  guardarDatosContacto();
+});
 
-  if (!docSnap.exists()) return;
+// --------------------------------- DATOS BANCARIOS ---------------------------------
 
-  const { nombreBanco, cbuBanco, aliasBanco, titularBanco } = docSnap.data();
+async function guardarDatosContacto() {
+  const whatsappContacto = document.getElementById("whatsappContacto").value;
+  const instagramContacto = document.getElementById("instagramContacto").value;
+  const tiktokContacto = document.getElementById("tiktokContacto").value;
+  await setDoc(doc(db, "configuracion", "social"), {
+    whatsappContacto,
+    instagramContacto,
+    tiktokContacto,
+  });
 
-  const nombreBancoInput = document.getElementById("nombreBanco");
-  const cbuBancoInput = document.getElementById("cbuBanco");
-  const aliasBancoInput = document.getElementById("aliasBanco");
-  const titularBancoInput = document.getElementById("titularBanco");
+  Swal.fire({
+    icon: "success",
+    title: "Contactos guardados",
+    html: `
+      <div style="text-align:left;">
+        <p><strong>Whatsapp:</strong> ${escapeHtml(
+          whatsappContacto || "Campo vacío"
+        )}</p>
+        <p><strong>Instagram:</strong> ${escapeHtml(
+          instagramContacto || "Campo vacío"
+        )}</p>
+        <p><strong>TikTok:</strong> ${escapeHtml(
+          tiktokContacto || "Campo vacío"
+        )}</p>
+      </div>
+    `,
+    confirmButtonText: "Aceptar",
+  });
 
-  if (nombreBanco) nombreBancoInput.value = nombreBanco;
-  else nombreBancoInput.placeholder = "Banco Ejemplo";
-
-  if (cbuBanco) cbuBancoInput.value = cbuBanco;
-  else cbuBancoInput.placeholder = "1234567890123456789012";
-
-  if (aliasBanco) aliasBancoInput.value = aliasBanco;
-  else aliasBancoInput.placeholder = "MI.ALIAS.BANCO";
-
-  if (titularBanco) titularBancoInput.value = titularBanco;
-  else aliasBancoInput.placeholder = "Juan Pérez";
+  console.log(whatsappContacto, instagramContacto);
 }
 
-MostrarDatosBancariosInput();
+// BTN DATOS BANCARIOS
+const btnGuardarDatosBancarios = document.getElementById(
+  "btnGuardarDatosBancarios"
+);
+btnGuardarDatosBancarios.addEventListener("click", () => {
+  guardarDatosBancarios();
+});
+
 async function guardarDatosBancarios() {
   const nombreBanco = document.getElementById("nombreBanco").value;
   const cbuBanco = document.getElementById("cbuBanco").value;
@@ -441,3 +386,55 @@ async function guardarDatosBancarios() {
     confirmButtonText: "Aceptar",
   });
 }
+async function ObtenerDatosGuardadosDB() {
+  // DATOS BANCARIOS
+  const docRef = doc(db, "configuracion", "datosBancarios");
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const { nombreBanco, cbuBanco, aliasBanco, titularBanco } = docSnap.data();
+
+    const nombreBancoInput = document.getElementById("nombreBanco");
+    const cbuBancoInput = document.getElementById("cbuBanco");
+    const aliasBancoInput = document.getElementById("aliasBanco");
+    const titularBancoInput = document.getElementById("titularBanco");
+
+    if (nombreBanco) nombreBancoInput.value = nombreBanco;
+    else nombreBancoInput.placeholder = "Banco Ejemplo";
+
+    if (cbuBanco) cbuBancoInput.value = cbuBanco;
+    else cbuBancoInput.placeholder = "1234567890123456789012";
+
+    if (aliasBanco) aliasBancoInput.value = aliasBanco;
+    else aliasBancoInput.placeholder = "MI.ALIAS.BANCO";
+
+    if (titularBanco) titularBancoInput.value = titularBanco;
+    else aliasBancoInput.placeholder = "Juan Pérez";
+    console.log("caca1");
+  }
+
+  // DATOS CONTACTO
+  const docRefCont = doc(db, "configuracion", "social");
+  const docSnapCont = await getDoc(docRefCont);
+
+  if (docSnapCont.exists()) {
+    const { whatsappContacto, instagramContacto, tiktokContacto } =
+      docSnapCont.data();
+
+    const whatsappContactoInput = document.getElementById("whatsappContacto");
+    const instagramContactoInput = document.getElementById("instagramContacto");
+    const tiktokContactoInput = document.getElementById("tiktokContacto");
+
+    if (whatsappContacto) whatsappContactoInput.value = whatsappContacto;
+    else whatsappContactoInput.placeholder = "Ej: 1112345678";
+
+    if (tiktokContacto) instagramContactoInput.value = instagramContacto;
+    else instagramContactoInput.tiktokContacto = "Ej: @usuario_ig";
+
+    if (tiktokContacto) tiktokContactoInput.value = tiktokContacto;
+    else tiktokContactoInput.placeholder = "Ej: @usuario_tiktok";
+
+    console.log("caca2");
+  }
+}
+ObtenerDatosGuardadosDB();

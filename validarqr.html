@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Validación de Entradas QR</title>
+    <title>Validación de QR</title>
     <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
     <script type="module" src="/js/validarQr.js"></script>
     <link
@@ -13,15 +13,23 @@
     <link rel="stylesheet" href="/css/style.css" />
   </head>
   <body class="qr-body">
-    <div class="container">
-      <h2 class="qr-title text-center mb-4">Escanea el QR del ticket</h2>
-      <div class="qr-video-container mb-3">
-        <video id="camara" class="qr-video" playsinline autoplay></video>
-        <canvas id="canvas" class="qr-canvas"></canvas>
+    <div class="container py-4">
+      <h2 id="qr-titulo" class="qr-title text-center mb-4">Escanea el QR</h2>
+
+      <div class="qr-video-container mb-3 border rounded p-2 shadow-sm">
+        <video
+          id="camara"
+          class="qr-video rounded"
+          playsinline
+          autoplay
+        ></video>
+        <canvas id="canvas" class="qr-canvas d-none"></canvas>
       </div>
-      <div id="qr-resultado" class="qr-resultado text-center">
+
+      <div id="qr-resultado" class="qr-resultado text-center fw-bold my-2">
         Esperando QR...
       </div>
+
       <div id="qr-info-adicional" class="qr-info-adicional text-center"></div>
     </div>
   </body>

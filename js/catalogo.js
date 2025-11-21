@@ -228,7 +228,7 @@ function mostrarIrAlCarrito(mensaje) {
   Toastify({
     node: toastmsj,
     duration: 4000,
-    gravity: "top",
+    gravity: "bot",
     position: "center",
     style: {
       background: "#ffffffda",
@@ -238,12 +238,12 @@ function mostrarIrAlCarrito(mensaje) {
       textAlign: "center",
       borderRadius: "4px",
       fontSize: "1.2rem",
-      fontWeight: "500",
+      fontWeight: "600",
       color: "#000000fa",
       boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
     },
     stopOnFocus: true,
-    onClick: () => (window.location.href = "../pages/carrito.html"),
+    //onClick: () => (window.location.href = "../pages/carrito.html"),
   }).showToast();
 
   cartelEnCurso = false;

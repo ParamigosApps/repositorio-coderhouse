@@ -10,6 +10,7 @@ import {
   setDoc,
   getDoc,
   getDocs,
+  updateDoc,
   deleteDoc,
   collection,
   doc,
@@ -296,8 +297,6 @@ export function cargarEntradasPendientes() {
   });
 }
 
-cargarEntradasPendientes();
-
 function escapeHtml(text) {
   if (!text) return "";
   return text
@@ -308,19 +307,177 @@ function escapeHtml(text) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
+
+// --------------------------------- GUARDAR EN DATA DE CONTACTO Y BASE DE DATOS ---------------------------------
+const btnGuardarEmpleado = document.getElementById("btnGuardarEmpleado");
+let idEmpleadoSeleccionado = null;
+
+// GUARDAR O EDITAR EMPLEADO
+btnGuardarEmpleado.addEventListener("click", async () => {
+  const nombre = document.getElementById("nombreEmpleado").value.trim();
+  const usuario = document.getElementById("usuarioEmpleado").value.trim();
+  const contraseña = document.getElementById("contraseñaEmpleado").value.trim();
+  const permisos = document.getElementById("permisoEmpleado").value.trim();
+
+  if (!nombre || !usuario || !contraseña || !permisos) {
+    return Swal.fire("Error", "Completa todos los campos", "error");
+  }
+
+  try {
+    if (idEmpleadoSeleccionado) {
+      // EDITAR
+      await updateDoc(doc(db, "empleados", idEmpleadoSeleccionado), {
+        nombre,
+        usuario,
+        contraseña,
+        permisos,
+      });
+
+      Swal.fire("Actualizado", "Empleado modificado correctamente", "success");
+      idEmpleadoSeleccionado = null;
+    } else {
+      // CREAR NUEVO
+      await addDoc(collection(db, "empleados"), {
+        nombre,
+        usuario,
+        contraseña,
+        permisos,
+      });
+
+      Swal.fire("Guardado", "Empleado creado correctamente", "success");
+    }
+
+    limpiarFormulario();
+    cargarEmpleados();
+  } catch (error) {
+    console.error("Error:", error);
+    Swal.fire("Error", "No se pudo guardar", "error");
+  }
+});
+
+// LIMPIAR FORMULARIO
+function limpiarFormulario() {
+  document.getElementById("nombreEmpleado").value = "";
+  document.getElementById("usuarioEmpleado").value = "";
+  document.getElementById("contraseñaEmpleado").value = "";
+  document.getElementById("permisoEmpleado").value = "";
+}
+
+export async function cargarEmpleados() {
+  try {
+    const empleadosSnapshot = await getDocs(collection(db, "empleados"));
+    const lista = document.querySelector("#empleadosLista");
+    lista.innerHTML = "";
+
+    empleadosSnapshot.forEach((docu) => {
+      const emp = docu.data();
+
+      const row = document.createElement("div");
+      row.className = "empleado-row";
+
+      row.innerHTML = `
+        <div>${emp.nombre}</div>
+        <div>${emp.usuario}</div>
+        <div>${emp.permisos}</div>
+        <div class="acciones">
+          <button class="btnEditar btn btn-sm btn-primary" data-id="${docu.id}">Editar</button>
+          <button class="btnEliminar btn btn-sm btn-danger" data-id="${docu.id}">Eliminar</button>
+        </div>
+      `;
+
+      row
+        .querySelector(".btnEditar")
+        .addEventListener("click", () =>
+          editarEmpleado(
+            docu.id,
+            emp.nombre,
+            emp.usuario,
+            emp.contraseña,
+            emp.permisos
+          )
+        );
+
+      row
+        .querySelector(".btnEliminar")
+        .addEventListener("click", () => eliminarEmpleado(docu.id));
+
+      lista.appendChild(row);
+    });
+  } catch (error) {
+    console.error("Error cargando empleados:", error);
+  }
+}
+
+// Delegación de eventos para Editar y Eliminar
+document.addEventListener("click", (e) => {
+  const row = e.target.closest("tr.empleado-row");
+  if (!row) return;
+
+  const id = row.dataset.id;
+
+  if (e.target.classList.contains("btnEditarEmpleado")) {
+    const celdas = row.querySelectorAll("td");
+    const nombre = celdas[0].innerText;
+    const usuario = celdas[1].innerText;
+    const permisos = celdas[2].innerText;
+
+    editarEmpleado(id, nombre, usuario, "********", permisos);
+  }
+
+  if (e.target.classList.contains("btnEliminarEmpleado")) {
+    eliminarEmpleado(id);
+  }
+});
+
+// EDITAR EMPLEADO
+window.editarEmpleado = (id, nombre, usuario, contraseña, permisos) => {
+  document.getElementById("nombreEmpleado").value = nombre;
+  document.getElementById("usuarioEmpleado").value = usuario;
+  document.getElementById("contraseñaEmpleado").value = contraseña;
+  document.getElementById("permisoEmpleado").value = permisos;
+
+  idEmpleadoSeleccionado = id;
+
+  Swal.fire("Edición", "Modifica los campos y guarda", "info");
+};
+
+// ELIMINAR EMPLEADO
+window.eliminarEmpleado = async (id) => {
+  Swal.fire({
+    title: "¿Eliminar empleado?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Eliminar",
+    cancelButtonText: "Cancelar",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      await deleteDoc(doc(db, "empleados", id));
+      cargarEmpleados();
+      Swal.fire("Eliminado", "Empleado eliminado", "success");
+    }
+  });
+};
+
+// MOSTRAR/OCULTAR PASSWORD EMPLEADO
+const togglePassword = document.getElementById("togglePassword");
+
+togglePassword.addEventListener("click", () => {
+  const input = document.getElementById("contraseñaEmpleado");
+  input.type = input.type === "password" ? "text" : "password";
+  console.log("CACA");
+});
+
+// --------------------------------- GUARDAR EN DATA DE CONTACTO Y BASE DE DATOS ---------------------------------
+
 // --------------------------------- DATOS WHATSAPP ---------------------------------
-//const numWhatsapp
+
 const numWhatsappInput = document.getElementById("numWhatsapp");
-//1121894427
 
 const btnGuardarContacto = document.getElementById("btnGuardarContacto");
 
 btnGuardarContacto.addEventListener("click", () => {
   guardarDatosContacto();
 });
-
-// --------------------------------- DATOS BANCARIOS ---------------------------------
-
 async function guardarDatosContacto() {
   const whatsappContacto = document.getElementById("whatsappContacto").value;
   const instagramContacto = document.getElementById("instagramContacto").value;
@@ -438,4 +595,7 @@ async function ObtenerDatosGuardadosDB() {
     console.log("caca2");
   }
 }
+
 ObtenerDatosGuardadosDB();
+cargarEntradasPendientes();
+cargarEmpleados();

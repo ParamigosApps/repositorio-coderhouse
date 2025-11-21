@@ -444,19 +444,178 @@
               data-bs-parent="#accordionAdmin"
             >
               <div class="accordion-body d-grid gap-2">
-                <!--  ---------- USUARIOS ---------- -->
-                <button class="btn btn-outline-dark">Usuarios</button>
-                <!--  ---------- METODOS DE PAGO ---------- -->
+                <!--  ---------- EMPLEADOS ---------- -->
                 <button
                   class="btn btn-outline-dark"
                   type="button"
                   data-bs-toggle="collapse"
-                  data-bs-target="#formMetodosDePago"
-                  id="btnMetodosDePago"
+                  data-bs-target="#formEditarEmpleados"
+                  id="btnEditarEmpleados"
                 >
-                  Métodos de pago
+                  Nuevo empleado
                 </button>
-                <div id="formMetodosDePago" class="collapse">
+                <div id="formEditarEmpleados" class="collapse">
+                  <h6 class="mt-1 mb-3 text-muted">
+                    Crear un nuevo empleado..
+                  </h6>
+                  <label class="form-label small mb-1"
+                    >Nombre del empleado
+                    <span style="color: red">*</span></label
+                  >
+                  <input
+                    type="text"
+                    id="nombreEmpleado"
+                    class="form-control"
+                    required
+                  />
+                  <label class="form-label small mb-1 mt-2"
+                    >Usuario <span style="color: red">*</span></label
+                  >
+                  <input
+                    type="text"
+                    id="usuarioEmpleado"
+                    class="form-control"
+                    required
+                  />
+                  <label class="form-label small mb-1 mt-2"
+                    >Contraseña <span style="color: red">*</span></label
+                  >
+                  <div class="input-group">
+                    <input
+                      type="password"
+                      id="contraseñaEmpleado"
+                      class="form-control"
+                      required
+                    />
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      id="togglePassword"
+                    >
+                      👁️
+                    </button>
+                  </div>
+                  <label class="form-label small mb-1 mt-2"
+                    >Permisos del empleado
+                    <span style="color: red">*</span></label
+                  >
+                  <select
+                    id="permisoEmpleado"
+                    class="form-select mb-1 mt-2"
+                    required
+                  >
+                    <option value="">Seleccionar Privilegios</option>
+                    <option value="Nivel1">Nivel 1. Verificar QR</option>
+                    <option value="Nivel2">Nivel 2. Administrar CAJA</option>
+                    <option value="Nivel3">Nivel 3. Ver. QR y Adm. CAJA</option>
+                    <option value="Nivel4">Nivel 4. ACCESO TOTAL</option>
+                  </select>
+
+                  <div class="d-flex justify-content-center">
+                    <button
+                      class="btn btn-dark mt-3 mb-3"
+                      id="btnGuardarEmpleado"
+                    >
+                      Guardar empleado
+                    </button>
+                  </div>
+
+                  <!-- Tabla de empleados -->
+                  <div id="empleadosLista" class="empleados-grid"></div>
+                </div>
+                <!--  ---------- CONTACTO ---------- -->
+                <button
+                  class="btn btn-outline-dark"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#formContacto"
+                  id="btnContacto"
+                >
+                  Editar contacto
+                </button>
+                <div id="formContacto" class="collapse">
+                  <h6 class="mt-1 mb-3 text-muted">
+                    Ingresa tus datos de contacto...
+                  </h6>
+                  <label class="form-label small mb-1"
+                    >Whatsapp <span style="color: red">*</span></label
+                  >
+
+                  <input
+                    type="numer"
+                    id="whatsappContacto"
+                    class="form-control"
+                    placeholder="Ej: 1112345678"
+                    required
+                  />
+
+                  <label class="form-label small mb-1 mt-2">Instagram </label>
+                  <input
+                    type="text"
+                    id="instagramContacto"
+                    class="form-control"
+                    placeholder="Ej: @usuario_ig"
+                  />
+                  <label class="form-label small mb-1 mt-2">TikTok</label>
+                  <input
+                    type="text"
+                    id="tiktokContacto"
+                    class="form-control"
+                    placeholder="Ej: @usuario_tiktok"
+                  />
+                  <div class="d-flex justify-content-center">
+                    <button
+                      class="btn btn-dark mt-3 mb-3"
+                      id="btnGuardarContacto"
+                    >
+                      Guardar datos
+                    </button>
+                  </div>
+                </div>
+
+                <!--  ---------- CERRAR SESION ---------- -->
+                <button class="btn btn-outline-dark">Cerrar sesión</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- EMPLEADOS -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseEmpleados"
+              >
+                👨‍💼 Empleados
+              </button>
+            </h2>
+            <div
+              id="collapseEmpleados"
+              class="accordion-collapse collapse"
+              data-bs-parent="#accordionAdmin"
+            >
+              <div class="accordion-body d-grid gap-2">
+                <!--  ---------- CAJA DE EMPLEADOS ---------- -->
+                <button
+                  class="btn btn-outline-dark"
+                  onclick="window.location.href='validarqr.html?tipo=caja'"
+                >
+                  Caja de empleados
+                </button>
+                <!--  ---------- VERIFICAR ENTRADAS ---------- -->
+                <button
+                  class="btn btn-outline-dark"
+                  onclick="window.location.href='validarqr.html?tipo=entradas'"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#verificarIngresos"
+                  id="btnVerificarIngresos"
+                >
+                  Verificar ingresos
+                </button>
+                <div id="verificarIngresos" class="collapse">
                   <h6 class="mt-1 mb-3 text-muted">
                     Datos del banco donde recibir...
                   </h6>
@@ -502,55 +661,6 @@
                       id="btnGuardarDatosBancarios"
                     >
                       Guardar datos bancarios
-                    </button>
-                  </div>
-                </div>
-                <!--  ---------- CONTACTO ---------- -->
-                <button
-                  class="btn btn-outline-dark"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#formContacto"
-                  id="btnContacto"
-                >
-                  Contacto
-                </button>
-                <div id="formContacto" class="collapse">
-                  <h6 class="mt-1 mb-3 text-muted">
-                    Ingresa tus datos de contacto...
-                  </h6>
-                  <label class="form-label small mb-1"
-                    >Whatsapp <span style="color: red">*</span></label
-                  >
-
-                  <input
-                    type="numer"
-                    id="whatsappContacto"
-                    class="form-control"
-                    placeholder="Ej: 1112345678"
-                    required
-                  />
-
-                  <label class="form-label small mb-1 mt-2">Instagram </label>
-                  <input
-                    type="text"
-                    id="instagramContacto"
-                    class="form-control"
-                    placeholder="Ej: @usuario_ig"
-                  />
-                  <label class="form-label small mb-1 mt-2">TikTok</label>
-                  <input
-                    type="text"
-                    id="tiktokContacto"
-                    class="form-control"
-                    placeholder="Ej: @usuario_tiktok"
-                  />
-                  <div class="d-flex justify-content-center">
-                    <button
-                      class="btn btn-dark mt-3 mb-3"
-                      id="btnGuardarContacto"
-                    >
-                      Guardar datos
                     </button>
                   </div>
                 </div>

@@ -3,7 +3,7 @@ import { formatearFecha } from "./utils.js";
 
 const tamañoQR = 220;
 
-export async function generarQr({
+export async function generarEntradaQr({
   ticketId,
   contenido = null, // ⚡ nuevo parámetro
   nombreEvento,
@@ -91,7 +91,7 @@ export async function generarQr({
   }
 }
 
-export async function generarTicketQr({
+export async function generarCompraQr({
   carrito,
   usuarioId,
   nombreUsuario = "Invitado",
@@ -101,20 +101,10 @@ export async function generarTicketQr({
   const ticketId = `${Date.now()}-${Math.floor(Math.random() * 9999)}`;
   const fecha = new Date().toLocaleString();
 
-  // Texto real almacenado dentro del QR
-  const contenidoQr = `
-TICKET: ${ticketId}
-CLIENTE: ${nombreUsuario}
-USUARIO_ID: ${usuarioId}
-LUGAR: ${lugar}
-TOTAL: $${total}
-FECHA: ${fecha}
+  // Texto para el QR: solo el ticketId
+  const contenidoQr = ticketId;
 
-PRODUCTOS:
-${carrito.map((p) => `- ${p.nombre} x${p.enCarrito} ($${p.precio})`).join("\n")}
-`;
-
-  // Mostrar modal antes del QR
+  // Mostrar modal con info del ticket
   await Swal.fire({
     title: `🧾 Ticket generado`,
     html: `
@@ -128,17 +118,17 @@ ${carrito.map((p) => `- ${p.nombre} x${p.enCarrito} ($${p.precio})`).join("\n")}
     `,
     didOpen: async () => {
       const qrContainer = document.getElementById("qrContainer");
-      await generarQr({
+      await generarEntradaQr({
         ticketId,
-        contenido: contenidoQr, // ⚡ PASAR todo el texto
+        contenido: contenidoQr,
         tamaño: tamañoQR,
         qrContainer,
       });
     },
     confirmButtonText: "Cerrar",
-    customClass: {
-      confirmButton: "btn btn-dark",
-    },
+    customClass: { confirmButton: "btn btn-dark" },
     buttonsStyling: false,
   });
+
+  return ticketId; // Devuelve ticketId para guardar en la base
 }

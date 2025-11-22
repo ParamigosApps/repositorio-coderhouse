@@ -1,6 +1,7 @@
 // cargarEventos.js
 import { escapeHtml, formatearFecha } from "./utils.js";
 import { db } from "/js/firebase.js";
+
 import {
   collection,
   getDocs,

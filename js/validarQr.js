@@ -90,6 +90,7 @@ function setTituloModo(modo = "entradas") {
       : modo === "compras"
       ? "ESCÁNER COMPRAS"
       : "ESCÁNER CARRITOS";
+  console.log("el modo es: " + modo);
 }
 
 // ---------------- Escanear QR ----------------
@@ -109,6 +110,7 @@ function scanQR() {
       if (!ticketsProcesados.has(ticketId)) {
         ticketsProcesados.add(ticketId);
         validarTicket(ticketId, modo);
+        console.log("aca vemos ticket y modo " + ticketId + " " + modo);
       }
     }
   }
@@ -116,10 +118,16 @@ function scanQR() {
 }
 
 // ---------------- Validar ticket ----------------
-async function validarTicket(ticketId, modo = "entrada") {
+async function validarTicket(ticketId, modo = "entradas") {
   try {
-    const coleccionActual = modo === "entrada" ? "entradas" : "compras";
-    const coleccionOtra = modo === "entrada" ? "compras" : "entradas";
+    // Colección correcta según el modo actual
+    const coleccionActual = modo; // "entradas" o "compras"
+    const coleccionOtra = modo === "entradas" ? "compras" : "entradas";
+
+    console.log(`Escaneando ticket: ${ticketId}`);
+    console.log(`Modo actual: ${modo}`);
+    console.log(`Consultando colección actual: ${coleccionActual}`);
+    console.log(`Consultando colección otra: ${coleccionOtra}`);
 
     const refActual = doc(db, coleccionActual, ticketId);
     const refOtra = doc(db, coleccionOtra, ticketId);
@@ -130,20 +138,44 @@ async function validarTicket(ticketId, modo = "entrada") {
     qrInfo.textContent = "";
 
     if (snapActual.exists()) {
-      // ✅ Ticket válido para este modo
       const ticketData = snapActual.data();
+      console.log(`Ticket encontrado en colección actual:`, ticketData);
 
+      if (ticketData.usado) {
+        qrResultado.textContent =
+          modo === "entradas" ? "⚠ Entrada ya usada" : "⚠ Pedido ya entregado";
+        qrResultado.className = "qr-resultado used";
+      } else {
+        qrResultado.textContent =
+          modo === "entradas"
+            ? "✅ Entrada válida - Permitido el ingreso"
+            : "✅ Pedido válido - Entregar al cliente";
+        qrResultado.className = "qr-resultado valid";
+
+        // Marcar como usado en Firestore
+        await updateDoc(refActual, { usado: true });
+
+        // Si es pedido, actualizar lista de pedidos pendientes
+        if (
+          modo === "compras" &&
+          typeof mostrarPedidosConfirmados === "function"
+        ) {
+          mostrarPedidosConfirmados(ticketData.usuarioId);
+        }
+      }
+      // ------------------- Detalle de productos -------------------
       let detalle = "";
-      if ((modo === "compra" || modo === "carrito") && ticketData.items) {
+      if (modo === "compras" && ticketData.items) {
         detalle = ticketData.items
           .map((p) => `- ${p.nombre} x${p.enCarrito} ($${p.precio})`)
           .join("<br>");
       }
 
+      // ------------------- Mostrar Swal para aprobar -------------------
       const result = await Swal.fire({
-        title: modo === "entrada" ? "Aprobar entrada" : "Confirmar pedido",
+        title: modo === "entradas" ? "Aprobar entrada" : "Confirmar pedido",
         html: `
-          <p><strong>${modo === "entrada" ? "Evento" : "Pedido"}:</strong> ${
+          <p><strong>${modo === "entradas" ? "Evento" : "Pedido"}:</strong> ${
           ticketData.nombre || "Sin nombre"
         }</p>
           <p><strong>Usuario:</strong> ${
@@ -170,29 +202,33 @@ async function validarTicket(ticketId, modo = "entrada") {
         return;
       }
 
-      if (ticketData.usado) {
-        qrResultado.textContent =
-          modo === "entrada" ? "⚠ Entrada ya usada" : "⚠ Pedido ya entregado";
-        qrResultado.className = "qr-resultado used";
-      } else {
-        qrResultado.textContent =
-          modo === "entrada"
-            ? "✅ Entrada válida - Permitido el ingreso"
-            : "✅ Pedido válido - Entregar al cliente";
-        qrResultado.className = "qr-resultado valid";
-        await updateDoc(refActual, { usado: true });
-      }
+      // ------------------- Marcar como usado -------------------
+      qrResultado.textContent =
+        modo === "entradas"
+          ? "✅ Entrada válida - Permitido el ingreso"
+          : "✅ Pedido válido - Entregar al cliente";
+      qrResultado.className = "qr-resultado valid";
+      await updateDoc(refActual, { usado: true });
 
-      qrInfo.textContent = `${modo === "entrada" ? "Evento" : "Pedido"}: ${
+      qrInfo.textContent = `${modo === "entradas" ? "Evento" : "Pedido"}: ${
         ticketData.nombre || "Sin nombre"
       } | Usuario: ${ticketData.usuarioNombre || "Desconocido"}`;
     } else if (snapOtra.exists()) {
-      // ❌ Ticket válido, pero para la otra colección
+      // Ticket existe pero pertenece a otra colección
+      const ticketData = snapOtra.data();
+      console.log(`Ticket encontrado en otra colección:`, ticketData);
+
+      qrResultado.textContent =
+        modo === "entradas"
+          ? "❌ Este QR corresponde a un pedido"
+          : "❌ Este QR corresponde a una entrada";
+      qrResultado.className = "qr-resultado invalid";
+
       await Swal.fire({
         title: "❌ Ticket inválido para este modo",
         html: `<p style="color:red; font-size:0.9em">
-                Este ticket es ${
-                  modo === "entrada" ? "una compra" : "una entrada"
+                Este QR corresponde a ${
+                  modo === "entradas" ? "un pedido" : "una entrada"
                 } 
                 y no puede ser usado aquí.
               </p>`,
@@ -202,15 +238,16 @@ async function validarTicket(ticketId, modo = "entrada") {
         allowEscapeKey: false,
       });
     } else {
-      // ❌ Ticket no encontrado en ninguna colección
+      // Ticket no encontrado
+      console.log("Ticket no encontrado en ninguna colección");
       qrResultado.textContent =
-        modo === "entrada" ? "❌ Entrada inválida" : "❌ Pedido inválido";
+        modo === "entradas" ? "❌ Entrada inválida" : "❌ Pedido inválido";
       qrResultado.className = "qr-resultado invalid";
     }
 
     ticketsProcesados.delete(ticketId);
   } catch (err) {
-    console.error(err);
+    console.error("Error validando ticket:", err);
     qrResultado.textContent = "Error validando ticket";
     qrResultado.className = "qr-resultado invalid";
     ticketsProcesados.delete(ticketId);

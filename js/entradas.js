@@ -1,6 +1,6 @@
 // /js/entradas.js
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
-import { generarQr } from "./generarQr.js";
+import { generarEntradaQr } from "./generarQr.js";
 import { db, auth } from "./firebase.js";
 
 import { formatearFecha } from "./utils.js";
@@ -55,14 +55,14 @@ export async function crearEntrada(
           ? "Entrada gratuita"
           : `$${entradaData.precio}`;
 
-      await generarQr({
+      await generarEntradaQr({
         ticketId: docRef.id,
         nombreEvento: entradaData.nombre || "Evento sin nombre",
         usuario: auth.currentUser.displayName || "Usuario",
         fecha: entradaData.fecha,
         lugar: entradaData.lugar,
         precio: valorEntrada,
-        modoAdmin, // aunque lo pasemos, generarQr puede usarlo para no mostrar
+        modoAdmin,
       });
     } else if (!pagado) {
       Swal.fire(
@@ -578,7 +578,7 @@ export async function cargarEntradas() {
             qrDivs.forEach((qrContainer) => {
               const ticketId = qrContainer.id.replace("qrcode_", "");
               const downloadLink = qrContainer.nextElementSibling; // el <a> sigue al qrContainer
-              generarQr({
+              generarEntradaQr({
                 ticketId,
                 nombreEvento: entrada.nombre,
                 usuario: auth.currentUser.displayName || "Usuario",

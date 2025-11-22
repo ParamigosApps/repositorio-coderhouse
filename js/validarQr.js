@@ -8,6 +8,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
 
+// ---------------- FIREBASE ----------------
 const firebaseConfig = {
   apiKey: "AIzaSyDkQEN7UMAVQQvOmWZjABmVYgVMMC4g9g0",
   authDomain: "appbar-24e02.firebaseapp.com",
@@ -17,10 +18,10 @@ const firebaseConfig = {
   appId: "1:339569084121:web:be83a06de71c21f5bea0c8",
   measurementId: "G-GMHEKEPVJC",
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// ---------------- ELEMENTOS ----------------
 const video = document.getElementById("camara");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -31,17 +32,11 @@ const qrTitulo = document.getElementById("qr-titulo");
 const ticketsProcesados = new Set();
 const DURACION_RESULTADO = 4000;
 
-// ------------ LEER MODO CORRECTAMENTE ------------
+// ---------------- MODO ----------------
 const params = new URLSearchParams(window.location.search);
-const modo = params.get("modo"); // debe ser "caja" o "entradas"
-
-// Título según modo
+const modo = params.get("modo"); // "caja" o "entradas"
 qrTitulo.textContent =
   modo === "caja" ? "Validación de Compras - Caja" : "Validación de Entradas";
-
-// Colección actual y contraria
-const coleccionActual = modo === "caja" ? "compras" : "entradas";
-const coleccionContraria = modo === "caja" ? "entradas" : "compras";
 
 // ---------------- ESCANEAR QR ----------------
 function scanQR() {
@@ -72,13 +67,11 @@ async function validarQr(ticketId) {
     const coleccionPrincipal = modo === "entradas" ? "entradas" : "compras";
     const coleccionSecundaria = modo === "entradas" ? "compras" : "entradas";
 
-    // Buscar en la colección principal
     let docRef = doc(db, coleccionPrincipal, ticketId);
     let docSnap = await getDoc(docRef);
     let tipo = coleccionPrincipal;
 
     if (!docSnap.exists()) {
-      // Buscar en la colección secundaria solo para informar
       docRef = doc(db, coleccionSecundaria, ticketId);
       docSnap = await getDoc(docRef);
       tipo = coleccionSecundaria;
@@ -98,7 +91,7 @@ async function validarQr(ticketId) {
 
     const data = docSnap.data();
 
-    // ---------------- Mostrar SweetAlert ----------------
+    // ---------------- SWEETALERT ----------------
     if (tipo === "entradas") {
       const result = await Swal.fire({
         title: `<i class="bi bi-ticket-perforated-fill"></i> Entrada ${data.estado.toUpperCase()}`,
@@ -175,54 +168,6 @@ async function validarQr(ticketId) {
   }
 }
 
-// ---------------- SWEETALERT ----------------
-function mostrarDetalleCompleto(data) {
-  if (modo === "entradas") {
-    Swal.fire({
-      title: `<i class="bi bi-ticket-perforated-fill"></i> Entrada ${data.estado.toUpperCase()}`,
-      html: `
-        <p><b>Evento:</b> ${data.nombre}</p>
-        <p><b>Usuario:</b> ${data.usuarioNombre}</p>
-        <p><b>Fecha:</b> ${data.fecha || "Desconocida"}</p>
-        <p><b>Estado:</b> ${data.estado.toUpperCase()}</p>
-        <p><b>ID Ticket:</b> ${data.id || ticketId}</p>
-      `,
-      icon: data.estado === "aprobada" ? "success" : "warning",
-      showCloseButton: true,
-      width: 450,
-      confirmButtonText: "Aceptar",
-    });
-  } else {
-    const htmlItems = data.items
-      .map(
-        (i) => `<tr>
-                  <td>${i.titulo}</td>
-                  <td>${i.cantidad}</td>
-                  <td>$${i.precio}</td>
-                  <td>$${i.cantidad * i.precio}</td>
-                </tr>`
-      )
-      .join("");
-    Swal.fire({
-      title: `<i class="bi bi-cart-check-fill"></i> Compra ${data.estado.toUpperCase()}`,
-      html: `
-        <table class="table table-sm table-striped">
-          <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr></thead>
-          <tbody>${htmlItems}</tbody>
-        </table>
-        <p><b>Total:</b> $${data.total}</p>
-        <p><b>Usuario:</b> ${data.usuarioNombre || "Desconocido"}</p>
-        <p><b>Fecha:</b> ${data.fecha || "Desconocida"}</p>
-        <p><b>ID Compra:</b> ${data.id || ticketId}</p>
-      `,
-      icon: data.estado === "aprobada" ? "success" : "warning",
-      showCloseButton: true,
-      width: 550,
-      confirmButtonText: "Aceptar",
-    });
-  }
-}
-
 // ---------------- LIMPIAR RESULTADO ----------------
 function limpiarResultado(tiempo = 2000) {
   setTimeout(() => {
@@ -233,15 +178,35 @@ function limpiarResultado(tiempo = 2000) {
   }, tiempo);
 }
 
-// ---------------- INICIO ----------------
-navigator.mediaDevices
-  .getUserMedia({ video: { facingMode: "environment" } })
-  .then((stream) => {
+// ---------------- INICIO DE CÁMARA ----------------
+async function iniciarCamara() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" } },
+      audio: false,
+    });
+
     video.srcObject = stream;
-    scanQR();
-  })
-  .catch((err) => {
-    console.error(err);
-    qrResultado.textContent = "❌ No se pudo acceder a la cámara";
+    video.onloadedmetadata = () => {
+      video.play();
+      scanQR();
+    };
+  } catch (err) {
+    console.error("Error al iniciar la cámara:", err);
+    qrResultado.textContent =
+      "❌ No se pudo acceder a la cámara. Revisa permisos y navegador";
     qrResultado.className = "qr-resultado invalid";
-  });
+
+    // Botón de reintento
+    const recargarBtn = document.createElement("button");
+    recargarBtn.textContent = "Reintentar cámara";
+    recargarBtn.className = "btn btn-warning mt-2";
+    recargarBtn.onclick = () => {
+      iniciarCamara();
+      recargarBtn.remove();
+    };
+    qrResultado.parentNode.appendChild(recargarBtn);
+  }
+}
+
+iniciarCamara();

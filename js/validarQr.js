@@ -62,40 +62,55 @@ function scanQR() {
 async function validarQr(ticketId) {
   if (!ticketId) return;
 
-  // Determinar colección según modo
-  const coleccion = modo === "caja" ? "compras" : "entradas";
+  const coleccionActual = modo === "caja" ? "compras" : "entradas";
+  const coleccionContraria = modo === "caja" ? "entradas" : "compras";
 
   try {
-    const docRef = doc(db, coleccion, ticketId);
-    const docSnap = await getDoc(docRef);
+    // Busco en la colección correspondiente al modo
+    let docRef = doc(db, coleccionActual, ticketId);
+    let docSnap = await getDoc(docRef);
 
-    if (!docSnap.exists()) {
-      qrResultado.textContent = "❌ No encontrado";
-      qrResultado.className = "qr-resultado invalid";
-      limpiarResultado();
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+
+      if (modo === "entradas") {
+        qrResultado.textContent = `✅ Entrada ${data.estado.toUpperCase()}`;
+        qrResultado.className = "qr-resultado valid";
+        qrInfo.textContent = `Evento: ${
+          data.nombre || "Sin nombre"
+        } | Usuario: ${data.usuarioNombre || "Desconocido"}`;
+        if (!data.usado) await updateDoc(docRef, { usado: true });
+      } else {
+        qrResultado.textContent = `✅ Compra ${data.estado.toUpperCase()}`;
+        qrResultado.className = "qr-resultado valid";
+        const productosTexto = data.items
+          ? data.items.map((i) => `${i.titulo} x${i.cantidad}`).join(", ")
+          : "";
+        qrInfo.textContent = `Productos: ${productosTexto} | Total: $${
+          data.total || 0
+        }`;
+      }
+
+      mostrarDetalleCompleto(data);
+      limpiarResultado(DURACION_RESULTADO);
       return;
     }
 
-    const data = docSnap.data();
+    // Si no se encuentra en la colección del modo, busco en la contraria
+    docRef = doc(db, coleccionContraria, ticketId);
+    docSnap = await getDoc(docRef);
 
-    if (modo === "entradas") {
-      qrResultado.textContent = `✅ Entrada ${data.estado.toUpperCase()}`;
-      qrResultado.className = "qr-resultado valid";
-      qrInfo.textContent = `Evento: ${data.evento || "Sin nombre"} | Usuario: ${
-        data.usuario || "Desconocido"
-      }`;
-      if (!data.usado) await updateDoc(docRef, { usado: true });
+    if (docSnap.exists()) {
+      qrResultado.textContent = `❌ QR rechazado (es ${
+        modo === "caja" ? "entrada" : "compra"
+      })`;
+      qrResultado.className = "qr-resultado invalid";
     } else {
-      qrResultado.textContent = `✅ Compra ${data.estado.toUpperCase()}`;
-      qrResultado.className = "qr-resultado valid";
-      const productosTexto = data.items
-        .map((i) => `${i.titulo} x${i.cantidad}`)
-        .join(", ");
-      qrInfo.textContent = `Productos: ${productosTexto} | Total: $${data.total}`;
+      qrResultado.textContent = "❌ No encontrado";
+      qrResultado.className = "qr-resultado invalid";
     }
 
-    mostrarDetalleCompleto(data);
-    limpiarResultado(DURACION_RESULTADO);
+    limpiarResultado();
   } catch (error) {
     console.error(error);
     qrResultado.textContent = "❌ Error al validar";
@@ -110,30 +125,30 @@ function mostrarDetalleCompleto(data) {
     Swal.fire({
       title: `<i class="bi bi-ticket-perforated-fill"></i> Entrada ${data.estado.toUpperCase()}`,
       html: `
-        <p><b>Evento:</b> ${data.evento}</p>
-        <p><b>Usuario:</b> ${data.usuario}</p>
-        <p><b>Fecha:</b> ${
-          data.fecha ? new Date(data.fecha).toLocaleString() : "Desconocida"
-        }</p>
+        <p><b>Evento:</b> ${data.nombre}</p>
+        <p><b>Usuario:</b> ${data.usuarioNombre}</p>
+        <p><b>Fecha:</b> ${data.fecha || "Desconocida"}</p>
         <p><b>Estado:</b> ${data.estado.toUpperCase()}</p>
-        <p><b>ID Ticket:</b> ${data.id || ""}</p>
+        <p><b>ID Ticket:</b> ${data.id || ticketId}</p>
       `,
-      icon: data.estado === "pagado" ? "success" : "warning",
+      icon: data.estado === "aprobada" ? "success" : "warning",
       showCloseButton: true,
       width: 450,
       confirmButtonText: "Aceptar",
     });
   } else {
     const htmlItems = data.items
-      .map(
-        (i) => `<tr>
+      ? data.items
+          .map(
+            (i) => `<tr>
                   <td>${i.titulo}</td>
                   <td>${i.cantidad}</td>
                   <td>$${i.precio}</td>
                   <td>$${i.cantidad * i.precio}</td>
                 </tr>`
-      )
-      .join("");
+          )
+          .join("")
+      : "";
     Swal.fire({
       title: `<i class="bi bi-cart-check-fill"></i> Compra ${data.estado.toUpperCase()}`,
       html: `
@@ -141,14 +156,12 @@ function mostrarDetalleCompleto(data) {
           <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr></thead>
           <tbody>${htmlItems}</tbody>
         </table>
-        <p><b>Total:</b> $${data.total}</p>
-        <p><b>Usuario:</b> ${data.usuario || "Desconocido"}</p>
-        <p><b>Fecha:</b> ${
-          data.fecha ? new Date(data.fecha).toLocaleString() : "Desconocida"
-        }</p>
-        <p><b>ID Compra:</b> ${data.id || ""}</p>
+        <p><b>Total:</b> $${data.total || 0}</p>
+        <p><b>Usuario:</b> ${data.usuarioNombre || "Desconocido"}</p>
+        <p><b>Fecha:</b> ${data.fecha || "Desconocida"}</p>
+        <p><b>ID Compra:</b> ${data.id || ticketId}</p>
       `,
-      icon: data.estado === "pagado" ? "success" : "warning",
+      icon: data.estado === "aprobada" ? "success" : "warning",
       showCloseButton: true,
       width: 550,
       confirmButtonText: "Aceptar",

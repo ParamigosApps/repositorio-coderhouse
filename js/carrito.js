@@ -23,7 +23,7 @@ export function calcularTotal() {
 
 export function mostrarCarrito() {
   if (!carritoItems) {
-    console.log("No existe carritoItems en esta pagina");
+    console.log("No existe carritoItems en esta aina");
     return;
   }
   carritoItems.innerHTML = ""; // 🧽 limpiar render previo
@@ -350,6 +350,8 @@ export async function mostrarPedidosConfirmados(usuarioId) {
 // carrito.js//// carrito.js
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
 import { mostrarMensaje } from "./utils.js";
+import { mostrarTodosLosPedidos } from "./pedidos.js";
+import { auth } from "./firebase.js";
 
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 const carritoItems = document.getElementById("carritoItems");
@@ -513,7 +515,21 @@ carritoOverlay?.addEventListener("click", cerrarPanel);
 cerrarCarrito?.addEventListener("click", cerrarPanel);
 
 // ================= INICIALIZAR =================
-mostrarCarrito();
-actualizarCarritoVisual();
 
 export { carrito };
+document.addEventListener("DOMContentLoaded", async () => {
+  if (auth.currentUser) {
+    await mostrarTodosLosPedidos(auth.currentUser.uid);
+  }
+
+  // Opcional: si el usuario inicia sesión después
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      await mostrarTodosLosPedidos(user.uid);
+      console.log("se inicio sesion");
+    }
+  });
+  mostrarCarrito();
+  actualizarCarritoVisual();
+  mostrarTodosLosPedidos();
+});

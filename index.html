@@ -74,10 +74,17 @@
           Confirmar Pedido
         </button>
       </div>
-      <div class="pedidos-confirmados container my-4">
-        <h3>Pedidos confirmados</h3>
-        <div id="listaPedidos"></div>
-      </div>
+      <section id="container-pedidos">
+        <div class="lista-pedidos" id="listaPedidosPagos">
+          <h3>Pagados</h3>
+        </div>
+        <div class="lista-pedidos" id="listaPedidosPendientes">
+          <h3>Pendientes</h3>
+        </div>
+        <div class="lista-pedidos" id="listaPedidosRetirados">
+          <h3>Retirados</h3>
+        </div>
+      </section>
     </aside>
 
     <div id="carritoOverlay" class="carrito-overlay" hidden></div>

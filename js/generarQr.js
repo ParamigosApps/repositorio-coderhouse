@@ -67,7 +67,7 @@ export async function generarEntradaQr({
         <h5>🎟 ${nombreEvento}</h5>
         <p><strong>ID:</strong> ${ticketId}</p>
         <p><strong>Usuario:</strong> ${usuario}</p>
-        <p><strong>Fecha:</strong> ${fecha}</p>
+        <p><strong>Fecha:</strong> ${formatearFecha(fecha)}</p>
         <p><strong>Lugar:</strong> ${lugar}</p>
         <p><strong>Precio:</strong> ${displayPrecio}</p>
       `;
@@ -91,22 +91,66 @@ export async function generarEntradaQr({
   }
 }
 
+// export async function generarCompraQr({
+//   carrito,
+//   usuarioId,
+//   nombreUsuario = "Invitado",
+//   lugar = "Tienda",
+//   total,
+// }) {
+//   const ticketId = `${Date.now()}-${Math.floor(Math.random() * 9999)}`;
+//   const fecha = new Date().toLocaleString();
+
+//   // Texto para el QR: solo el ticketId
+//   const contenidoQr = ticketId;
+
+//   // Mostrar modal con info del ticket
+//   await Swal.fire({
+//     title: `🧾 Ticket generado`,
+//     html: `
+//       <p><strong>Ticket:</strong> ${ticketId}</p>
+//       <p><strong>Cliente:</strong> ${nombreUsuario}</p>
+//       <p><strong>Lugar:</strong> ${lugar}</p>
+//       <p><strong>Fecha:</strong> ${formatearFecha(fecha)}</p>
+//       <p><strong>Total:</strong> $${total}</p>
+//       <hr>
+//       <div id="qrContainer" style="display:flex;justify-content:center;"></div>
+//     `,
+//     didOpen: async () => {
+//       const qrContainer = document.getElementById("qrContainer");
+//       await generarEntradaQr({
+//         ticketId,
+//         contenido: contenidoQr,
+//         tamaño: tamañoQR,
+//         qrContainer,
+//       });
+//     },
+
+//     confirmButtonText: "Cerrar",
+//     customClass: { confirmButton: "btn btn-dark" },
+//     buttonsStyling: false,
+//   });
+
+//   return ticketId; // Devuelve ticketId para guardar en la base
+// }
 export async function generarCompraQr({
   carrito,
   usuarioId,
   nombreUsuario = "Invitado",
   lugar = "Tienda",
   total,
+  ticketId, // si viene, usarlo
+  modoLectura = false, // si true, no genera uno nuevo
 }) {
-  const ticketId = `${Date.now()}-${Math.floor(Math.random() * 9999)}`;
-  const fecha = new Date().toLocaleString();
+  if (!ticketId || !modoLectura) {
+    ticketId = `${Date.now()}-${Math.floor(Math.random() * 9999)}`;
+  }
 
-  // Texto para el QR: solo el ticketId
+  const fecha = new Date().toLocaleString();
   const contenidoQr = ticketId;
 
-  // Mostrar modal con info del ticket
   await Swal.fire({
-    title: `🧾 Ticket generado`,
+    title: `🧾 Ticket ${modoLectura ? "(Histórico)" : "generado"}`,
     html: `
       <p><strong>Ticket:</strong> ${ticketId}</p>
       <p><strong>Cliente:</strong> ${nombreUsuario}</p>
@@ -121,7 +165,7 @@ export async function generarCompraQr({
       await generarEntradaQr({
         ticketId,
         contenido: contenidoQr,
-        tamaño: tamañoQR,
+        tamaño: 200, // tamaño del QR
         qrContainer,
       });
     },
@@ -130,5 +174,5 @@ export async function generarCompraQr({
     buttonsStyling: false,
   });
 
-  return ticketId; // Devuelve ticketId para guardar en la base
+  return ticketId;
 }

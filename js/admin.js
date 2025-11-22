@@ -539,7 +539,6 @@ async function ObtenerDatosGuardadosDB() {
 
     if (titularBanco) titularBancoInput.value = titularBanco;
     else aliasBancoInput.placeholder = "Juan Pérez";
-    console.log("caca1");
   }
 
   // DATOS CONTACTO

@@ -1051,6 +1051,7 @@ body.qr-body {
   border-radius: 1rem;
   padding: 20px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  color: #ffffff;
 }
 
 .qr-title {
@@ -1179,6 +1180,51 @@ body.qr-body {
   .manual-qr, .btn-primary {
     width: 100%;
   }
+}
+#container-pedidos {
+  display: block;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 10px;
+}
+
+.lista-pedidos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 250px;
+  min-height: 50px;
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #fff;
+}
+
+.lista-pedidos h3 {
+  margin-bottom: 4px;
+  font-size: 18px;
+  text-align: center;
+}
+
+.pedido-item {
+  height: 120px !important;
+  padding: 4x;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  background-color: #242;
+  position: relative;
+  cursor: pointer;
+}
+.pedido-item:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.pedido-item button {
+  cursor: pointer;
+  background: #333;
+  border: none;
 }
 
 /*# sourceMappingURL=style.css.map */

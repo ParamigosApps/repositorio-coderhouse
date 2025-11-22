@@ -1,7 +1,12 @@
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
 
 // ------------------------------ TOASTIFY ------------------------------ //
-export function mostrarMensaje(mensaje, color = "#000", colorletra = "#fff") {
+
+export function mostrarMensaje(
+  mensaje,
+  color = "#ffffffb0",
+  colorletra = "#000000"
+) {
   if (typeof Toastify === "undefined") {
     alert(mensaje);
     return;
@@ -9,10 +14,16 @@ export function mostrarMensaje(mensaje, color = "#000", colorletra = "#fff") {
 
   Toastify({
     text: mensaje,
-    gravity: "bottom",
-    position: "center",
-    duration: 2500,
-    style: { background: color, color: colorletra },
+    gravity: "top", // arriba
+    position: "center", // centrado horizontalmente
+    duration: 2000,
+    style: {
+      background: color, // color de fondo
+      color: colorletra, // color del texto
+      width: "80%", // ancho del toast
+      margin: "0 auto", // centrar horizontalmente
+      textAlign: "center", // centrar texto
+    },
   }).showToast();
 }
 

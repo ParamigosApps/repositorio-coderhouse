@@ -121,12 +121,13 @@ document
 */
 // finalizarCompra.js
 // /js/finalizarCompra.js
+
 import {
-  agregarProducto,
   mostrarCarrito,
   actualizarCarritoVisual,
   calcularTotal,
 } from "./carrito.js";
+import { crearPedido, mostrarTodosLosPedidos } from "./pedidos.js";
 import { generarCompraQr } from "./generarQr.js";
 import { auth } from "./firebase.js";
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
@@ -189,21 +190,39 @@ export async function finalizarCompra() {
 
     // --------------------------- PAGO EN CAJA ---------------------------
     if (isDenied) {
+      // Generar ticketId único
+      const ticketId = `${Date.now()}-${Math.floor(Math.random() * 9999)}`;
+
+      // Crear pedido en Firebase y pasar ticketId
+      const pedidoId = await crearPedido(
+        usuarioId,
+        carrito,
+        total,
+        nombreUsuario,
+        "pendiente",
+        false,
+        ticketId
+      );
+
+      // Generar QR con el ticketId y esperar a que el usuario lo vea
       await generarCompraQr({
         carrito,
         usuarioId,
         nombreUsuario,
         lugar: "Tienda",
         total,
+        ticketId, // <-- pasamos el mismo ticketId
       });
 
-      // Limpiar carrito y cerrar panel
+      // Limpiar carrito y actualizar UI
       localStorage.removeItem("carrito");
-      mostrarCarrito();
       actualizarCarritoVisual();
+      mostrarCarrito();
       document.getElementById("carritoPanel")?.classList.remove("open");
       document.getElementById("carritoOverlay")?.setAttribute("hidden", true);
-      return;
+
+      // Refrescar lista de pedidos pendientes
+      await mostrarTodosLosPedidos(usuarioId);
     }
 
     // --------------------------- MERCADO PAGO ---------------------------

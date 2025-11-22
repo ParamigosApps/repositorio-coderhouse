@@ -69,27 +69,28 @@ async function validarQr(ticketId) {
   if (!ticketId) return;
 
   try {
-    // Primero intentar en la colección actual
-    let docRef = doc(db, coleccionActual, ticketId);
+    const coleccionPrincipal = modo === "entradas" ? "entradas" : "compras";
+    const coleccionSecundaria = modo === "entradas" ? "compras" : "entradas";
+
+    // Buscar en la colección principal
+    let docRef = doc(db, coleccionPrincipal, ticketId);
     let docSnap = await getDoc(docRef);
+    let tipo = coleccionPrincipal;
 
     if (!docSnap.exists()) {
-      // Revisar en la colección contraria para detectar QR de otro tipo
-      docRef = doc(db, coleccionContraria, ticketId);
+      // Buscar en la colección secundaria solo para informar
+      docRef = doc(db, coleccionSecundaria, ticketId);
       docSnap = await getDoc(docRef);
+      tipo = coleccionSecundaria;
 
-      if (docSnap.exists()) {
-        qrResultado.textContent =
-          modo === "entradas"
-            ? "❌ QR rechazado (es una compra)"
-            : "❌ QR rechazado (es una entrada)";
+      if (!docSnap.exists()) {
+        qrResultado.textContent = "❌ Ticket no encontrado";
         qrResultado.className = "qr-resultado invalid";
         limpiarResultado();
         return;
       }
 
-      // No existe en ninguna
-      qrResultado.textContent = "❌ No encontrado";
+      qrResultado.textContent = `❌ QR inválido: es un ${tipo}`;
       qrResultado.className = "qr-resultado invalid";
       limpiarResultado();
       return;
@@ -97,23 +98,74 @@ async function validarQr(ticketId) {
 
     const data = docSnap.data();
 
-    if (modo === "entradas") {
-      qrResultado.textContent = `✅ Entrada ${data.estado.toUpperCase()}`;
-      qrResultado.className = "qr-resultado valid";
-      qrInfo.textContent = `Evento: ${data.nombre || "Sin nombre"} | Usuario: ${
-        data.usuarioNombre || "Desconocido"
-      }`;
-      if (!data.usado) await updateDoc(docRef, { usado: true });
+    // ---------------- Mostrar SweetAlert ----------------
+    if (tipo === "entradas") {
+      const result = await Swal.fire({
+        title: `<i class="bi bi-ticket-perforated-fill"></i> Entrada ${data.estado.toUpperCase()}`,
+        html: `
+          <p><b>Evento:</b> ${data.nombre}</p>
+          <p><b>Usuario:</b> ${data.usuarioNombre}</p>
+          <p><b>Fecha:</b> ${data.fecha || "Desconocida"}</p>
+          <p><b>Estado:</b> ${data.estado.toUpperCase()}</p>
+          <p><b>ID Ticket:</b> ${data.id || ticketId}</p>
+        `,
+        icon: data.estado === "aprobada" ? "success" : "warning",
+        showCloseButton: true,
+        showCancelButton: true,
+        confirmButtonText: "Aprobar",
+        cancelButtonText: "Cancelar",
+        width: 450,
+      });
+
+      if (result.isConfirmed && !data.usado) {
+        await updateDoc(docRef, { usado: true });
+        qrResultado.textContent = `✅ Entrada Aprobada`;
+        qrResultado.className = "qr-resultado valid";
+      } else {
+        qrResultado.textContent = `⏸ Entrada pendiente`;
+        qrResultado.className = "qr-resultado invalid";
+      }
     } else {
-      qrResultado.textContent = `✅ Compra ${data.estado.toUpperCase()}`;
-      qrResultado.className = "qr-resultado valid";
-      const productosTexto = data.items
-        .map((i) => `${i.titulo} x${i.cantidad}`)
-        .join(", ");
-      qrInfo.textContent = `Productos: ${productosTexto} | Total: $${data.total}`;
+      const htmlItems = data.items
+        .map(
+          (i) => `<tr>
+                    <td>${i.titulo}</td>
+                    <td>${i.cantidad}</td>
+                    <td>$${i.precio}</td>
+                    <td>$${i.cantidad * i.precio}</td>
+                  </tr>`
+        )
+        .join("");
+
+      const result = await Swal.fire({
+        title: `<i class="bi bi-cart-check-fill"></i> Compra ${data.estado.toUpperCase()}`,
+        html: `
+          <table class="table table-sm table-striped">
+            <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr></thead>
+            <tbody>${htmlItems}</tbody>
+          </table>
+          <p><b>Total:</b> $${data.total}</p>
+          <p><b>Usuario:</b> ${data.usuarioNombre || "Desconocido"}</p>
+          <p><b>Fecha:</b> ${data.fecha || "Desconocida"}</p>
+          <p><b>ID Compra:</b> ${data.id || ticketId}</p>
+        `,
+        icon: data.estado === "aprobada" ? "success" : "warning",
+        showCloseButton: true,
+        showCancelButton: true,
+        confirmButtonText: "Aprobar",
+        cancelButtonText: "Cancelar",
+        width: 550,
+      });
+
+      if (result.isConfirmed) {
+        qrResultado.textContent = `✅ Compra Aprobada`;
+        qrResultado.className = "qr-resultado valid";
+      } else {
+        qrResultado.textContent = `⏸ Compra pendiente`;
+        qrResultado.className = "qr-resultado invalid";
+      }
     }
 
-    mostrarDetalleCompleto(data);
     limpiarResultado(DURACION_RESULTADO);
   } catch (error) {
     console.error(error);

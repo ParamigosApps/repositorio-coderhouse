@@ -33,21 +33,22 @@ export async function crearEntrada(
 
     const cantidadFinal = Number(entradaData.cantidad) || 1;
 
-    const docRef = await addDoc(
-      collection(db, pagado ? "entradas" : "entradasPendientes"),
-      {
-        eventoId,
-        ...entradaData,
-        cantidad: cantidadFinal,
-        creadaEn: new Date().toISOString(),
-        usado: false,
-        pagado,
-        usuarioId: auth.currentUser.uid,
-        usuarioNombre: auth.currentUser.displayName || "Usuario",
-        estado: pagado ? "aprobada" : "pendiente",
-      }
-    );
+    // Guardar en la colección según pago
+    const coleccion = pagado ? "entradas" : "entradasPendientes";
 
+    const docRef = await addDoc(collection(db, coleccion), {
+      eventoId,
+      ...entradaData,
+      cantidad: cantidadFinal,
+      creadaEn: new Date().toISOString(),
+      usado: false,
+      pagado,
+      usuarioId: auth.currentUser.uid,
+      usuarioNombre: auth.currentUser.displayName || "Usuario",
+      estado: pagado ? "aprobada" : "pendiente",
+    });
+
+    // Generar QR solo si la entrada está pagada y no es admin
     if (pagado && !modoAdmin) {
       await generarQr({
         ticketId: docRef.id,
@@ -55,20 +56,20 @@ export async function crearEntrada(
         usuario: auth.currentUser.displayName || "Usuario",
         fecha: entradaData.fecha,
         lugar: entradaData.lugar,
-        precio: entradaData.precio,
+        precio: entradaData.precio ?? 0,
         modoAdmin,
-        tipo: "Entrada",
         qrContainer: null,
+        individual: true,
       });
     } else if (!pagado) {
       Swal.fire(
         "✅ Solicitud registrada",
-        "En espera de aprobación.",
-        "success"
+        "Tu solicitud fue registrada y está pendiente de aprobación.",
+        "info"
       );
     }
 
-    return docRef;
+    return docRef.id;
   } catch (err) {
     console.error("Error creando entrada:", err);
     Swal.fire("Error", "No se pudo guardar la entrada.", "error");

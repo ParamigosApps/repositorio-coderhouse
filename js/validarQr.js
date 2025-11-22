@@ -31,11 +31,17 @@ const qrTitulo = document.getElementById("qr-titulo");
 const ticketsProcesados = new Set();
 const DURACION_RESULTADO = 4000;
 
+// ------------ LEER MODO CORRECTAMENTE ------------
 const params = new URLSearchParams(window.location.search);
-const modo = params.get("modo"); // "caja" o "entradas"
+const modo = params.get("modo"); // debe ser "caja" o "entradas"
 
+// Título según modo
 qrTitulo.textContent =
   modo === "caja" ? "Validación de Compras - Caja" : "Validación de Entradas";
+
+// Colección actual y contraria
+const coleccionActual = modo === "caja" ? "compras" : "entradas";
+const coleccionContraria = modo === "caja" ? "entradas" : "compras";
 
 // ---------------- ESCANEAR QR ----------------
 function scanQR() {
@@ -62,55 +68,53 @@ function scanQR() {
 async function validarQr(ticketId) {
   if (!ticketId) return;
 
-  const coleccionActual = modo === "caja" ? "compras" : "entradas";
-  const coleccionContraria = modo === "caja" ? "entradas" : "compras";
-
   try {
-    // Busco en la colección correspondiente al modo
+    // Primero intentar en la colección actual
     let docRef = doc(db, coleccionActual, ticketId);
     let docSnap = await getDoc(docRef);
 
-    if (docSnap.exists()) {
-      const data = docSnap.data();
+    if (!docSnap.exists()) {
+      // Revisar en la colección contraria para detectar QR de otro tipo
+      docRef = doc(db, coleccionContraria, ticketId);
+      docSnap = await getDoc(docRef);
 
-      if (modo === "entradas") {
-        qrResultado.textContent = `✅ Entrada ${data.estado.toUpperCase()}`;
-        qrResultado.className = "qr-resultado valid";
-        qrInfo.textContent = `Evento: ${
-          data.nombre || "Sin nombre"
-        } | Usuario: ${data.usuarioNombre || "Desconocido"}`;
-        if (!data.usado) await updateDoc(docRef, { usado: true });
-      } else {
-        qrResultado.textContent = `✅ Compra ${data.estado.toUpperCase()}`;
-        qrResultado.className = "qr-resultado valid";
-        const productosTexto = data.items
-          ? data.items.map((i) => `${i.titulo} x${i.cantidad}`).join(", ")
-          : "";
-        qrInfo.textContent = `Productos: ${productosTexto} | Total: $${
-          data.total || 0
-        }`;
+      if (docSnap.exists()) {
+        qrResultado.textContent =
+          modo === "entradas"
+            ? "❌ QR rechazado (es una compra)"
+            : "❌ QR rechazado (es una entrada)";
+        qrResultado.className = "qr-resultado invalid";
+        limpiarResultado();
+        return;
       }
 
-      mostrarDetalleCompleto(data);
-      limpiarResultado(DURACION_RESULTADO);
+      // No existe en ninguna
+      qrResultado.textContent = "❌ No encontrado";
+      qrResultado.className = "qr-resultado invalid";
+      limpiarResultado();
       return;
     }
 
-    // Si no se encuentra en la colección del modo, busco en la contraria
-    docRef = doc(db, coleccionContraria, ticketId);
-    docSnap = await getDoc(docRef);
+    const data = docSnap.data();
 
-    if (docSnap.exists()) {
-      qrResultado.textContent = `❌ QR rechazado (es ${
-        modo === "caja" ? "entrada" : "compra"
-      })`;
-      qrResultado.className = "qr-resultado invalid";
+    if (modo === "entradas") {
+      qrResultado.textContent = `✅ Entrada ${data.estado.toUpperCase()}`;
+      qrResultado.className = "qr-resultado valid";
+      qrInfo.textContent = `Evento: ${data.nombre || "Sin nombre"} | Usuario: ${
+        data.usuarioNombre || "Desconocido"
+      }`;
+      if (!data.usado) await updateDoc(docRef, { usado: true });
     } else {
-      qrResultado.textContent = "❌ No encontrado";
-      qrResultado.className = "qr-resultado invalid";
+      qrResultado.textContent = `✅ Compra ${data.estado.toUpperCase()}`;
+      qrResultado.className = "qr-resultado valid";
+      const productosTexto = data.items
+        .map((i) => `${i.titulo} x${i.cantidad}`)
+        .join(", ");
+      qrInfo.textContent = `Productos: ${productosTexto} | Total: $${data.total}`;
     }
 
-    limpiarResultado();
+    mostrarDetalleCompleto(data);
+    limpiarResultado(DURACION_RESULTADO);
   } catch (error) {
     console.error(error);
     qrResultado.textContent = "❌ Error al validar";
@@ -138,17 +142,15 @@ function mostrarDetalleCompleto(data) {
     });
   } else {
     const htmlItems = data.items
-      ? data.items
-          .map(
-            (i) => `<tr>
+      .map(
+        (i) => `<tr>
                   <td>${i.titulo}</td>
                   <td>${i.cantidad}</td>
                   <td>$${i.precio}</td>
                   <td>$${i.cantidad * i.precio}</td>
                 </tr>`
-          )
-          .join("")
-      : "";
+      )
+      .join("");
     Swal.fire({
       title: `<i class="bi bi-cart-check-fill"></i> Compra ${data.estado.toUpperCase()}`,
       html: `
@@ -156,7 +158,7 @@ function mostrarDetalleCompleto(data) {
           <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr></thead>
           <tbody>${htmlItems}</tbody>
         </table>
-        <p><b>Total:</b> $${data.total || 0}</p>
+        <p><b>Total:</b> $${data.total}</p>
         <p><b>Usuario:</b> ${data.usuarioNombre || "Desconocido"}</p>
         <p><b>Fecha:</b> ${data.fecha || "Desconocida"}</p>
         <p><b>ID Compra:</b> ${data.id || ticketId}</p>

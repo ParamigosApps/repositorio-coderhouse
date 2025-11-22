@@ -1,7 +1,12 @@
 // /js/admin.js
+
+// /js/admin.js
 import { db, auth } from "./firebase.js";
 import { initAdminProductos } from "./admin-productos.js";
-import { actualizarContadorEntradasPendientes } from "./entradas.js";
+import {
+  actualizarContadorEntradasPendientes,
+  crearEntrada,
+} from "./entradas.js";
 import { cargarCatalogo } from "./cargarCatalogo.js";
 import { formatearFecha } from "./utils.js";
 
@@ -21,7 +26,17 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
-import { crearEntrada } from "./entradas.js";
+
+function escapeHtml(text) {
+  if (!text) return "";
+  return text
+    .toString()
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 const esAdmin = localStorage.getItem("esAdmin") === "true";
 
@@ -29,89 +44,97 @@ const esAdmin = localStorage.getItem("esAdmin") === "true";
 // DOM Ready
 // -----------------------------
 document.addEventListener("DOMContentLoaded", () => {
-  // CREAR EVENTOS
+  // ---------------- CREAR EVENTO ----------------
   const formCrearEvento = document.getElementById("form-crear-evento");
   const btnGuardarEvento = document.getElementById("btnGuardarEvento");
-
   const mensajeError = document.getElementById("mensajeError");
-
-  // CATALOGO
   const btnCatalogoCompleto = document.getElementById("btnCatalogoCompleto");
 
   if (btnCatalogoCompleto) {
     btnCatalogoCompleto.addEventListener("click", () => {
-      renderizarCatalogo();
+      cargarCatalogo();
     });
   }
 
-  // GUARDAR EVENTO
-  btnGuardarEvento.addEventListener("click", async () => {
-    const nombre = document.getElementById("nombreEvento").value.trim();
-    const fecha = document.getElementById("fechaEvento").value;
-    const lugar = document.getElementById("lugarEvento").value.trim();
-    const horarioDesde = document
-      .getElementById("horarioDesdeEvento")
-      .value.trim();
-    const horarioHasta = document
-      .getElementById("horarioHastaEvento")
-      .value.trim();
-    const horario = `Desde ${horarioDesde}hs hasta ${horarioHasta}hs.`;
-    const precio = document.getElementById("precioEvento").value.trim();
-    const descripcion = document
-      .getElementById("descripcionEvento")
-      .value.trim();
-    const entradasPorUsuarioInput = document.getElementById(
-      "entradasPorUsuarioEvento"
-    );
-    const entradasPorUsuario =
-      parseInt(entradasPorUsuarioInput.value.trim()) || 4;
-
-    mensajeError.style.display = "none";
-    if (!nombre || !fecha || !lugar || !descripcion) {
-      mensajeError.textContent =
-        "⚠️ Por favor completá todos los campos obligatorios.";
-      mensajeError.style.display = "block";
-      return;
-    }
-    if (descripcion.length > 180) {
-      mensajeError.textContent =
-        "⚠️ La descripción no puede superar los 180 caracteres.";
-      mensajeError.style.display = "block";
-      return;
-    }
-
-    try {
-      await addDoc(collection(db, "eventos"), {
-        nombre,
-        fecha,
-        lugar,
-        horario,
-        precio: precio || "Entrada gratuita",
-        descripcion,
-        entradasPorUsuario,
-        creadoEn: serverTimestamp(),
-      });
-
-      Swal.fire(
-        "🎉 Evento creado",
-        `El evento "${nombre}" fue creado correctamente.`,
-        "success"
+  if (btnGuardarEvento) {
+    btnGuardarEvento.addEventListener("click", async () => {
+      const nombre = document.getElementById("nombreEvento")?.value.trim();
+      const fecha = document.getElementById("fechaEvento")?.value;
+      const lugar = document.getElementById("lugarEvento")?.value.trim();
+      const horarioDesde = document
+        .getElementById("horarioDesdeEvento")
+        ?.value.trim();
+      const horarioHasta = document
+        .getElementById("horarioHastaEvento")
+        ?.value.trim();
+      const horario = `Desde ${horarioDesde || "-"}hs hasta ${
+        horarioHasta || "-"
+      }hs.`;
+      const precio = document.getElementById("precioEvento")?.value.trim();
+      const descripcion = document
+        .getElementById("descripcionEvento")
+        ?.value.trim();
+      const entradasPorUsuarioInput = document.getElementById(
+        "entradasPorUsuarioEvento"
       );
-      formCrearEvento.reset();
-      await cargarEventosAdmin();
-    } catch (error) {
-      console.error("Error al guardar evento:", error);
-      Swal.fire("Error", "No se pudo guardar el evento.", "error");
-    }
-  });
+      const entradasPorUsuario =
+        parseInt(entradasPorUsuarioInput?.value.trim()) || 4;
+
+      if (mensajeError) mensajeError.style.display = "none";
+
+      if (!nombre || !fecha || !lugar || !descripcion) {
+        if (mensajeError) {
+          mensajeError.textContent =
+            "⚠️ Por favor completá todos los campos obligatorios.";
+          mensajeError.style.display = "block";
+        }
+        return;
+      }
+
+      if (descripcion.length > 180) {
+        if (mensajeError) {
+          mensajeError.textContent =
+            "⚠️ La descripción no puede superar los 180 caracteres.";
+          mensajeError.style.display = "block";
+        }
+        return;
+      }
+
+      try {
+        await addDoc(collection(db, "eventos"), {
+          nombre,
+          fecha,
+          lugar,
+          horario,
+          precio: precio || "Entrada gratuita",
+          descripcion,
+          entradasPorUsuario,
+          creadoEn: serverTimestamp(),
+        });
+
+        Swal.fire(
+          "🎉 Evento creado",
+          `El evento "${nombre}" fue creado correctamente.`,
+          "success"
+        );
+
+        if (formCrearEvento) formCrearEvento.reset();
+        await cargarEventosAdmin();
+      } catch (error) {
+        console.error("Error al guardar evento:", error);
+        Swal.fire("Error", "No se pudo guardar el evento.", "error");
+      }
+    });
+  }
 
   initAdminProductos();
   cargarEventosAdmin();
   cargarCatalogo();
 });
 
-// Función: cargarEventosAdmin
-
+// -----------------------------
+// FUNCIONES DE EVENTOS
+// -----------------------------
 export async function cargarEventosAdmin() {
   const listaEventos = document.getElementById("listaEventos");
   if (!listaEventos) return;
@@ -134,7 +157,7 @@ export async function cargarEventosAdmin() {
       const div = document.createElement("div");
       div.className = "card mb-3 shadow-sm p-3";
 
-      let valorEntrada = e.precio && e.precio > 0 ? `$${e.precio}` : "Gratis";
+      const valorEntrada = e.precio && e.precio > 0 ? `$${e.precio}` : "Gratis";
 
       div.innerHTML = `
         <h4 class="fw-bold">${e.nombre || "Sin nombre"}</h4>
@@ -158,7 +181,6 @@ export async function cargarEventosAdmin() {
 
       listaEventos.appendChild(div);
 
-      // Botón eliminar
       div.querySelector(".btnEliminar")?.addEventListener("click", async () => {
         const confirm = await Swal.fire({
           title: "¿Eliminar evento?",
@@ -187,7 +209,9 @@ export async function cargarEventosAdmin() {
   }
 }
 
-// Cargar Entradas Pendientes
+// -----------------------------
+// ENTRADAS PENDIENTES
+// -----------------------------
 export function cargarEntradasPendientes() {
   const contenedor = document.getElementById("EntradasPendientes");
   if (!contenedor) return;
@@ -196,7 +220,7 @@ export function cargarEntradasPendientes() {
 
   const q = query(
     collection(db, "entradasPendientes"),
-    orderBy("creadaEn", "desc") // 🔥 orden correcto
+    orderBy("creadaEn", "desc")
   );
 
   return onSnapshot(q, (snapshot) => {
@@ -210,31 +234,25 @@ export function cargarEntradasPendientes() {
     snapshot.forEach((docSnap) => {
       const e = { id: docSnap.id, ...docSnap.data() };
 
-      console.log("entradas pendientes " + e.length);
       const div = document.createElement("div");
       div.className = "card mb-3 shadow-sm p-3";
 
       div.innerHTML = `
-          <h5 class="fw-bold">${e.usuarioNombre || "Sin nombre"}</strong></h5>
-          <h7 class="mb-0">Evento: <strong>${
-            e.eventoNombre || "-"
-          }</strong></h7>
-          <p class="mb-0">Cantidad de entradas: <strong>${
-            e.cantidad
-          }</strong></p>
-          <p class="mb-0">Monto total a recibir: <strong>$${
-            e.precio * e.cantidad || 0
-          }</strong></p>
-          <p class="mb-0 text-warning">Estado: <strong>${
-            e.estado || "pendiente"
-          }</strong></p>
-
-         <div class="text-center mt-2">
-        <button class="btn btn-success btn-aprobar"><strong>Aprobar</strong></button>
-        <button class="btn btn-danger btn-rechazar"><strong>Rechazar</strong></button>
-          </div>
+        <h5 class="fw-bold">${e.usuarioNombre || "Sin nombre"}</h5>
+        <h7 class="mb-0">Evento: <strong>${e.eventoNombre || "-"}</strong></h7>
+        <p class="mb-0">Cantidad de entradas: <strong>${e.cantidad}</strong></p>
+        <p class="mb-0">Monto total a recibir: <strong>$${
+          e.precio * e.cantidad || 0
+        }</strong></p>
+        <p class="mb-0 text-warning">Estado: <strong>${
+          e.estado || "pendiente"
+        }</strong></p>
+        <div class="text-center mt-2">
+          <button class="btn btn-success btn-aprobar"><strong>Aprobar</strong></button>
+          <button class="btn btn-danger btn-rechazar"><strong>Rechazar</strong></button>
         </div>
       `;
+
       actualizarContadorEntradasPendientes();
 
       // APROBAR
@@ -249,11 +267,10 @@ export function cargarEntradasPendientes() {
                 lugar: e.lugar,
                 precio: e.precio,
               },
-              true, // indica que es pagada
-              true // ⚡ modoAdmin -> no genera QR
+              true,
+              true
             );
           }
-
           await deleteDoc(doc(db, "entradasPendientes", e.id));
 
           const cantidad = e.cantidad || 1;
@@ -284,7 +301,6 @@ export function cargarEntradasPendientes() {
             confirmButtonText: "Sí, rechazar",
             cancelButtonText: "Cancelar",
           });
-
           if (!confirm.isConfirmed) return;
 
           await deleteDoc(doc(db, "entradasPendientes", e.id));
@@ -297,27 +313,19 @@ export function cargarEntradasPendientes() {
   });
 }
 
-function escapeHtml(text) {
-  if (!text) return "";
-  return text
-    .toString()
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-// --------------------------------- GUARDAR EN DATA DE CONTACTO Y BASE DE DATOS ---------------------------------
-const btnGuardarEmpleado = document.getElementById("btnGuardarEmpleado");
+// -----------------------------
+// EMPLEADOS
+// -----------------------------
 let idEmpleadoSeleccionado = null;
 
-// GUARDAR O EDITAR EMPLEADO
-btnGuardarEmpleado.addEventListener("click", async () => {
-  const nombre = document.getElementById("nombreEmpleado").value.trim();
-  const usuario = document.getElementById("usuarioEmpleado").value.trim();
-  const contraseña = document.getElementById("contraseñaEmpleado").value.trim();
-  const permisos = document.getElementById("permisoEmpleado").value.trim();
+const btnGuardarEmpleado = document.getElementById("btnGuardarEmpleado");
+btnGuardarEmpleado?.addEventListener("click", async () => {
+  const nombre = document.getElementById("nombreEmpleado")?.value.trim();
+  const usuario = document.getElementById("usuarioEmpleado")?.value.trim();
+  const contraseña = document
+    .getElementById("contraseñaEmpleado")
+    ?.value.trim();
+  const permisos = document.getElementById("permisoEmpleado")?.value.trim();
 
   if (!nombre || !usuario || !contraseña || !permisos) {
     return Swal.fire("Error", "Completa todos los campos", "error");
@@ -325,38 +333,32 @@ btnGuardarEmpleado.addEventListener("click", async () => {
 
   try {
     if (idEmpleadoSeleccionado) {
-      // EDITAR
       await updateDoc(doc(db, "empleados", idEmpleadoSeleccionado), {
         nombre,
         usuario,
         contraseña,
         permisos,
       });
-
       Swal.fire("Actualizado", "Empleado modificado correctamente", "success");
       idEmpleadoSeleccionado = null;
     } else {
-      // CREAR NUEVO
       await addDoc(collection(db, "empleados"), {
         nombre,
         usuario,
         contraseña,
         permisos,
       });
-
       Swal.fire("Guardado", "Empleado creado correctamente", "success");
     }
-
-    limpiarFormulario();
+    limpiarFormularioEmpleado();
     cargarEmpleados();
-  } catch (error) {
-    console.error("Error:", error);
+  } catch (err) {
+    console.error("Error:", err);
     Swal.fire("Error", "No se pudo guardar", "error");
   }
 });
 
-// LIMPIAR FORMULARIO
-function limpiarFormulario() {
+function limpiarFormularioEmpleado() {
   document.getElementById("nombreEmpleado").value = "";
   document.getElementById("usuarioEmpleado").value = "";
   document.getElementById("contraseñaEmpleado").value = "";
@@ -367,11 +369,11 @@ export async function cargarEmpleados() {
   try {
     const empleadosSnapshot = await getDocs(collection(db, "empleados"));
     const lista = document.querySelector("#empleadosLista");
+    if (!lista) return;
     lista.innerHTML = "";
 
     empleadosSnapshot.forEach((docu) => {
       const emp = docu.data();
-
       const row = document.createElement("div");
       row.className = "empleado-row";
 
@@ -387,7 +389,7 @@ export async function cargarEmpleados() {
 
       row
         .querySelector(".btnEditar")
-        .addEventListener("click", () =>
+        ?.addEventListener("click", () =>
           editarEmpleado(
             docu.id,
             emp.nombre,
@@ -396,92 +398,64 @@ export async function cargarEmpleados() {
             emp.permisos
           )
         );
-
       row
         .querySelector(".btnEliminar")
-        .addEventListener("click", () => eliminarEmpleado(docu.id));
+        ?.addEventListener("click", () => eliminarEmpleado(docu.id));
 
       lista.appendChild(row);
     });
-  } catch (error) {
-    console.error("Error cargando empleados:", error);
+  } catch (err) {
+    console.error("Error cargando empleados:", err);
   }
 }
 
-// Delegación de eventos para Editar y Eliminar
-document.addEventListener("click", (e) => {
-  const row = e.target.closest("tr.empleado-row");
-  if (!row) return;
-
-  const id = row.dataset.id;
-
-  if (e.target.classList.contains("btnEditarEmpleado")) {
-    const celdas = row.querySelectorAll("td");
-    const nombre = celdas[0].innerText;
-    const usuario = celdas[1].innerText;
-    const permisos = celdas[2].innerText;
-
-    editarEmpleado(id, nombre, usuario, "********", permisos);
-  }
-
-  if (e.target.classList.contains("btnEliminarEmpleado")) {
-    eliminarEmpleado(id);
-  }
-});
-
-// EDITAR EMPLEADO
 window.editarEmpleado = (id, nombre, usuario, contraseña, permisos) => {
   document.getElementById("nombreEmpleado").value = nombre;
   document.getElementById("usuarioEmpleado").value = usuario;
   document.getElementById("contraseñaEmpleado").value = contraseña;
   document.getElementById("permisoEmpleado").value = permisos;
-
   idEmpleadoSeleccionado = id;
-
   Swal.fire("Edición", "Modifica los campos y guarda", "info");
 };
 
-// ELIMINAR EMPLEADO
 window.eliminarEmpleado = async (id) => {
-  Swal.fire({
+  const confirm = await Swal.fire({
     title: "¿Eliminar empleado?",
     icon: "warning",
     showCancelButton: true,
     confirmButtonText: "Eliminar",
     cancelButtonText: "Cancelar",
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      await deleteDoc(doc(db, "empleados", id));
-      cargarEmpleados();
-      Swal.fire("Eliminado", "Empleado eliminado", "success");
-    }
   });
+  if (!confirm.isConfirmed) return;
+
+  await deleteDoc(doc(db, "empleados", id));
+  cargarEmpleados();
+  Swal.fire("Eliminado", "Empleado eliminado", "success");
 };
 
-// MOSTRAR/OCULTAR PASSWORD EMPLEADO
+// -----------------------------
+// TOGGLE PASSWORD
+// -----------------------------
 const togglePassword = document.getElementById("togglePassword");
-
-togglePassword.addEventListener("click", () => {
+togglePassword?.addEventListener("click", () => {
   const input = document.getElementById("contraseñaEmpleado");
+  if (!input) return;
   input.type = input.type === "password" ? "text" : "password";
-  console.log("CACA");
 });
 
-// --------------------------------- GUARDAR EN DATA DE CONTACTO Y BASE DE DATOS ---------------------------------
-
-// --------------------------------- DATOS WHATSAPP ---------------------------------
-
-const numWhatsappInput = document.getElementById("numWhatsapp");
-
+// -----------------------------
+// CONTACTO Y DATOS BANCARIOS
+// -----------------------------
 const btnGuardarContacto = document.getElementById("btnGuardarContacto");
+btnGuardarContacto?.addEventListener("click", guardarDatosContacto);
 
-btnGuardarContacto.addEventListener("click", () => {
-  guardarDatosContacto();
-});
 async function guardarDatosContacto() {
-  const whatsappContacto = document.getElementById("whatsappContacto").value;
-  const instagramContacto = document.getElementById("instagramContacto").value;
-  const tiktokContacto = document.getElementById("tiktokContacto").value;
+  const whatsappContacto =
+    document.getElementById("whatsappContacto")?.value || "";
+  const instagramContacto =
+    document.getElementById("instagramContacto")?.value || "";
+  const tiktokContacto = document.getElementById("tiktokContacto")?.value || "";
+
   await setDoc(doc(db, "configuracion", "social"), {
     whatsappContacto,
     instagramContacto,
@@ -506,23 +480,19 @@ async function guardarDatosContacto() {
     `,
     confirmButtonText: "Aceptar",
   });
-
-  console.log(whatsappContacto, instagramContacto);
 }
 
-// BTN DATOS BANCARIOS
 const btnGuardarDatosBancarios = document.getElementById(
   "btnGuardarDatosBancarios"
 );
-btnGuardarDatosBancarios.addEventListener("click", () => {
-  guardarDatosBancarios();
-});
+btnGuardarDatosBancarios?.addEventListener("click", guardarDatosBancarios);
 
 async function guardarDatosBancarios() {
-  const nombreBanco = document.getElementById("nombreBanco").value;
-  const cbuBanco = document.getElementById("cbuBanco").value;
-  const aliasBanco = document.getElementById("aliasBanco").value;
-  const titularBanco = document.getElementById("titularBanco").value;
+  const nombreBanco = document.getElementById("nombreBanco")?.value || "";
+  const cbuBanco = document.getElementById("cbuBanco")?.value || "";
+  const aliasBanco = document.getElementById("aliasBanco")?.value || "";
+  const titularBanco = document.getElementById("titularBanco")?.value || "";
+
   await setDoc(doc(db, "configuracion", "datosBancarios"), {
     nombreBanco,
     cbuBanco,
@@ -544,6 +514,7 @@ async function guardarDatosBancarios() {
     confirmButtonText: "Aceptar",
   });
 }
+
 async function ObtenerDatosGuardadosDB() {
   // DATOS BANCARIOS
   const docRef = doc(db, "configuracion", "datosBancarios");

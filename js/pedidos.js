@@ -1,4 +1,4 @@
-// pedidos.js
+// /js/pedidos.js
 import { db, auth } from "./firebase.js";
 import {
   collection,
@@ -19,7 +19,7 @@ export async function crearPedido(
   nombreUsuario,
   estado = "pendiente",
   pagado = false,
-  ticketId // <-- ID del ticket
+  ticketId
 ) {
   try {
     const docRef = await addDoc(collection(db, "compras"), {
@@ -41,7 +41,7 @@ export async function crearPedido(
 }
 
 /**
- * Obtener pedidos de un usuario filtrando por estado
+ * Obtener pedidos por estado
  */
 export async function obtenerPedidosPorEstado(usuarioId, estado) {
   try {
@@ -55,9 +55,7 @@ export async function obtenerPedidosPorEstado(usuarioId, estado) {
         pedidos.push({ id: doc.id, ...data });
     });
 
-    // Ordenar por fecha descendente (más reciente arriba)
     pedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
     return pedidos;
   } catch (err) {
     console.error("❌ Error obteniendo pedidos:", err);
@@ -66,7 +64,7 @@ export async function obtenerPedidosPorEstado(usuarioId, estado) {
 }
 
 /**
- * Eliminar un pedido por ID
+ * Eliminar pedido
  */
 export async function eliminarPedido(pedidoId) {
   try {
@@ -79,9 +77,10 @@ export async function eliminarPedido(pedidoId) {
 }
 
 /**
- * Mostrar todos los pedidos del usuario
+ * Mostrar todos los pedidos
  */
 export async function mostrarTodosLosPedidos(usuarioId) {
+  if (!usuarioId) return;
   const contPendientes = document.getElementById("listaPedidosPendientes");
   const contPagos = document.getElementById("listaPedidosPagos");
   const contRetirados = document.getElementById("listaPedidosRetirados");
@@ -98,9 +97,6 @@ export async function mostrarTodosLosPedidos(usuarioId) {
   mostrarPedidosUI(contRetirados, pedidosRetirados);
 }
 
-/**
- * Función auxiliar para renderizar pedidos en un contenedor
- */
 function mostrarPedidosUI(contenedor, pedidos) {
   if (!contenedor) return;
   contenedor.innerHTML = "";
@@ -111,9 +107,8 @@ function mostrarPedidosUI(contenedor, pedidos) {
     div.style.padding = "10px";
     div.style.marginBottom = "10px";
     div.style.borderRadius = "5px";
-    div.style.position = "relative"; // para la X
+    div.style.position = "relative";
 
-    // Crear botón de eliminar
     const btnEliminar = document.createElement("button");
     btnEliminar.textContent = "✖";
     btnEliminar.style.position = "absolute";
@@ -127,17 +122,12 @@ function mostrarPedidosUI(contenedor, pedidos) {
     div.appendChild(btnEliminar);
 
     btnEliminar.addEventListener("click", async () => {
-      const confirm = window.confirm("¿Eliminar este pedido?");
-      if (!confirm) return;
+      if (!window.confirm("¿Eliminar este pedido?")) return;
       const success = await eliminarPedido(pedido.id);
-      if (success) {
-        div.remove();
-      } else {
-        alert("No se pudo eliminar el pedido");
-      }
+      if (success) div.remove();
+      else alert("No se pudo eliminar el pedido");
     });
 
-    // Crear contenido del pedido (plegable)
     const contenido = document.createElement("div");
     contenido.style.cursor = "pointer";
     contenido.style.userSelect = "none";
@@ -151,7 +141,6 @@ function mostrarPedidosUI(contenedor, pedidos) {
       <div class="detalles-pedido" style="display:none;margin-top:10px;"></div>
     `;
 
-    // Evento para mostrar u ocultar detalles
     contenido.addEventListener("click", (e) => {
       if (e.target.classList.contains("ver-qr") || e.target === btnEliminar)
         return;
@@ -160,9 +149,8 @@ function mostrarPedidosUI(contenedor, pedidos) {
         detalles.style.display === "none" ? "block" : "none";
     });
 
-    // Evento para ver QR
     contenido.querySelector(".ver-qr").addEventListener("click", (e) => {
-      e.stopPropagation(); // evitar toggle
+      e.stopPropagation();
       generarCompraQr({
         carrito: pedido.items,
         usuarioId: pedido.usuarioId,
@@ -174,7 +162,6 @@ function mostrarPedidosUI(contenedor, pedidos) {
       });
     });
 
-    // Colorear según estado
     div.style.backgroundColor =
       pedido.estado === "pagado"
         ? "#d4edda"
@@ -182,15 +169,15 @@ function mostrarPedidosUI(contenedor, pedidos) {
         ? "#fff3cd"
         : "#f8d7da";
 
-    div.appendChild(contenido);
     contenedor.appendChild(div);
   });
 }
 
-// Cargar pedidos al iniciar la página
-window.addEventListener("DOMContentLoaded", async () => {
-  const usuarioId = auth.currentUser?.uid;
-  if (usuarioId) {
-    await mostrarTodosLosPedidos(usuarioId);
-  }
+// ================= DOMContentLoaded =================
+document.addEventListener("DOMContentLoaded", () => {
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      await mostrarTodosLosPedidos(user.uid);
+    }
+  });
 });

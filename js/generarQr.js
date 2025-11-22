@@ -91,48 +91,6 @@ export async function generarEntradaQr({
   }
 }
 
-// export async function generarCompraQr({
-//   carrito,
-//   usuarioId,
-//   nombreUsuario = "Invitado",
-//   lugar = "Tienda",
-//   total,
-// }) {
-//   const ticketId = `${Date.now()}-${Math.floor(Math.random() * 9999)}`;
-//   const fecha = new Date().toLocaleString();
-
-//   // Texto para el QR: solo el ticketId
-//   const contenidoQr = ticketId;
-
-//   // Mostrar modal con info del ticket
-//   await Swal.fire({
-//     title: `🧾 Ticket generado`,
-//     html: `
-//       <p><strong>Ticket:</strong> ${ticketId}</p>
-//       <p><strong>Cliente:</strong> ${nombreUsuario}</p>
-//       <p><strong>Lugar:</strong> ${lugar}</p>
-//       <p><strong>Fecha:</strong> ${formatearFecha(fecha)}</p>
-//       <p><strong>Total:</strong> $${total}</p>
-//       <hr>
-//       <div id="qrContainer" style="display:flex;justify-content:center;"></div>
-//     `,
-//     didOpen: async () => {
-//       const qrContainer = document.getElementById("qrContainer");
-//       await generarEntradaQr({
-//         ticketId,
-//         contenido: contenidoQr,
-//         tamaño: tamañoQR,
-//         qrContainer,
-//       });
-//     },
-
-//     confirmButtonText: "Cerrar",
-//     customClass: { confirmButton: "btn btn-dark" },
-//     buttonsStyling: false,
-//   });
-
-//   return ticketId; // Devuelve ticketId para guardar en la base
-// }
 export async function generarCompraQr({
   carrito,
   usuarioId,
@@ -150,7 +108,7 @@ export async function generarCompraQr({
   const contenidoQr = ticketId;
 
   await Swal.fire({
-    title: `🧾 Ticket ${modoLectura ? "(Histórico)" : "generado"}`,
+    title: `🧾 Ticket ${modoLectura ? "(Caja)" : "generado"}`,
     html: `
       <p><strong>Ticket:</strong> ${ticketId}</p>
       <p><strong>Cliente:</strong> ${nombreUsuario}</p>

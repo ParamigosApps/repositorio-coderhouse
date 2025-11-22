@@ -89,8 +89,7 @@ function setTituloModo(modo = "entradas") {
       ? "ESCÁNER ENTRADAS"
       : modo === "compras"
       ? "ESCÁNER COMPRAS"
-      : "ESCÁNER CARRITOS";
-  console.log("el modo es: " + modo);
+      : "ESCÁNER COMPRAS";
 }
 
 // ---------------- Escanear QR ----------------
@@ -119,15 +118,14 @@ function scanQR() {
 
 // ---------------- Validar ticket ----------------
 async function validarTicket(ticketId, modo = "entradas") {
+  console.log("Ticket escaneado:", ticketId);
+  console.log("Modo actual:", modo);
+
   try {
-    // Colección correcta según el modo actual
     const coleccionActual = modo; // "entradas" o "compras"
     const coleccionOtra = modo === "entradas" ? "compras" : "entradas";
-
-    console.log(`Escaneando ticket: ${ticketId}`);
-    console.log(`Modo actual: ${modo}`);
-    console.log(`Consultando colección actual: ${coleccionActual}`);
-    console.log(`Consultando colección otra: ${coleccionOtra}`);
+    console.log("Colección actual:", coleccionActual);
+    console.log("Colección otra:", coleccionOtra);
 
     const refActual = doc(db, coleccionActual, ticketId);
     const refOtra = doc(db, coleccionOtra, ticketId);
@@ -135,110 +133,117 @@ async function validarTicket(ticketId, modo = "entradas") {
     const snapActual = await getDoc(refActual);
     const snapOtra = await getDoc(refOtra);
 
+    console.log("Snap actual existe:", snapActual.exists());
+    console.log("Snap otra existe:", snapOtra.exists());
+
     qrInfo.textContent = "";
 
     if (snapActual.exists()) {
       const ticketData = snapActual.data();
-      console.log(`Ticket encontrado en colección actual:`, ticketData);
+      console.log("Ticket encontrado en colección actual:", ticketData);
 
       if (ticketData.usado) {
         qrResultado.textContent =
           modo === "entradas" ? "⚠ Entrada ya usada" : "⚠ Pedido ya entregado";
         qrResultado.className = "qr-resultado used";
       } else {
-        qrResultado.textContent =
-          modo === "entradas"
-            ? "✅ Entrada válida - Permitido el ingreso"
-            : "✅ Pedido válido - Entregar al cliente";
-        qrResultado.className = "qr-resultado valid";
-
-        // Marcar como usado en Firestore
-        await updateDoc(refActual, { usado: true });
-
-        // Si es pedido, actualizar lista de pedidos pendientes
-        if (
-          modo === "compras" &&
-          typeof mostrarPedidosConfirmados === "function"
-        ) {
-          mostrarPedidosConfirmados(ticketData.usuarioId);
+        // Detalle de productos si es compra
+        let detalleHTML = "";
+        if (modo === "compras" && ticketData.items?.length) {
+          detalleHTML = `<div style="max-height:200px;overflow-y:auto;border:1px solid #ccc;padding:5px;margin-top:5px;">
+            <table style="width:100%;border-collapse:collapse;font-size:0.9em">
+              <thead>
+                <tr>
+                  <th style="border-bottom:1px solid #ccc;text-align:left">Producto</th>
+                  <th style="border-bottom:1px solid #ccc;text-align:center">Cantidad</th>
+                  <th style="border-bottom:1px solid #ccc;text-align:right">Precio</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${ticketData.items
+                  .map(
+                    (p) => `
+                  <tr>
+                    <td>${p.nombre}</td>
+                    <td style="text-align:center">${p.enCarrito}</td>
+                    <td style="text-align:right">$${p.precio}</td>
+                  </tr>`
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>`;
         }
-      }
-      // ------------------- Detalle de productos -------------------
-      let detalle = "";
-      if (modo === "compras" && ticketData.items) {
-        detalle = ticketData.items
-          .map((p) => `- ${p.nombre} x${p.enCarrito} ($${p.precio})`)
-          .join("<br>");
-      }
 
-      // ------------------- Mostrar Swal para aprobar -------------------
-      const result = await Swal.fire({
-        title: modo === "entradas" ? "Aprobar entrada" : "Confirmar pedido",
-        html: `
-          <p><strong>${modo === "entradas" ? "Evento" : "Pedido"}:</strong> ${
+        // Swal para aprobar
+        const result = await Swal.fire({
+          title: modo === "entradas" ? "Aprobar entrada" : "Confirmar pedido",
+          html: `
+            <p><strong>${modo === "entradas" ? "Evento" : "Pedido"}:</strong> ${
+            ticketData.nombre || "Sin nombre"
+          }</p>
+            <p><strong>Usuario:</strong> ${
+              ticketData.usuarioNombre || "Desconocido"
+            }</p>
+            <p><strong>Fecha:</strong> ${
+              formatearFecha(ticketData.fecha) || "Sin fecha"
+            }</p>
+            ${detalleHTML}
+          `,
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "Aprobar",
+          cancelButtonText: "Cancelar",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          width: 500,
+        });
+
+        if (!result.isConfirmed) {
+          ticketsProcesados.delete(ticketId);
+          return;
+        }
+
+        // Marcar como usado
+        if (modo === "entradas") {
+          await updateDoc(refActual, { usado: true });
+          qrResultado.textContent = "✅ Entrada válida - Permitido el ingreso";
+        } else if (modo === "compras") {
+          await updateDoc(refActual, { usado: true, estado: "retirado" });
+          qrResultado.textContent = "✅ Pedido válido - Entregar al cliente";
+          if (typeof mostrarPedidosConfirmados === "function") {
+            mostrarPedidosConfirmados(ticketData.usuarioId);
+          }
+        }
+
+        qrResultado.className = "qr-resultado valid";
+        qrInfo.textContent = `${modo === "entradas" ? "Evento" : "Pedido"}: ${
           ticketData.nombre || "Sin nombre"
-        }</p>
-          <p><strong>Usuario:</strong> ${
-            ticketData.usuarioNombre || "Desconocido"
-          }</p>
-          <p><strong>Fecha:</strong> ${
-            formatearFecha(ticketData.fecha) || "Sin fecha"
-          }</p>
-          ${
-            detalle
-              ? `<hr><p><strong>Productos:</strong><br>${detalle}</p>`
-              : ""
-          }`,
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Aprobar",
-        cancelButtonText: "Cancelar",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-      });
-
-      if (!result.isConfirmed) {
-        ticketsProcesados.delete(ticketId);
-        return;
+        } | Usuario: ${ticketData.usuarioNombre || "Desconocido"}`;
       }
-
-      // ------------------- Marcar como usado -------------------
-      qrResultado.textContent =
-        modo === "entradas"
-          ? "✅ Entrada válida - Permitido el ingreso"
-          : "✅ Pedido válido - Entregar al cliente";
-      qrResultado.className = "qr-resultado valid";
-      await updateDoc(refActual, { usado: true });
-
-      qrInfo.textContent = `${modo === "entradas" ? "Evento" : "Pedido"}: ${
-        ticketData.nombre || "Sin nombre"
-      } | Usuario: ${ticketData.usuarioNombre || "Desconocido"}`;
     } else if (snapOtra.exists()) {
-      // Ticket existe pero pertenece a otra colección
       const ticketData = snapOtra.data();
-      console.log(`Ticket encontrado en otra colección:`, ticketData);
+      console.log("Ticket encontrado en otra colección:", ticketData);
 
       qrResultado.textContent =
         modo === "entradas"
-          ? "❌ Este QR corresponde a un pedido"
-          : "❌ Este QR corresponde a una entrada";
-      qrResultado.className = "qr-resultado invalid";
+          ? "⚠ Este QR corresponde a un pedido"
+          : "⚠ Este QR corresponde a una entrada";
+      qrResultado.className = "qr-resultado other";
 
       await Swal.fire({
-        title: "❌ Ticket inválido para este modo",
-        html: `<p style="color:red; font-size:0.9em">
+        title: "⚠ Ticket de otra colección",
+        html: `<p style="color:orange; font-size:0.9em">
                 Este QR corresponde a ${
                   modo === "entradas" ? "un pedido" : "una entrada"
-                } 
-                y no puede ser usado aquí.
+                } y no puede ser confirmado en este modo.
               </p>`,
-        icon: "error",
+        icon: "info",
         confirmButtonText: "Aceptar",
         allowOutsideClick: false,
         allowEscapeKey: false,
       });
     } else {
-      // Ticket no encontrado
       console.log("Ticket no encontrado en ninguna colección");
       qrResultado.textContent =
         modo === "entradas" ? "❌ Entrada inválida" : "❌ Pedido inválido";

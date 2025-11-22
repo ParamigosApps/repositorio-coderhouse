@@ -10,28 +10,35 @@ import {
 import { generarCompraQr } from "./generarQr.js";
 
 /**
- * Crear un pedido pendiente en Firestore
+ * Crear un pedido en Firestore (pendiente o pagado)
+ * @param {Array} carrito - Lista de productos
+ * @param {number} total - Total de la compra
+ * @param {string} lugar - Lugar de la compra
+ * @param {boolean} pagado - true si fue pago online, false si es en caja
  */
-export async function crearPedidoPendiente({
+export async function crearPedido({
   carrito,
   total,
   lugar = "Tienda",
+  pagado = false,
 }) {
   if (!auth.currentUser) throw new Error("Usuario no logueado");
   const usuarioId = auth.currentUser.uid;
-  const nombreUsuario = auth.currentUser.displayName || "Usuario";
+  const usuarioNombre = auth.currentUser.displayName || "Usuario";
 
   // Generar ticketId único
   const ticketId = `${Date.now()}-${Math.floor(Math.random() * 9999)}`;
 
-  // Guardar en Firestore
-  await addDoc(collection(db, "pedidosPendientes"), {
+  // Guardar en Firestore en la colección "compras"
+  await addDoc(collection(db, "compras"), {
     usuarioId,
-    nombreUsuario,
-    carrito,
+    usuarioNombre,
+    items: carrito,
     total,
-    estado: "pendiente",
+    pagado, // true o false
+    estado: pagado ? "pagado" : "pendiente",
     ticketId,
+    usado: false,
     creadoEn: serverTimestamp(),
   });
 
@@ -39,7 +46,11 @@ export async function crearPedidoPendiente({
 }
 
 /**
- * Generar QR de compra
+ * Mostrar QR de compra
+ * @param {Array} carrito - Productos del pedido
+ * @param {number} total - Total del pedido
+ * @param {string} ticketId - ID del ticket
+ * @param {string} lugar - Lugar de la compra
  */
 export async function mostrarQrCompra({
   carrito,
@@ -48,13 +59,13 @@ export async function mostrarQrCompra({
   lugar = "Tienda",
 }) {
   if (!auth.currentUser) throw new Error("Usuario no logueado");
-  const nombreUsuario = auth.currentUser.displayName || "Usuario";
+  const usuarioNombre = auth.currentUser.displayName || "Usuario";
 
   await Swal.fire({
     title: "🧾 Tu ticket de compra",
     html: `
       <p><strong>Ticket:</strong> ${ticketId}</p>
-      <p><strong>Cliente:</strong> ${nombreUsuario}</p>
+      <p><strong>Cliente:</strong> ${usuarioNombre}</p>
       <p><strong>Lugar:</strong> ${lugar}</p>
       <p><strong>Fecha:</strong> ${formatearFecha(new Date())}</p>
       <p><strong>Total:</strong> $${total}</p>
@@ -63,11 +74,10 @@ export async function mostrarQrCompra({
     `,
     didOpen: async () => {
       const qrContainer = document.getElementById("qrCompraContainer");
-      await generarCompraQr({
-        contenido: ticketId,
+      generarCompraQr({
+        contenido: `ticketId`,
         qrContainer,
         tamaño: 200,
-        modoLectura: true,
       });
     },
     confirmButtonText: "Cerrar",

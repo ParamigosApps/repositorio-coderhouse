@@ -4,7 +4,7 @@ import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.e
 
 export function mostrarMensaje(
   mensaje,
-  color = "#ffffffb0",
+  color = "#ffffff",
   colorletra = "#000000"
 ) {
   if (typeof Toastify === "undefined") {

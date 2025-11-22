@@ -6,7 +6,7 @@ import {
 } from "./carrito.js";
 import { auth } from "./firebase.js";
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
-import { crearPedidoPendiente, mostrarQrCompra } from "./compras.js";
+import { crearPedido, mostrarQrCompra } from "./compras.js"; // <-- ahora usamos crearPedido unificado
 
 export async function finalizarCompra() {
   try {
@@ -59,15 +59,20 @@ export async function finalizarCompra() {
 
     if (isDismissed) return;
 
-    // PAGO EN CAJA
+    // ================= PAGO EN CAJA =================
     if (isDenied) {
-      const ticketId = await crearPedidoPendiente({
+      // Guardar pedido en "compras" con pagado: false
+      const ticketId = await crearPedido({
         carrito,
         total,
         lugar: "Tienda",
+        pagado: false,
       });
+
+      // Mostrar QR
       await mostrarQrCompra({ carrito, total, ticketId, lugar: "Tienda" });
 
+      // Limpiar carrito
       localStorage.removeItem("carrito");
       actualizarCarritoVisual();
       mostrarCarrito();
@@ -76,8 +81,17 @@ export async function finalizarCompra() {
       return;
     }
 
-    // MERCADO PAGO
+    // ================= MERCADO PAGO =================
     if (isConfirmed) {
+      // Primero creamos el pedido con pagado: true
+      const ticketId = await crearPedido({
+        carrito,
+        total,
+        lugar: "Tienda",
+        pagado: true,
+      });
+
+      // Crear preferencia en backend
       const res = await fetch("/api/crear-preferencia", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -89,12 +103,15 @@ export async function finalizarCompra() {
             usuarioId: auth.currentUser.uid,
             productoId: p.id,
           })),
+          ticketId, // pasamos el ticketId al backend por si hace falta
         }),
       });
 
       const data = await res.json();
       if (!data.init_point)
         return Swal.fire("Error", "No se pudo iniciar el pago.", "error");
+
+      // Redirigir a Mercado Pago
       window.location.href = data.init_point;
     }
   } catch (err) {
@@ -103,6 +120,7 @@ export async function finalizarCompra() {
   }
 }
 
+// ================= EVENTO BOTÓN =================
 document
   .getElementById("btnPagarCarrito")
   ?.addEventListener("click", finalizarCompra);

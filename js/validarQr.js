@@ -1,3 +1,4 @@
+// validarQr.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
 import {
   getFirestore,
@@ -33,8 +34,8 @@ const DURACION_RESULTADO = 4000;
 const params = new URLSearchParams(window.location.search);
 const modo = params.get("modo"); // "caja" o "entradas"
 
-if (modo === "caja") qrTitulo.textContent = "Validación de Compras - Caja";
-else qrTitulo.textContent = "Validación de Entradas";
+qrTitulo.textContent =
+  modo === "caja" ? "Validación de Compras - Caja" : "Validación de Entradas";
 
 // ---------------- ESCANEAR QR ----------------
 function scanQR() {
@@ -58,26 +59,14 @@ function scanQR() {
 }
 
 // ---------------- VALIDAR QR ----------------
-async function validarQr(qrText) {
-  if (!qrText) return;
+async function validarQr(ticketId) {
+  if (!ticketId) return;
 
-  const tipo = qrText.charAt(0); // 'E' o 'C'
-  const id = qrText.slice(2);
-
-  if (
-    (modo === "caja" && tipo !== "C") ||
-    (modo === "entradas" && tipo !== "E")
-  ) {
-    qrResultado.textContent = "❌ QR incorrecto para este modo";
-    qrResultado.className = "qr-resultado invalid";
-    limpiarResultado();
-    return;
-  }
-
-  const coleccion = tipo === "E" ? "entradas" : "compras";
+  // Determinar colección según modo
+  const coleccion = modo === "caja" ? "compras" : "entradas";
 
   try {
-    const docRef = doc(db, coleccion, id);
+    const docRef = doc(db, coleccion, ticketId);
     const docSnap = await getDoc(docRef);
 
     if (!docSnap.exists()) {
@@ -89,7 +78,7 @@ async function validarQr(qrText) {
 
     const data = docSnap.data();
 
-    if (tipo === "E") {
+    if (modo === "entradas") {
       qrResultado.textContent = `✅ Entrada ${data.estado.toUpperCase()}`;
       qrResultado.className = "qr-resultado valid";
       qrInfo.textContent = `Evento: ${data.evento || "Sin nombre"} | Usuario: ${
@@ -105,9 +94,7 @@ async function validarQr(qrText) {
       qrInfo.textContent = `Productos: ${productosTexto} | Total: $${data.total}`;
     }
 
-    // Mostrar SweetAlert con detalle
-    mostrarDetalle(data, tipo);
-
+    mostrarDetalleCompleto(data);
     limpiarResultado(DURACION_RESULTADO);
   } catch (error) {
     console.error(error);
@@ -118,39 +105,52 @@ async function validarQr(qrText) {
 }
 
 // ---------------- SWEETALERT ----------------
-function mostrarDetalle(data, tipo) {
-  if (tipo === "E") {
+function mostrarDetalleCompleto(data) {
+  if (modo === "entradas") {
     Swal.fire({
       title: `<i class="bi bi-ticket-perforated-fill"></i> Entrada ${data.estado.toUpperCase()}`,
       html: `
         <p><b>Evento:</b> ${data.evento}</p>
         <p><b>Usuario:</b> ${data.usuario}</p>
-        <p><b>Fecha:</b> ${new Date(data.fecha).toLocaleString()}</p>
+        <p><b>Fecha:</b> ${
+          data.fecha ? new Date(data.fecha).toLocaleString() : "Desconocida"
+        }</p>
+        <p><b>Estado:</b> ${data.estado.toUpperCase()}</p>
+        <p><b>ID Ticket:</b> ${data.id || ""}</p>
       `,
       icon: data.estado === "pagado" ? "success" : "warning",
       showCloseButton: true,
-      width: 400,
+      width: 450,
       confirmButtonText: "Aceptar",
     });
   } else {
     const htmlItems = data.items
       .map(
-        (i) =>
-          `<tr><td>${i.titulo}</td><td>${i.cantidad}</td><td>$${i.precio}</td></tr>`
+        (i) => `<tr>
+                  <td>${i.titulo}</td>
+                  <td>${i.cantidad}</td>
+                  <td>$${i.precio}</td>
+                  <td>$${i.cantidad * i.precio}</td>
+                </tr>`
       )
       .join("");
     Swal.fire({
       title: `<i class="bi bi-cart-check-fill"></i> Compra ${data.estado.toUpperCase()}`,
       html: `
         <table class="table table-sm table-striped">
-          <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th></tr></thead>
+          <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr></thead>
           <tbody>${htmlItems}</tbody>
         </table>
-        <p class="text-end"><b>Total: $${data.total}</b></p>
+        <p><b>Total:</b> $${data.total}</p>
+        <p><b>Usuario:</b> ${data.usuario || "Desconocido"}</p>
+        <p><b>Fecha:</b> ${
+          data.fecha ? new Date(data.fecha).toLocaleString() : "Desconocida"
+        }</p>
+        <p><b>ID Compra:</b> ${data.id || ""}</p>
       `,
       icon: data.estado === "pagado" ? "success" : "warning",
       showCloseButton: true,
-      width: 500,
+      width: 550,
       confirmButtonText: "Aceptar",
     });
   }

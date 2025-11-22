@@ -99,3 +99,7 @@ export async function cargarEventos() {
     `;
   }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  cargarEventos();
+});

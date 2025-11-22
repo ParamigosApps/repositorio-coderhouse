@@ -49,25 +49,21 @@ export async function crearEntrada(
     );
 
     if (pagado && !modoAdmin) {
-      // Solo mostramos QR al usuario, no al admin
-      const valorEntrada =
-        !entradaData.precio || entradaData.precio < 1
-          ? "Entrada gratuita"
-          : `$${entradaData.precio}`;
-
       await generarQr({
         ticketId: docRef.id,
         nombreEvento: entradaData.nombre || "Evento sin nombre",
         usuario: auth.currentUser.displayName || "Usuario",
         fecha: entradaData.fecha,
         lugar: entradaData.lugar,
-        precio: valorEntrada,
-        modoAdmin, // aunque lo pasemos, generarQr puede usarlo para no mostrar
+        precio: entradaData.precio,
+        modoAdmin,
+        tipo: "Entrada",
+        qrContainer: null,
       });
     } else if (!pagado) {
       Swal.fire(
-        "✅ Solicitud de entrada registrada",
-        "Envía el comprobante para que un administrador apruebe la solicitud.",
+        "✅ Solicitud registrada",
+        "En espera de aprobación.",
         "success"
       );
     }
@@ -78,6 +74,18 @@ export async function crearEntrada(
     Swal.fire("Error", "No se pudo guardar la entrada.", "error");
   }
 }
+
+// Función para generar compra
+export async function crearCompra(carrito, total) {
+  if (!auth.currentUser)
+    return Swal.fire("Error", "Debes iniciar sesión.", "error");
+
+  const usuarioId = auth.currentUser.uid;
+  const nombreUsuario = auth.currentUser.displayName || "Invitado";
+
+  await generarTicketQr({ carrito, usuarioId, nombreUsuario, total });
+}
+
 // -------------------------- PEDIR ENTRADA --------------------------
 export async function pedirEntrada(eventoId, e) {
   try {
@@ -544,7 +552,7 @@ export async function cargarEntradas() {
           }
 
           const qrTitle = document.createElement("p");
-          qrTitle.textContent = `Entrada ${i + 1}`;
+          qrTitle.textContent = `Entrada ${i + 1}`; // ← corregido
           qrTitle.style.fontWeight = "bold";
           qrTitle.style.marginBottom = "12px";
           qrTitle.style.fontSize = "2rem";

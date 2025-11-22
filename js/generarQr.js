@@ -1,11 +1,12 @@
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
+import { formatearFecha } from "./utils.js";
 
 const tamañoQR = 220;
 
 export async function generarQr({
   ticketId,
-  nombreEvento = "Evento",
-  tipo = "Entrada",
+  contenido = null, // ⚡ nuevo parámetro
+  nombreEvento,
   usuario = "Invitado",
   fecha = "Fecha no disponible",
   lugar = "Lugar a definir",
@@ -13,12 +14,12 @@ export async function generarQr({
   qrContainer = null,
   downloadLink = null,
   modoAdmin = false,
-  tamaño = tamañoQR,
+  tamaño = 220,
 }) {
   try {
     if (!ticketId) throw new Error("TicketID es requerido para generar QR.");
 
-    const crearQr = (contenedor, texto, size = tamañoQR) => {
+    const crearQr = (contenedor, texto, size = 220) => {
       contenedor.innerHTML = "";
       contenedor.style.display = "flex";
       contenedor.style.justifyContent = "center";
@@ -33,10 +34,10 @@ export async function generarQr({
       });
     };
 
-    const contenidoQr = `${tipo}: ${ticketId}`;
+    const textoQr = contenido || ticketId; // ⚡ si hay contenido, lo usa
 
     if (qrContainer) {
-      crearQr(qrContainer, contenidoQr, tamaño);
+      crearQr(qrContainer, textoQr, tamaño);
 
       if (downloadLink) {
         setTimeout(() => {
@@ -47,7 +48,7 @@ export async function generarQr({
             const src =
               img.tagName === "IMG" ? img.src : img.toDataURL("image/png");
             downloadLink.href = src;
-            downloadLink.download = `${tipo.toLowerCase()}_${ticketId}.png`;
+            downloadLink.download = `entrada_${ticketId}.png`;
             downloadLink.style.display = "inline-block";
           }
         }, 500);
@@ -74,10 +75,10 @@ export async function generarQr({
 
       const qrDiv = document.createElement("div");
       tempDiv.appendChild(qrDiv);
-      crearQr(qrDiv, contenidoQr, tamaño);
+      crearQr(qrDiv, textoQr, tamaño);
 
       Swal.fire({
-        title: `Tu ${tipo.toLowerCase()} 🎫`,
+        title: "Tu entrada 🎫",
         html: tempDiv,
         showConfirmButton: true,
         confirmButtonText: "Cerrar",
@@ -90,17 +91,30 @@ export async function generarQr({
   }
 }
 
-// Función para generar tickets de compra
 export async function generarTicketQr({
-  carrito = [],
+  carrito,
   usuarioId,
   nombreUsuario = "Invitado",
   lugar = "Tienda",
-  total = 0,
+  total,
 }) {
-  const ticketId = `TCK-${Date.now()}-${Math.floor(Math.random() * 9999)}`;
+  const ticketId = `${Date.now()}-${Math.floor(Math.random() * 9999)}`;
   const fecha = new Date().toLocaleString();
 
+  // Texto real almacenado dentro del QR
+  const contenidoQr = `
+TICKET: ${ticketId}
+CLIENTE: ${nombreUsuario}
+USUARIO_ID: ${usuarioId}
+LUGAR: ${lugar}
+TOTAL: $${total}
+FECHA: ${fecha}
+
+PRODUCTOS:
+${carrito.map((p) => `- ${p.nombre} x${p.enCarrito} ($${p.precio})`).join("\n")}
+`;
+
+  // Mostrar modal antes del QR
   await Swal.fire({
     title: `🧾 Ticket generado`,
     html: `
@@ -116,17 +130,15 @@ export async function generarTicketQr({
       const qrContainer = document.getElementById("qrContainer");
       await generarQr({
         ticketId,
-        nombreEvento: "Compra",
-        tipo: "Compra",
-        usuario: nombreUsuario,
-        fecha,
-        lugar,
-        precio: total,
+        contenido: contenidoQr, // ⚡ PASAR todo el texto
+        tamaño: tamañoQR,
         qrContainer,
       });
     },
     confirmButtonText: "Cerrar",
-    customClass: { confirmButton: "btn btn-dark" },
+    customClass: {
+      confirmButton: "btn btn-dark",
+    },
     buttonsStyling: false,
   });
 }

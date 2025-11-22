@@ -240,3 +240,106 @@ carritoIcono?.addEventListener("keydown", (e) => {
 });
 cerrarCarrito?.addEventListener("click", cerrarPanel);
 carritoOverlay?.addEventListener("click", cerrarPanel);
+
+import { generarTicketQr } from "./generarQr.js";
+
+export async function crearCompra(
+  usuarioId,
+  carrito,
+  total,
+  nombreUsuario = "Invitado"
+) {
+  try {
+    // Creamos un documento en Firestore con toda la info del pedido
+    const docRef = await addDoc(collection(db, "compras"), {
+      usuarioId,
+      usuarioNombre: nombreUsuario,
+      items: carrito,
+      total,
+      fecha: new Date().toISOString(),
+      usado: false, // para que la caja marque si ya se entregó
+    });
+
+    const ticketId = docRef.id;
+
+    // Generamos el QR solo con el ticketId
+    generarQr({ ticketId, qrContainer: null });
+
+    return ticketId;
+  } catch (err) {
+    console.error("Error creando compra:", err);
+  }
+}
+
+async function guardarCompra(usuarioId, carrito) {
+  const docRef = await addDoc(collection(db, "compras"), {
+    usuarioId,
+    carrito,
+    fecha: new Date(),
+    usado: false,
+  });
+  return docRef.id; // Este ID será el ticketId que pondrás en el QR
+}
+
+// CARRITOS CONFIRMADOS - PENDIENTES DE PAGAR O RETIRAR
+const listaPedidos = document.getElementById("listaPedidos");
+
+export async function mostrarPedidosConfirmados(usuarioId) {
+  if (!listaPedidos) return;
+  listaPedidos.innerHTML = "Cargando pedidos...";
+
+  try {
+    const pedidosSnap = await getDocs(collection(db, "compras"));
+    const pedidos = [];
+
+    pedidosSnap.forEach((docu) => {
+      const data = docu.data();
+      // Filtrar por usuario y solo los no usados
+      if (data.usuarioId === usuarioId && !data.usado) {
+        pedidos.push({ id: docu.id, ...data });
+      }
+    });
+
+    if (pedidos.length === 0) {
+      listaPedidos.innerHTML = `<p class="text-muted">No hay pedidos confirmados pendientes.</p>`;
+      return;
+    }
+
+    listaPedidos.innerHTML = "";
+    pedidos.forEach((pedido) => {
+      const div = document.createElement("div");
+      div.className = "pedido-confirmado p-3 mb-2 border rounded shadow-sm";
+
+      div.innerHTML = `
+        <p><strong>Pedido ID:</strong> ${pedido.id}</p>
+        <p><strong>Total:</strong> $${pedido.total}</p>
+        <p><strong>Productos:</strong></p>
+        <ul>
+          ${pedido.items
+            .map((p) => `<li>${p.nombre} x${p.enCarrito} ($${p.precio})</li>`)
+            .join("")}
+        </ul>
+        <button class="btn btn-sm btn-dark" id="btnQr-${
+          pedido.id
+        }">Ver QR</button>
+      `;
+      listaPedidos.appendChild(div);
+
+      // Evento para mostrar QR
+      document
+        .getElementById(`btnQr-${pedido.id}`)
+        .addEventListener("click", async () => {
+          await generarQr({
+            ticketId: pedido.id,
+            contenido: pedido.contenidoQr || JSON.stringify(pedido.items),
+            nombreEvento: "Tienda todovaper",
+            usuario: pedido.usuarioNombre || "Invitado",
+            total: pedido.total,
+          });
+        });
+    });
+  } catch (err) {
+    console.error(err);
+    listaPedidos.innerHTML = `<p class="text-danger">Error cargando pedidos.</p>`;
+  }
+}

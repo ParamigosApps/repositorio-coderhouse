@@ -31,13 +31,12 @@ export async function cargarEventos() {
     }
 
     // ACTUALIZAR CONTADOR DE EVENTOS DISPONIBLES
-    console.log(`📦 Eventos encontrados: ${snapshot.size}`);
+
     let contadorEventosDisponibles = document.getElementById(
       "contadorEventosDisponibles"
     );
     contadorEventosDisponibles.textContent = snapshot.size;
 
-    console.log(`📦 Eventos: ${contadorEventosDisponibles}`);
     snapshot.forEach((docSnap) => {
       const e = docSnap.data();
       const id = docSnap.id;

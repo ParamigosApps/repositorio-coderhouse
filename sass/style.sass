@@ -992,4 +992,131 @@ header .contadorCarrito
   font-size: 0.9rem
   padding: 4px
 
+// QR PAGE
+body.qr-body
+  background: linear-gradient(135deg, #f0f4f8, #ffffff)
+  min-height: 100vh
+  display: flex
+  flex-direction: column
+  justify-content: flex-start
+  align-items: center
+  padding: 15px 10px
+  font-family: 'Segoe UI', sans-serif
+
+.qr-container
+  max-width: 480px
+  width: 100%
+  display: flex
+  flex-direction: column
+  align-items: center
+  background: #ffffff
+  border-radius: 1rem
+  padding: 20px
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08)
+
+.qr-title
+  margin-bottom: 0.8rem
+  font-weight: 700
+  font-size: 1.8rem
+  color: #1565c0
+  text-align: center
+
+.qr-video-container
+  width: 100%
+  border-radius: 1rem
+  overflow: hidden
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1)
+  border: 2px solid #90caf9
+  margin-bottom: 1rem
+  background: #fff
+
+.qr-video
+  width: 100%
+  border-radius: 1rem
+  object-fit: cover
+
+.qr-resultado
+  margin: 0.5rem 0
+  font-size: 1.2rem
+  font-weight: 600
+  color: #424242
+  text-align: center
+
+.qr-resultado.valid
+  color: #2e7d32
+
+.qr-resultado.invalid
+  color: #c62828
+
+.qr-resultado.used
+  color: #f9a825
+
+.qr-info-adicional
+  font-size: 0.95rem
+  color: #555
+  margin-bottom: 1.5rem
+  text-align: center
+
+.manual-container
+  display: flex
+  justify-content: center
+  gap: 0.5rem
+  margin-bottom: 1rem
+  width: 100%
+  max-width: 350px
+
+.manual-qr
+  flex: 1
+  border-radius: 0.5rem
+  border: 1px solid #90caf9
+  padding: 0.2rem 0.6rem
+
+.btn-primary
+  border-radius: 0.5rem
+  padding: 0.4rem 1rem
+  background: #1565c0
+  border: none
+  color: #fff
+  transition: all 0.2s ease
+
+.btn-primary:hover
+  background: #0d47a1
+
+.btn-exit
+  margin-top: 1.5rem
+  border-radius: 0.5rem
+  padding: 0.5rem 1.2rem
+  background: #c62828
+  border: none
+  color: #fff
+  font-weight: 600
+  transition: all 0.2s ease
   
+
+.btn-exit:hover
+  background: #8e0000
+
+// Responsive
+@media (max-width: 576px)
+  .qr-container
+    padding: 15px
+  .qr-title
+    font-size: 1.5rem
+  .qr-video-container
+    border: 1px solid #90caf9
+  .manual-container
+    flex-direction: column
+    gap: 0.5rem
+  .manual-qr
+    width: 100%
+  .btn-primary, .btn-exit
+    width: 100%
+    text-align: center
+
+  .qr-video-container
+    max-width: 100%
+  .manual-container
+    flex-direction: column
+    gap: 0.5rem
+  .manual-qr, .btn-primary
+    width: 100%

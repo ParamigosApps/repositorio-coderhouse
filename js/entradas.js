@@ -33,60 +33,51 @@ export async function crearEntrada(
 
     const cantidadFinal = Number(entradaData.cantidad) || 1;
 
-    // Guardar en la colección según pago
-    const coleccion = pagado ? "entradas" : "entradasPendientes";
+    const docRef = await addDoc(
+      collection(db, pagado ? "entradas" : "entradasPendientes"),
+      {
+        eventoId,
+        ...entradaData,
+        cantidad: cantidadFinal,
+        creadaEn: new Date().toISOString(),
+        usado: false,
+        pagado,
+        usuarioId: auth.currentUser.uid,
+        usuarioNombre: auth.currentUser.displayName || "Usuario",
+        estado: pagado ? "aprobada" : "pendiente",
+      }
+    );
 
-    const docRef = await addDoc(collection(db, coleccion), {
-      eventoId,
-      ...entradaData,
-      cantidad: cantidadFinal,
-      creadaEn: new Date().toISOString(),
-      usado: false,
-      pagado,
-      usuarioId: auth.currentUser.uid,
-      usuarioNombre: auth.currentUser.displayName || "Usuario",
-      estado: pagado ? "aprobada" : "pendiente",
-    });
-
-    // Generar QR solo si la entrada está pagada y no es admin
     if (pagado && !modoAdmin) {
+      // Solo mostramos QR al usuario, no al admin
+      const valorEntrada =
+        !entradaData.precio || entradaData.precio < 1
+          ? "Entrada gratuita"
+          : `$${entradaData.precio}`;
+
       await generarQr({
         ticketId: docRef.id,
         nombreEvento: entradaData.nombre || "Evento sin nombre",
         usuario: auth.currentUser.displayName || "Usuario",
         fecha: entradaData.fecha,
         lugar: entradaData.lugar,
-        precio: entradaData.precio ?? 0,
-        modoAdmin,
-        qrContainer: null,
-        individual: true,
+        precio: valorEntrada,
+        modoAdmin, // aunque lo pasemos, generarQr puede usarlo para no mostrar
       });
     } else if (!pagado) {
       Swal.fire(
-        "✅ Solicitud registrada",
-        "Tu solicitud fue registrada y está pendiente de aprobación.",
-        "info"
+        "✅ Solicitud de entrada registrada",
+        "Envía el comprobante para que un administrador apruebe la solicitud.",
+        "success"
       );
     }
 
-    return docRef.id;
+    return docRef;
   } catch (err) {
     console.error("Error creando entrada:", err);
     Swal.fire("Error", "No se pudo guardar la entrada.", "error");
   }
 }
-
-// Función para generar compra
-export async function crearCompra(carrito, total) {
-  if (!auth.currentUser)
-    return Swal.fire("Error", "Debes iniciar sesión.", "error");
-
-  const usuarioId = auth.currentUser.uid;
-  const nombreUsuario = auth.currentUser.displayName || "Invitado";
-
-  await generarTicketQr({ carrito, usuarioId, nombreUsuario, total });
-}
-
 // -------------------------- PEDIR ENTRADA --------------------------
 export async function pedirEntrada(eventoId, e) {
   try {
@@ -553,7 +544,7 @@ export async function cargarEntradas() {
           }
 
           const qrTitle = document.createElement("p");
-          qrTitle.textContent = `Entrada ${i + 1}`; // ← corregido
+          qrTitle.textContent = `Entrada ${i + 1}`;
           qrTitle.style.fontWeight = "bold";
           qrTitle.style.marginBottom = "12px";
           qrTitle.style.fontSize = "2rem";

@@ -1,4 +1,3 @@
-// validarQr.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
 import {
   getFirestore,
@@ -7,8 +6,8 @@ import {
   updateDoc,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
+import { formatearFecha } from "./utils.js";
 
-// ---------------- FIREBASE ----------------
 const firebaseConfig = {
   apiKey: "AIzaSyDkQEN7UMAVQQvOmWZjABmVYgVMMC4g9g0",
   authDomain: "appbar-24e02.firebaseapp.com",
@@ -18,27 +17,82 @@ const firebaseConfig = {
   appId: "1:339569084121:web:be83a06de71c21f5bea0c8",
   measurementId: "G-GMHEKEPVJC",
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ---------------- ELEMENTOS ----------------
 const video = document.getElementById("camara");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const qrResultado = document.getElementById("qr-resultado");
 const qrInfo = document.getElementById("qr-info-adicional");
-const qrTitulo = document.getElementById("qr-titulo");
-
+const qrTitulo = document.querySelector(".qr-title");
 const ticketsProcesados = new Set();
-const DURACION_RESULTADO = 4000;
 
-// ---------------- MODO ----------------
-const params = new URLSearchParams(window.location.search);
-const modo = params.get("modo"); // "caja" o "entradas"
-qrTitulo.textContent =
-  modo === "caja" ? "Validación de Compras - Caja" : "Validación de Entradas";
+// ---------------- Botón validar manual ----------------
+const manualQrInput = document.getElementById("manualQrInput");
+const manualQrBtn = document.getElementById("manualQrBtn");
 
-// ---------------- ESCANEAR QR ----------------
+manualQrBtn.addEventListener("click", () => {
+  const ticketId = manualQrInput.value.trim();
+  if (!ticketId) return;
+
+  if (!ticketsProcesados.has(ticketId)) {
+    ticketsProcesados.add(ticketId);
+    validarTicket(ticketId, modo);
+    manualQrInput.value = ""; // limpiar input después de validar
+  }
+});
+
+// Permitir validar presionando Enter
+manualQrInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    manualQrBtn.click();
+  }
+});
+
+// ---------------- Botón salir ----------------
+const exitQrBtn = document.getElementById("exitQrBtn");
+
+exitQrBtn.addEventListener("click", () => {
+  // Detener la cámara
+  const stream = video.srcObject;
+  if (stream) {
+    stream.getTracks().forEach((track) => track.stop());
+    video.srcObject = null;
+  }
+  // Redirigir o cerrar modal
+  window.location.href = "/admin.html"; // ejemplo: volver al inicio
+});
+
+// ---------------- Cámara ----------------
+navigator.mediaDevices
+  .getUserMedia({ video: { facingMode: "environment" } })
+  .then((stream) => {
+    video.srcObject = stream;
+    requestAnimationFrame(scanQR);
+  })
+  .catch((err) => {
+    console.error("Error cámara:", err);
+    qrResultado.textContent = "No se pudo acceder a la cámara.";
+    qrResultado.className = "qr-resultado invalid";
+  });
+
+// ---------------- Modo ----------------
+const urlParams = new URLSearchParams(window.location.search);
+let modo = urlParams.get("modo") || "entradas"; // "entrada", "compra" o "carrito"
+setTituloModo(modo);
+
+function setTituloModo(modo = "entradas") {
+  qrTitulo.textContent =
+    modo === "entradas"
+      ? "ESCÁNER ENTRADAS"
+      : modo === "compras"
+      ? "ESCÁNER COMPRAS"
+      : "ESCÁNER CARRITOS";
+}
+
+// ---------------- Escanear QR ----------------
 function scanQR() {
   if (video.readyState === video.HAVE_ENOUGH_DATA) {
     canvas.width = video.videoWidth;
@@ -49,164 +103,122 @@ function scanQR() {
     const code = jsQR(imageData.data, imageData.width, imageData.height);
 
     if (code) {
-      const ticketId = code.data;
+      const ticketId = code.data
+        .replace(/^(Entrada|Compra|Carrito):\s*/, "")
+        .trim();
       if (!ticketsProcesados.has(ticketId)) {
         ticketsProcesados.add(ticketId);
-        validarQr(ticketId);
+        validarTicket(ticketId, modo);
       }
     }
   }
   requestAnimationFrame(scanQR);
 }
 
-// ---------------- VALIDAR QR ----------------
-async function validarQr(ticketId) {
-  if (!ticketId) return;
-
+// ---------------- Validar ticket ----------------
+async function validarTicket(ticketId, modo = "entrada") {
   try {
-    const coleccionPrincipal = modo === "entradas" ? "entradas" : "compras";
-    const coleccionSecundaria = modo === "entradas" ? "compras" : "entradas";
+    const coleccionActual = modo === "entrada" ? "entradas" : "compras";
+    const coleccionOtra = modo === "entrada" ? "compras" : "entradas";
 
-    let docRef = doc(db, coleccionPrincipal, ticketId);
-    let docSnap = await getDoc(docRef);
-    let tipo = coleccionPrincipal;
+    const refActual = doc(db, coleccionActual, ticketId);
+    const refOtra = doc(db, coleccionOtra, ticketId);
 
-    if (!docSnap.exists()) {
-      docRef = doc(db, coleccionSecundaria, ticketId);
-      docSnap = await getDoc(docRef);
-      tipo = coleccionSecundaria;
+    const snapActual = await getDoc(refActual);
+    const snapOtra = await getDoc(refOtra);
 
-      if (!docSnap.exists()) {
-        qrResultado.textContent = "❌ Ticket no encontrado";
-        qrResultado.className = "qr-resultado invalid";
-        limpiarResultado();
+    qrInfo.textContent = "";
+
+    if (snapActual.exists()) {
+      // ✅ Ticket válido para este modo
+      const ticketData = snapActual.data();
+
+      let detalle = "";
+      if ((modo === "compra" || modo === "carrito") && ticketData.items) {
+        detalle = ticketData.items
+          .map((p) => `- ${p.nombre} x${p.enCarrito} ($${p.precio})`)
+          .join("<br>");
+      }
+
+      const result = await Swal.fire({
+        title: modo === "entrada" ? "Aprobar entrada" : "Confirmar pedido",
+        html: `
+          <p><strong>${modo === "entrada" ? "Evento" : "Pedido"}:</strong> ${
+          ticketData.nombre || "Sin nombre"
+        }</p>
+          <p><strong>Usuario:</strong> ${
+            ticketData.usuarioNombre || "Desconocido"
+          }</p>
+          <p><strong>Fecha:</strong> ${
+            formatearFecha(ticketData.fecha) || "Sin fecha"
+          }</p>
+          ${
+            detalle
+              ? `<hr><p><strong>Productos:</strong><br>${detalle}</p>`
+              : ""
+          }`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Aprobar",
+        cancelButtonText: "Cancelar",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      });
+
+      if (!result.isConfirmed) {
+        ticketsProcesados.delete(ticketId);
         return;
       }
 
-      qrResultado.textContent = `❌ QR inválido: es un ${tipo}`;
-      qrResultado.className = "qr-resultado invalid";
-      limpiarResultado();
-      return;
-    }
-
-    const data = docSnap.data();
-
-    // ---------------- SWEETALERT ----------------
-    if (tipo === "entradas") {
-      const result = await Swal.fire({
-        title: `<i class="bi bi-ticket-perforated-fill"></i> Entrada ${data.estado.toUpperCase()}`,
-        html: `
-          <p><b>Evento:</b> ${data.nombre}</p>
-          <p><b>Usuario:</b> ${data.usuarioNombre}</p>
-          <p><b>Fecha:</b> ${data.fecha || "Desconocida"}</p>
-          <p><b>Estado:</b> ${data.estado.toUpperCase()}</p>
-          <p><b>ID Ticket:</b> ${data.id || ticketId}</p>
-        `,
-        icon: data.estado === "aprobada" ? "success" : "warning",
-        showCloseButton: true,
-        showCancelButton: true,
-        confirmButtonText: "Aprobar",
-        cancelButtonText: "Cancelar",
-        width: 450,
-      });
-
-      if (result.isConfirmed && !data.usado) {
-        await updateDoc(docRef, { usado: true });
-        qrResultado.textContent = `✅ Entrada Aprobada`;
-        qrResultado.className = "qr-resultado valid";
+      if (ticketData.usado) {
+        qrResultado.textContent =
+          modo === "entrada" ? "⚠ Entrada ya usada" : "⚠ Pedido ya entregado";
+        qrResultado.className = "qr-resultado used";
       } else {
-        qrResultado.textContent = `⏸ Entrada pendiente`;
-        qrResultado.className = "qr-resultado invalid";
+        qrResultado.textContent =
+          modo === "entrada"
+            ? "✅ Entrada válida - Permitido el ingreso"
+            : "✅ Pedido válido - Entregar al cliente";
+        qrResultado.className = "qr-resultado valid";
+        await updateDoc(refActual, { usado: true });
       }
+
+      qrInfo.textContent = `${modo === "entrada" ? "Evento" : "Pedido"}: ${
+        ticketData.nombre || "Sin nombre"
+      } | Usuario: ${ticketData.usuarioNombre || "Desconocido"}`;
+    } else if (snapOtra.exists()) {
+      // ❌ Ticket válido, pero para la otra colección
+      await Swal.fire({
+        title: "❌ Ticket inválido para este modo",
+        html: `<p style="color:red; font-size:0.9em">
+                Este ticket es ${
+                  modo === "entrada" ? "una compra" : "una entrada"
+                } 
+                y no puede ser usado aquí.
+              </p>`,
+        icon: "error",
+        confirmButtonText: "Aceptar",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      });
     } else {
-      const htmlItems = data.items
-        .map(
-          (i) => `<tr>
-                    <td>${i.titulo}</td>
-                    <td>${i.cantidad}</td>
-                    <td>$${i.precio}</td>
-                    <td>$${i.cantidad * i.precio}</td>
-                  </tr>`
-        )
-        .join("");
-
-      const result = await Swal.fire({
-        title: `<i class="bi bi-cart-check-fill"></i> Compra ${data.estado.toUpperCase()}`,
-        html: `
-          <table class="table table-sm table-striped">
-            <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr></thead>
-            <tbody>${htmlItems}</tbody>
-          </table>
-          <p><b>Total:</b> $${data.total}</p>
-          <p><b>Usuario:</b> ${data.usuarioNombre || "Desconocido"}</p>
-          <p><b>Fecha:</b> ${data.fecha || "Desconocida"}</p>
-          <p><b>ID Compra:</b> ${data.id || ticketId}</p>
-        `,
-        icon: data.estado === "aprobada" ? "success" : "warning",
-        showCloseButton: true,
-        showCancelButton: true,
-        confirmButtonText: "Aprobar",
-        cancelButtonText: "Cancelar",
-        width: 550,
-      });
-
-      if (result.isConfirmed) {
-        qrResultado.textContent = `✅ Compra Aprobada`;
-        qrResultado.className = "qr-resultado valid";
-      } else {
-        qrResultado.textContent = `⏸ Compra pendiente`;
-        qrResultado.className = "qr-resultado invalid";
-      }
+      // ❌ Ticket no encontrado en ninguna colección
+      qrResultado.textContent =
+        modo === "entrada" ? "❌ Entrada inválida" : "❌ Pedido inválido";
+      qrResultado.className = "qr-resultado invalid";
     }
 
-    limpiarResultado(DURACION_RESULTADO);
-  } catch (error) {
-    console.error(error);
-    qrResultado.textContent = "❌ Error al validar";
+    ticketsProcesados.delete(ticketId);
+  } catch (err) {
+    console.error(err);
+    qrResultado.textContent = "Error validando ticket";
     qrResultado.className = "qr-resultado invalid";
-    limpiarResultado();
+    ticketsProcesados.delete(ticketId);
   }
-}
 
-// ---------------- LIMPIAR RESULTADO ----------------
-function limpiarResultado(tiempo = 2000) {
   setTimeout(() => {
     qrResultado.textContent = "Esperando QR...";
     qrResultado.className = "qr-resultado";
     qrInfo.textContent = "";
-    ticketsProcesados.clear();
-  }, tiempo);
+  }, 3000);
 }
-
-// ---------------- INICIO DE CÁMARA ----------------
-async function iniciarCamara() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: "environment" } },
-      audio: false,
-    });
-
-    video.srcObject = stream;
-    video.onloadedmetadata = () => {
-      video.play();
-      scanQR();
-    };
-  } catch (err) {
-    console.error("Error al iniciar la cámara:", err);
-    qrResultado.textContent =
-      "❌ No se pudo acceder a la cámara. Revisa permisos y navegador";
-    qrResultado.className = "qr-resultado invalid";
-
-    // Botón de reintento
-    const recargarBtn = document.createElement("button");
-    recargarBtn.textContent = "Reintentar cámara";
-    recargarBtn.className = "btn btn-warning mt-2";
-    recargarBtn.onclick = () => {
-      iniciarCamara();
-      recargarBtn.remove();
-    };
-    qrResultado.parentNode.appendChild(recargarBtn);
-  }
-}
-
-iniciarCamara();

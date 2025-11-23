@@ -126,8 +126,6 @@ async function validarTicket(ticketId, modo = "entradas") {
   try {
     const coleccionActual = modo; // "entradas" o "compras"
     const coleccionOtra = modo === "entradas" ? "compras" : "entradas";
-    console.log("Colección actual:", coleccionActual);
-    console.log("Colección otra:", coleccionOtra);
 
     const refActual = doc(db, coleccionActual, ticketId);
     const refOtra = doc(db, coleccionOtra, ticketId);
@@ -234,7 +232,10 @@ async function validarTicket(ticketId, modo = "entradas") {
       qrResultado.className = "qr-resultado other";
 
       await Swal.fire({
-        title: "⚠ Ticket de otra colección",
+        title:
+          modo === "entradas"
+            ? "QR Invalido: es un pedido."
+            : "QR Invalido: es una Entrada.",
         html: `<p style="color:orange; font-size:0.9em">
                 Este QR corresponde a ${
                   modo === "entradas" ? "un pedido" : "una entrada"

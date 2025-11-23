@@ -97,40 +97,59 @@ export async function generarCompraQr({
   nombreUsuario = "Invitado",
   lugar = "Tienda",
   total,
-  ticketId, // si viene, usarlo
-  modoLectura = false, // si true, no genera uno nuevo
+  ticketId,
+  modoLectura = false,
+  qrContainer = null,
+  tamaño = 200,
 }) {
-  if (!ticketId || !modoLectura) {
+  if (!ticketId) {
     ticketId = `${Date.now()}-${Math.floor(Math.random() * 9999)}`;
   }
 
   const fecha = new Date().toLocaleString();
-  const contenidoQr = ticketId;
+  const contenidoQr = `Compra:${ticketId}`;
 
-  await Swal.fire({
-    title: `🧾 Ticket ${modoLectura ? "(Caja)" : "generado"}`,
-    html: `
+  const crearQr = (contenedor, texto, size = 200) => {
+    contenedor.innerHTML = "";
+    contenedor.style.display = "flex";
+    contenedor.style.justifyContent = "center";
+    contenedor.style.alignItems = "center";
+    contenedor.style.margin = "10px 0";
+
+    new QRCode(contenedor, {
+      text: texto.toString(),
+      width: size,
+      height: size,
+      correctLevel: QRCode.CorrectLevel.H,
+    });
+  };
+
+  if (!qrContainer) {
+    // Mostrar con Swal
+    const tempDiv = document.createElement("div");
+    tempDiv.style.textAlign = "center";
+    tempDiv.innerHTML = `
       <p><strong>Ticket:</strong> ${ticketId}</p>
       <p><strong>Cliente:</strong> ${nombreUsuario}</p>
       <p><strong>Lugar:</strong> ${lugar}</p>
       <p><strong>Fecha:</strong> ${fecha}</p>
       <p><strong>Total:</strong> $${total}</p>
       <hr>
-      <div id="qrContainer" style="display:flex;justify-content:center;"></div>
-    `,
-    didOpen: async () => {
-      const qrContainer = document.getElementById("qrContainer");
-      await generarEntradaQr({
-        ticketId,
-        contenido: contenidoQr,
-        tamaño: 200, // tamaño del QR
-        qrContainer,
-      });
-    },
-    confirmButtonText: "Cerrar",
-    customClass: { confirmButton: "btn btn-dark" },
-    buttonsStyling: false,
-  });
+    `;
+    const qrDiv = document.createElement("div");
+    tempDiv.appendChild(qrDiv);
+    crearQr(qrDiv, contenidoQr, tamaño);
+
+    await Swal.fire({
+      title: `🧾 Ticket ${modoLectura ? "(Caja)" : "Generado"}`,
+      html: tempDiv,
+      confirmButtonText: "Cerrar",
+      customClass: { confirmButton: "btn btn-dark" },
+      buttonsStyling: false,
+    });
+  } else {
+    crearQr(qrContainer, contenidoQr, tamaño);
+  }
 
   return ticketId;
 }

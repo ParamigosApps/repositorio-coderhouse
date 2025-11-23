@@ -539,7 +539,6 @@ async function ObtenerDatosGuardadosDB() {
 
     if (titularBanco) titularBancoInput.value = titularBanco;
     else aliasBancoInput.placeholder = "Juan Pérez";
-    console.log("caca1");
   }
 
   // DATOS CONTACTO
@@ -562,8 +561,6 @@ async function ObtenerDatosGuardadosDB() {
 
     if (tiktokContacto) tiktokContactoInput.value = tiktokContacto;
     else tiktokContactoInput.placeholder = "Ej: @usuario_tiktok";
-
-    console.log("caca2");
   }
 }
 

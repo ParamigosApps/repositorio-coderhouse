@@ -56,7 +56,7 @@ export async function crearEntrada(
           : `$${entradaData.precio}`;
 
       await generarEntradaQr({
-        ticketId: id,
+        ticketId: docRef.id,
         nombreEvento: entradaData.nombre || "Evento sin nombre",
         usuario: auth.currentUser.displayName || "Usuario",
         fecha: entradaData.fecha,
@@ -70,6 +70,7 @@ export async function crearEntrada(
         "Envía el comprobante para que un administrador apruebe la solicitud.",
         "success"
       );
+      //console.log(ticketId + "   id" + id);
     }
 
     return docRef;
@@ -578,7 +579,7 @@ export async function cargarEntradas() {
             qrDivs.forEach((qrContainer) => {
               const ticketId = qrContainer.id.replace("qrcode_", "");
               const downloadLink = qrContainer.nextElementSibling; // el <a> sigue al qrContainer
-              generarQr({
+              generarEntradaQr({
                 ticketId,
                 nombreEvento: entrada.nombre,
                 usuario: auth.currentUser.displayName || "Usuario",

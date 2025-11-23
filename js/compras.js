@@ -73,13 +73,21 @@ export async function mostrarQrCompra({
       <div id="qrCompraContainer" style="display:flex;justify-content:center;"></div>
     `,
     didOpen: async () => {
-      const qrContainer = document.getElementById("qrCompraContainer");
-      generarCompraQr({
-        contenido: `ticketId`,
-        qrContainer,
-        tamaño: 200,
-      });
+      const qrContainer = document.getElementById("qrContainer"); // Contenedor real
+      if (!qrContainer) return;
+
+      try {
+        await generarCompraQr({
+          ticketId,
+          contenido: `Compra:${ticketId}`, // opcional, poner prefijo como en entradas
+          qrContainer,
+          tamaño: 200,
+        });
+      } catch (err) {
+        console.error("Error generando QR:", err);
+      }
     },
+
     confirmButtonText: "Cerrar",
     customClass: { confirmButton: "btn btn-dark" },
     buttonsStyling: false,

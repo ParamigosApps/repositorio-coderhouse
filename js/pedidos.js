@@ -41,20 +41,17 @@ export async function mostrarTodosLosPedidos(usuarioId) {
   const contPagos = document.getElementById("listaPedidosPagos");
   const contRetirados = document.getElementById("listaPedidosRetirados");
 
-  if (!contPendientes || !contPagos || !contRetirados) {
-    console.error("❌ Contenedores de pedidos no encontrados en el DOM");
-    return;
+  if (contPendientes || contPagos || contRetirados) {
+    const pedidos = await obtenerPedidosPorUsuario(usuarioId);
+
+    const pendientes = pedidos.filter((p) => p.estado === "pendiente");
+    const pagados = pedidos.filter((p) => p.estado === "pagado");
+    const retirados = pedidos.filter((p) => p.estado === "retirado");
+
+    mostrarPedidosUI(contPendientes, pendientes);
+    mostrarPedidosUI(contPagos, pagados);
+    mostrarPedidosUI(contRetirados, retirados);
   }
-
-  const pedidos = await obtenerPedidosPorUsuario(usuarioId);
-
-  const pendientes = pedidos.filter((p) => p.estado === "pendiente");
-  const pagados = pedidos.filter((p) => p.estado === "pagado");
-  const retirados = pedidos.filter((p) => p.estado === "retirado");
-
-  mostrarPedidosUI(contPendientes, pendientes);
-  mostrarPedidosUI(contPagos, pagados);
-  mostrarPedidosUI(contRetirados, retirados);
 }
 
 function mostrarPedidosUI(contenedor, pedidos) {
@@ -113,7 +110,7 @@ function mostrarPedidosUI(contenedor, pedidos) {
         nombreUsuario: pedido.usuarioNombre,
         lugar: "Tienda",
         total: pedido.total,
-        ticketId: pedido.ticketId,
+        ticketId: pedido.id, // ✅ usar ID de Firestore
         modoLectura: true,
       });
     });
@@ -138,8 +135,7 @@ export async function crearPedido(
   total,
   nombreUsuario,
   estado = "pendiente",
-  pagado = false,
-  ticketId
+  pagado = false
 ) {
   try {
     const docRef = await addDoc(collection(db, "compras"), {
@@ -149,11 +145,17 @@ export async function crearPedido(
       total,
       fecha: new Date().toISOString(),
       estado,
-      ticketId,
       usado: false,
       pagado,
     });
-    return docRef.id;
+
+    // El ID de Firestore será nuestro ticketId
+    const ticketId = docRef.id;
+
+    // Opcional: actualizar el mismo documento para guardar ticketId en el campo
+    await docRef.update({ ticketId });
+
+    return ticketId; // Devuelve el ticketId para generar el QR
   } catch (err) {
     console.error("❌ Error creando pedido:", err);
     throw err;

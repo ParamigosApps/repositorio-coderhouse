@@ -103,10 +103,10 @@ function scanQR() {
     const code = jsQR(imageData.data, imageData.width, imageData.height);
 
     if (code) {
-      // const ticketId = code.data
-      //   .replace(/^(Entrada|Compra|Carrito):\s*/, "")
-      //   .trim();
-      const ticketId = code.data.trim();
+      const ticketId = code.data
+        .replace(/^(Entrada|Compra|Carrito):\s*/, "")
+        .trim();
+      //const ticketId = code.data.trim();
 
       if (!ticketsProcesados.has(ticketId)) {
         ticketsProcesados.add(ticketId);

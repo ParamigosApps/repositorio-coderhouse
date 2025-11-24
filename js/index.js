@@ -1,105 +1,73 @@
-//index.js
 import { cargarEventos } from "/js/cargarEventos.js";
 import { cargarEntradas } from "/js/entradas.js";
-import { initAdminProductos } from "./admin-productos.js";
+import { renderizarCatalogo } from "./cargarCatalogo.js";
+import { actualizarContadorMisEntradas } from "./entradas.js";
 
 const listaEventos = document.getElementById("listaEventos");
 const listaEntradas = document.getElementById("listaEntradas");
 const userId = localStorage.getItem("userId");
 
-// Cargar secciones
+// Carga inicial
 cargarEventos(listaEventos);
 cargarEntradas(listaEntradas, userId);
+actualizarContadorMisEntradas(userId);
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Botones y contenedores
-  const btnProximosEventos = document.getElementById("btnProximosEventos");
-  const btnMisEntradas = document.getElementById("btnMisEntradas");
+  // ------------ CATALOGO ---------------
   const btnCatalogoCompleto = document.getElementById("btnCatalogoCompleto");
   const btnCategorias = document.querySelectorAll(".btn-categoria");
-
-  const containerEventos = document.getElementById("containerEventos");
-  const containerEntradas = document.getElementById("containerEntradas");
   const catalogoContainer = document.getElementById("catalogoContainer");
 
-  // Mostrar catálogo al tocar categoría
   btnCategorias.forEach((btn) =>
     btn.addEventListener("click", () => {
-      if (catalogoContainer) catalogoContainer.classList.remove("d-none");
+      catalogoContainer?.classList.remove("d-none");
     })
   );
 
-  // Toggle catálogo completo
   if (btnCatalogoCompleto) {
     btnCatalogoCompleto.addEventListener("click", () => {
-      if (!catalogoContainer) return;
-      catalogoContainer.classList.toggle("d-none");
-      if (!catalogoContainer.classList.contains("d-none")) {
-        initAdminProductos();
+      catalogoContainer.classList.toggle("collapse");
+      if (!catalogoContainer.classList.contains("collapse")) {
+        //initAdminProductos();
+        renderizarCatalogo();
       }
     });
   }
 
-  // -----------------------------
-  // Toggle "Mis Entradas"
-  // -----------------------------
-  if (btnMisEntradas && containerEntradas) {
-    btnMisEntradas.addEventListener("click", () => {
-      containerEntradas.classList.toggle("d-none");
+  // ------------ EVENTOS & ENTRADAS ---------------
 
-      cargarEntradas();
-    });
-  }
+  const btnProximosEventos = document.getElementById("btnProximosEventos");
+  const btnMisEntradas = document.getElementById("btnMisEntradas");
 
-  // -----------------------------
-  // Toggle "Próximos Eventos"
-  // -----------------------------
-  if (btnProximosEventos && containerEventos) {
-    btnProximosEventos.addEventListener("click", () => {
-      containerEventos.classList.toggle("d-none");
-      containerEntradas.classList.toggle("d-none");
-      cargarEventos();
-    });
-  }
+  const containerEventos = document.getElementById("containerEventos");
+  const containerEntradas = document.getElementById("containerEntradas");
 
-  // -----------------------------
-  // Toggle "Redes sociales"
-  // -----------------------------
-  const btnRedes = document.getElementById("btnRedes"); // botón de redes
-  const containerRedes = document.getElementById("containerRedes"); // contenedor con redes
+  // Instancias Bootstrap
+  const bsEventos = bootstrap.Collapse.getOrCreateInstance(containerEventos, {
+    toggle: false,
+  });
+  const bsEntradas = bootstrap.Collapse.getOrCreateInstance(containerEntradas, {
+    toggle: false,
+  });
 
-  if (btnRedes && containerRedes) {
-    btnRedes.addEventListener("click", () => {
-      containerRedes.classList.toggle("d-none");
-      // Cerrar otros menús al abrir redes
-      if (!containerRedes.classList.contains("d-none")) {
-        containerEventos?.classList.add("d-none");
-        containerEntradas?.classList.add("d-none");
-        loginContainer?.classList.add("d-none");
-        catalogoContainer?.classList.add("d-none");
-      }
-    });
-  }
-  // -----------------------------
-  // Toggle "Login/Usuario"
-  // -----------------------------
-  const btnUsuario = document.querySelector("#loginContainer button"); // el botón dentro de loginContainer
-  const loginContainer = document.getElementById("loginContainer");
+  // Abrir eventos → cerrar entradas
+  btnProximosEventos?.addEventListener("click", () => {
+    bsEntradas.hide();
+    bsEventos.toggle();
+  });
 
-  if (btnUsuario && loginContainer) {
-    btnUsuario.addEventListener("click", () => {
-      loginContainer.classList.toggle("d-none");
-      // Opcional: si querés que se cierren otros contenedores al abrir este
-      if (!loginContainer.classList.contains("d-none")) {
-        containerEventos?.classList.add("d-none");
-        containerEntradas?.classList.add("d-none");
-        catalogoContainer?.classList.add("d-none");
-      }
-    });
-  }
+  // Abrir entradas → cerrar eventos
+  btnMisEntradas?.addEventListener("click", () => {
+    bsEventos.hide();
+    bsEntradas.toggle();
+  });
 
-  // -----------------------------
-  // Carga inicial de eventos
-  // -----------------------------
-  cargarEventos();
+  // Cargar datos al abrir
+  containerEventos.addEventListener("shown.bs.collapse", () => {
+    cargarEventos(listaEventos);
+  });
+
+  containerEntradas.addEventListener("shown.bs.collapse", () => {
+    cargarEntradas(listaEntradas, userId);
+  });
 });

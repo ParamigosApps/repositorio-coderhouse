@@ -132,6 +132,37 @@ export function formatearFecha(fechaStr) {
   return `${dia}/${mes}/${año}`;
 }
 
+export function popupAñadido(nombre, cantidad) {
+  return Swal.fire({
+    title: "¡Producto añadido!",
+    html: `<p style="font-size:18px;font-weight:600;">${nombre} x${cantidad} agregado al carrito 🛒</p>`,
+    icon: "success",
+    showCancelButton: true,
+    confirmButtonText: "Ir al carrito",
+    cancelButtonText: "Seguir comprando",
+    reverseButtons: true,
+    customClass: {
+      popup: "swal-popup-custom",
+      confirmButton: "swal-btn-confirm",
+      cancelButton: "swal-btn-cancel",
+    },
+    buttonsStyling: false,
+  });
+}
+
+export function obtenerFechaCompra() {
+  const fecha = new Date().toLocaleString("es-AR", {
+    dateStyle: "short",
+    timeStyle: "short",
+    hour12: false,
+  });
+
+  // "23/11/2025, 19:46" → ["23/11/2025", " 19:46"]
+  const [soloFecha, soloHora] = fecha.split(",");
+
+  return `${soloFecha} - ${soloHora.trim()} HS`;
+}
+
 export function escapeHtml(str) {
   if (!str) return "";
   return String(str)

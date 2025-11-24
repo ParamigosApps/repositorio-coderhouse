@@ -64,13 +64,13 @@ export async function generarEntradaQr({
       const info = document.createElement("div");
       const displayPrecio = !precio || precio < 1 ? "Gratis" : `$${precio}`;
       info.innerHTML = `
-        <h5>🎟 ${nombreEvento}</h5>
-        <p><strong>ID:</strong> ${ticketId}</p>
-        <p><strong>Usuario:</strong> ${usuario}</p>
-        <p><strong>Fecha:</strong> ${formatearFecha(fecha)}</p>
-        <p><strong>Lugar:</strong> ${lugar}</p>
-        <p><strong>Precio:</strong> ${displayPrecio}</p>
-      `;
+            <h5>🎟 ${nombreEvento}</h5>
+            <p><strong>ID:</strong> ${ticketId}</p>
+            <p><strong>Usuario:</strong> ${usuario}</p>
+            <p><strong>Fecha:</strong> ${formatearFecha(fecha)}</p>
+            <p><strong>Lugar:</strong> ${lugar}</p>
+            <p><strong>Precio:</strong> ${displayPrecio}</p>
+          `;
       tempDiv.appendChild(info);
 
       const qrDiv = document.createElement("div");
@@ -98,6 +98,7 @@ export async function generarCompraQr({
   lugar = "Tienda",
   total,
   ticketId,
+  fecha = "Fecha no disponible",
   modoLectura = false,
   qrContainer = null,
   tamaño = 200,
@@ -106,7 +107,6 @@ export async function generarCompraQr({
     ticketId = `${Date.now()}-${Math.floor(Math.random() * 9999)}`;
   }
 
-  const fecha = new Date().toLocaleString();
   const contenidoQr = `Compra:${ticketId}`;
 
   const crearQr = (contenedor, texto, size = 200) => {
@@ -129,13 +129,13 @@ export async function generarCompraQr({
     const tempDiv = document.createElement("div");
     tempDiv.style.textAlign = "center";
     tempDiv.innerHTML = `
-      <p><strong>Ticket:</strong> ${ticketId}</p>
-      <p><strong>Cliente:</strong> ${nombreUsuario}</p>
-      <p><strong>Lugar:</strong> ${lugar}</p>
-      <p><strong>Fecha:</strong> ${fecha}</p>
-      <p><strong>Total:</strong> $${total}</p>
-      <hr>
-    `;
+          <p><strong>Ticket:</strong> ${ticketId}</p>
+          <p><strong>Cliente:</strong> ${nombreUsuario}</p>
+          <p><strong>Lugar:</strong> ${lugar}</p>
+          <p><strong>Fecha:</strong> ${fecha}</p>
+          <p><strong>Total:</strong> $${total}</p>
+          <hr>
+        `;
     const qrDiv = document.createElement("div");
     tempDiv.appendChild(qrDiv);
     crearQr(qrDiv, contenidoQr, tamaño);

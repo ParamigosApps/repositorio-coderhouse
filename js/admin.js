@@ -176,7 +176,11 @@ export async function cargarEventosAdmin() {
             ? `<img src="${e.imagen}" class="img-fluid rounded mt-2" style="max-height:180px;object-fit:cover;">`
             : ""
         }
-        <button class="btn btn-sm btn-danger mt-1 btnEliminar w-50" data-eventoid="${id}">🗑️ Eliminar</button>
+        <button
+        class="btn btn-sm btn-danger mt-1 btnEliminar w-25 d-block mx-auto"
+        data-eventoid="${id}">
+        🗑️ Eliminar
+        </button>
       `;
 
       listaEventos.appendChild(div);

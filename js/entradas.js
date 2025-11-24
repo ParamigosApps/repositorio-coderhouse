@@ -274,6 +274,7 @@ Titular: ${datos.titularBanco}
             "Se registró la solicitud y puedes compartir el comprobante ahora.",
             "success"
           );
+          actualizarContadorMisEntradas();
         } else {
           await crearSolicitudPendiente(eventoId, usuarioId, entradaBase);
           return Swal.fire({
@@ -283,6 +284,7 @@ Titular: ${datos.titularBanco}
             confirmButtonText: "Salir",
             customClass: { confirmButton: "btn btn-dark" },
           });
+          actualizarContadorMisEntradas();
         }
       } else if (afterCopy.isDenied) {
         console.log("cancelo la orden con boton");
@@ -338,6 +340,58 @@ export function escucharEntradasPendientes(usuarioId, callback) {
     });
   });
 }
+// -------------------------- ACTUALIZAR CONTADOR DE ENTRADAS PENDIENTES DE APROBACION --------------------------
+export async function actualizarContadorEntradasPendientes() {
+  const pendientesSnap = await getDocs(
+    query(collection(db, "entradasPendientes"))
+  );
+
+  const cantidadTotal = pendientesSnap.docs.reduce(
+    (acc, doc) => acc + (doc.data().cantidad || 1),
+    0
+  );
+
+  const contadorElem = document.getElementById("contadorEntradasPendientes");
+
+  if (contadorElem) contadorElem.textContent = cantidadTotal;
+}
+// -------------------------- ACTUALIZAR CONTADOR "MIS ENTRADAS" --------------------------
+export async function actualizarContadorMisEntradas() {
+  const usuarioId = auth.currentUser?.uid;
+  const contadorElem = document.getElementById("contadorMisEntradas");
+
+  if (!usuarioId || !contadorElem) {
+    console.warn("⚠ No hay usuario logueado o no existe contadorMisEntradas");
+    return;
+  }
+
+  try {
+    const q = query(
+      collection(db, "entradas"),
+      where("usuarioId", "==", usuarioId)
+    );
+
+    const snapshot = await getDocs(q);
+
+    let total = 0;
+    snapshot.forEach((docSnap) => {
+      const entrada = docSnap.data();
+
+      // Si no trae cantidad, asumimos 1 por entrada
+      total += entrada.cantidad ?? 1;
+    });
+
+    contadorElem.textContent = total;
+  } catch (err) {
+    console.error("❌ Error contando mis entradas:", err);
+  }
+}
+
+document
+  .getElementById("btnMisEntradas")
+  ?.addEventListener("click", actualizarContadorMisEntradas);
+
+actualizarContadorEntradasPendientes();
 // -------------------------- CREAR SOLICITUDES PENDIENTES --------------------------
 export async function crearSolicitudPendiente(
   eventoId,
@@ -383,23 +437,6 @@ export async function crearSolicitudPendiente(
     console.error("Error creando solicitud pendiente:", err);
   }
 }
-
-// -------------------------- ACTUALIZAR CONTADOR DE ENTRADAS PENDIENTES DE APROBACION --------------------------
-export async function actualizarContadorEntradasPendientes() {
-  const pendientesSnap = await getDocs(
-    query(collection(db, "entradasPendientes"))
-  );
-
-  const cantidadTotal = pendientesSnap.docs.reduce(
-    (acc, doc) => acc + (doc.data().cantidad || 1),
-    0
-  );
-
-  const contadorElem = document.getElementById("contadorEntradasPendientes");
-
-  if (contadorElem) contadorElem.textContent = cantidadTotal;
-}
-actualizarContadorEntradasPendientes();
 
 // -------------------------- REGISTRAR TRANSFERENCIAS PENDIENTES --------------------------
 export async function registrarTransferencia(
@@ -450,6 +487,9 @@ export async function cargarEntradas() {
     if (!usuarioId) {
       contenedor.innerHTML = `<p class="text-danger mt-3 text-center">Debes iniciar sesión para ver tus entradas.</p>`;
       return;
+    } else {
+      actualizarContadorMisEntradas();
+      contenedor.innerHTML = "";
     }
 
     const q = query(
@@ -625,3 +665,9 @@ export async function ObtenerContacto() {
     docSnap.data();
   return { whatsappContacto, instagramContacto, tiktokContacto };
 }
+
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    actualizarContadorMisEntradas();
+  }
+});

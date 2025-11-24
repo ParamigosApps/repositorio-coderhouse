@@ -1,7 +1,7 @@
 // /js/compras.js
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
 import { auth, db } from "./firebase.js";
-import { formatearFecha } from "./utils.js";
+import { formatearFecha, obtenerFechaCompra } from "./utils.js";
 import {
   addDoc,
   collection,
@@ -11,10 +11,6 @@ import { generarCompraQr } from "./generarQr.js";
 
 /**
  * Crear un pedido en Firestore (pendiente o pagado)
- * @param {Array} carrito - Lista de productos
- * @param {number} total - Total de la compra
- * @param {string} lugar - Lugar de la compra
- * @param {boolean} pagado - true si fue pago online, false si es en caja
  */
 export async function crearPedido({
   carrito,
@@ -23,22 +19,23 @@ export async function crearPedido({
   pagado = false,
 }) {
   if (!auth.currentUser) throw new Error("Usuario no logueado");
+
   const usuarioId = auth.currentUser.uid;
   const usuarioNombre = auth.currentUser.displayName || "Usuario";
 
-  // Generar ticketId único
   const ticketId = `${Date.now()}-${Math.floor(Math.random() * 9999)}`;
+  const fechaCompra = obtenerFechaCompra(); // <-- FECHA REAL
 
-  // Guardar en Firestore en la colección "compras"
   await addDoc(collection(db, "compras"), {
     usuarioId,
     usuarioNombre,
     items: carrito,
     total,
-    pagado, // true o false
+    pagado,
     estado: pagado ? "pagado" : "pendiente",
     ticketId,
     usado: false,
+    fecha: fechaCompra, // <-- GUARDADA EN DB
     creadoEn: serverTimestamp(),
   });
 
@@ -47,10 +44,6 @@ export async function crearPedido({
 
 /**
  * Mostrar QR de compra
- * @param {Array} carrito - Productos del pedido
- * @param {number} total - Total del pedido
- * @param {string} ticketId - ID del ticket
- * @param {string} lugar - Lugar de la compra
  */
 export async function mostrarQrCompra({
   carrito,
@@ -59,7 +52,9 @@ export async function mostrarQrCompra({
   lugar = "Tienda",
 }) {
   if (!auth.currentUser) throw new Error("Usuario no logueado");
+
   const usuarioNombre = auth.currentUser.displayName || "Usuario";
+  const fechaCompra = obtenerFechaCompra(); // <-- MISMA FECHA QUE EN EL TICKET
 
   await Swal.fire({
     title: "🧾 Tu ticket de compra",
@@ -67,21 +62,23 @@ export async function mostrarQrCompra({
       <p><strong>Ticket:</strong> ${ticketId}</p>
       <p><strong>Cliente:</strong> ${usuarioNombre}</p>
       <p><strong>Lugar:</strong> ${lugar}</p>
-      <p><strong>Fecha:</strong> ${formatearFecha(new Date())}</p>
+      <p><strong>${fechaCompra}</strong></p>   <!-- FIX -->
       <p><strong>Total:</strong> $${total}</p>
       <hr>
       <div id="qrCompraContainer" style="display:flex;justify-content:center;"></div>
     `,
     didOpen: async () => {
-      const qrContainer = document.getElementById("qrContainer"); // Contenedor real
+      const qrContainer = document.getElementById("qrCompraContainer"); // <-- FIX ID
+
       if (!qrContainer) return;
 
       try {
         await generarCompraQr({
           ticketId,
-          contenido: `Compra:${ticketId}`, // opcional, poner prefijo como en entradas
-          qrContainer,
+          contenido: `Compra:${ticketId}`,
+          qrContainer, // <-- AHORA ENCUENTRA EL DIV CORRECTO
           tamaño: 200,
+          fecha: fechaCompra, // <-- PASAMOS LA FECHA AL QR
         });
       } catch (err) {
         console.error("Error generando QR:", err);

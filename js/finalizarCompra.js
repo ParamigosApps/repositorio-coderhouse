@@ -7,6 +7,7 @@ import {
 import { auth } from "./firebase.js";
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
 import { crearPedido, mostrarQrCompra } from "./compras.js"; // <-- ahora usamos crearPedido unificado
+import { mostrarTodosLosPedidos } from "./pedidos.js";
 
 export async function finalizarCompra() {
   try {
@@ -28,6 +29,7 @@ export async function finalizarCompra() {
           behavior: "smooth",
           block: "start",
         });
+
         document.getElementById("carritoPanel")?.classList.remove("open");
         document.getElementById("carritoOverlay")?.setAttribute("hidden", true);
       }
@@ -76,8 +78,9 @@ export async function finalizarCompra() {
       localStorage.removeItem("carrito");
       actualizarCarritoVisual();
       mostrarCarrito();
-      document.getElementById("carritoPanel")?.classList.remove("open");
-      document.getElementById("carritoOverlay")?.setAttribute("hidden", true);
+      mostrarTodosLosPedidos(auth.currentUser.uid);
+      //document.getElementById("carritoPanel")?.classList.remove("open");
+      //document.getElementById("carritoOverlay")?.setAttribute("hidden", true);
       return;
     }
 
@@ -122,5 +125,5 @@ export async function finalizarCompra() {
 
 // ================= EVENTO BOTÓN =================
 document
-  .getElementById("btnPagarCarrito")
+  .getElementById("btnConfirmarPedido")
   ?.addEventListener("click", finalizarCompra);

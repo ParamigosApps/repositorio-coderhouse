@@ -777,16 +777,20 @@ $qr-video-border-color: #343a40
   border: 1px solid #ccc
 
   // MENU ADMIN EMERGENTE DE ENTRADAS PENDIENTES DE APROBACION
-#iconoEntradasPendientes, #iconoEventosDisponibles
+#iconoEntradasPendientes, #iconoEventosDisponibles, #iconoMisEntradas
   width: 20px
   height: 20px
   font-size: 12px
   display: flex
   justify-content: center
   align-items: center
+  background-color: #242
+
+#iconoMisEntradas
+   left: 118px !important
 
 #iconoEventosDisponibles
-   left: 315px !important
+   left: 180px !important
 
 
 
@@ -1122,43 +1126,159 @@ body.qr-body
   .manual-qr, .btn-primary
     width: 100%
 
-  // LISTA DE COMPRAS RETIRADAS, PENDIENTES Y PAGAS
+// LISTA DE COMPRAS RETIRADAS, PENDIENTES Y PAGAS
 #container-pedidos
   display: block
   gap: 20px
   overflow-x: auto
-  padding: 10px
+  padding: 4px
 
 .lista-pedidos
   display: flex
   flex-direction: column
-  gap: 10px
+  gap: 6px
   min-width: 250px
-  min-height: 50px
   max-height: 500px
   overflow-y: auto
-  padding: 10px
+  padding: 12px
   border: 1px solid #ddd
-  border-radius: 6px
+  border-radius: 8px
   background-color: #fff
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05)
 
 .lista-pedidos h3
-  margin-bottom: 4px
-  font-size: 14px
-  text-align: center
-  
-.pedido-item
-  height: 120px !important
-  padding: 4x
   margin-bottom: 10px
-  border-radius: 5px
-  background-color: #242
+  font-size: 14px
+  font-weight: 600
+  text-align: center
+  color: #222
+
+// Tarjeta del pedido
+.pedido-item
+  padding: 10px 12px
+  margin-bottom: 10px
+  border-radius: 8px
+  background-color: #f6f6f6
+  border: 1px solid #e0e0e0
   position: relative
   cursor: pointer
-  &:hover
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2)
+  transition: 0.2s ease
 
+  &:hover
+    background-color: #f0f0f0
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15)
+
+  // Color según estado (más elegante)
+  &.estado-pagado
+    background-color: #e8f5e9
+    border-color: #b2dfdb
+
+  &.estado-pendiente
+    background-color: #fff8e1
+    border-color: #ffe082
+
+  &.estado-retirado
+    background-color: #ffebee
+    border-color: #ef9a9a
+
+// Botones internos
 .pedido-item button
   cursor: pointer
-  background: #333
   border: none
+  padding: 6px 12px
+  font-size: 13px
+  border-radius: 6px
+  transition: 0.2s ease
+
+// Botón "Ver QR"
+.pedido-item .ver-qr
+  position: absolute
+  right: 6px
+  bottom: 6px
+  background: #000
+  color: #fff
+  font-weight: 600
+
+  &:hover
+    background: #333
+    transform: scale(1.05)
+
+// Botón "X" eliminar
+.pedido-item .btn-danger
+  position: absolute
+  top: 2px
+  right: 2px
+  margin: 2px !important
+  padding: 2px 6px
+  background: #2c2b2b !important
+  color: white !important
+  border-radius: 4px
+
+  &:hover
+    background: #c62828 !important
+
+
+
+// BOTÓN CONFIRMAR (Azul profesional)
+.swal2-popup .swal-btn-confirm
+  background: #1e88e5 !important      // azul profesional
+  color: #fff !important
+  padding: 10px 24px !important
+  font-size: 15px !important
+  border-radius: 8px !important
+  font-weight: 600 !important
+  border: none !important
+  cursor: pointer !important
+  transition: 0.2s ease !important
+
+  &:hover
+    background: #1565c0 !important    // azul más fuerte
+    transform: scale(1.05) !important
+
+
+.btn-swal-estilo 
+  background: #1e88e5 !important
+  color: #fff !important
+  padding: 10px 24px !important
+  font-size: 15px !important
+  border-radius: 8px !important
+  font-weight: 600 !important
+  border: none !important
+  cursor: pointer !important
+  transition: 0.2s ease !important
+
+.btn-swal-estilo:hover 
+  background: #1565c0 !important
+  transform: scale(1.05) !important
+
+
+// BOTÓN CANCELAR (gris oscuro elegante)
+.swal2-popup .swal-btn-cancel
+  background: #444 !important
+  color: #fff !important
+  padding: 10px 24px !important
+  font-size: 15px !important
+  border-radius: 8px !important
+  font-weight: 600 !important
+  border: none !important
+  cursor: pointer !important
+  transition: 0.2s ease !important
+
+  &:hover
+    background: #222 !important
+    transform: scale(1.05) !important
+
+// BOTONES + y -
+.swal2-popup .btn-swal-cantidad
+  background: #1e88e5 !important
+  color: white !important
+  padding: 8px 14px !important
+  border-radius: 8px !important
+  font-size: 18px !important
+  border: none !important
+  cursor: pointer !important
+  transition: 0.15s !important
+
+  &:hover
+    background: #1565c0 !important
+    transform: scale(1.10) !important

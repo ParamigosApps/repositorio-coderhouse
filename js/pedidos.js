@@ -20,10 +20,7 @@ export async function obtenerPedidosPorUsuario(usuarioId) {
       pedidos.push({
         id: doc.id,
         ...data,
-        fecha:
-          data.fecha instanceof Timestamp
-            ? data.fecha.toDate()
-            : new Date(data.fecha),
+        fecha: data.fecha,
       });
     }
   });
@@ -56,8 +53,14 @@ export async function mostrarTodosLosPedidos(usuarioId) {
 
 function mostrarPedidosUI(contenedor, pedidos) {
   contenedor.innerHTML = "";
+  let estado = "";
+
+  if (contenedor.id === "listaPedidosPendientes") estado = "Pendientes de pago";
+  else if (contenedor.id === "listaPedidosPagos") estado = "Pagados";
+  else if (contenedor.id === "listaPedidosRetirados") estado = "Retirados";
+
   if (pedidos.length === 0) {
-    contenedor.innerHTML = `<p class="text-muted">No hay pedidos</p>`;
+    contenedor.innerHTML = `<p class="text-muted text-center">No tienes pedidos <strong>${estado}</strong></p>`;
     return;
   }
 
@@ -74,11 +77,11 @@ function mostrarPedidosUI(contenedor, pedidos) {
     div.innerHTML = `
       <strong>ID:</strong> ${pedido.id}<br>
       <strong>Total:</strong> $${pedido.total}<br>
-      <strong>Fecha:</strong> ${pedido.fecha.toLocaleString()}<br>
+      <strong>Fecha:</strong> ${pedido.fecha}<br>
       <strong>Estado:</strong> ${pedido.estado}<br>
       <button class="btn btn-sm btn-dark mt-2 ver-qr">Ver QR</button>
       <div class="detalles-pedido" style="display:none;margin-top:10px;"></div>
-      <button class="btn btn-sm btn-danger position-absolute top-0 end-0">✖</button>
+      <button class="btn btn-sm btn-danger position-absolute top-0 end-0">X</button>
     `;
 
     // Botón eliminar
@@ -87,6 +90,7 @@ function mostrarPedidosUI(contenedor, pedidos) {
       if (!confirm("¿Eliminar este pedido?")) return;
       await deleteDoc(doc(db, "compras", pedido.id));
       div.remove();
+      mostrarTodosLosPedidos(auth.currentUser.uid);
     });
 
     // Toggle detalles
@@ -111,10 +115,10 @@ function mostrarPedidosUI(contenedor, pedidos) {
         lugar: "Tienda",
         total: pedido.total,
         ticketId: pedido.id, // ✅ usar ID de Firestore
+        fecha: pedido.fecha,
         modoLectura: true,
       });
     });
-
     contenedor.appendChild(div);
   });
 }
@@ -174,7 +178,7 @@ export async function obtenerPedidosPorEstado(usuarioId, estado) {
       const data = doc.data();
       if (data.usuarioId !== usuarioId) return;
       if (!estado || data.estado === estado)
-        pedidos.push({ id: doc.id, ...data });
+        pedidos.push({ id: doc.id, ...data, fecha: data.fecha });
     });
 
     pedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));

@@ -175,7 +175,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   auth.onAuthStateChanged(async (user) => {
     if (user) {
       await mostrarTodosLosPedidos(user.uid);
-      console.log("se inicio sesion");
     }
   });
 

@@ -70,7 +70,7 @@
         <h3 class="MontoTotalCarritoH2 m-0">
           Total: <span id="MontoTotalCarrito">0</span>
         </h3>
-        <button id="btnPagarCarrito" class="btn btn-success">
+        <button id="btnConfirmarPedido" class="btn btn-swal-estilo">
           Confirmar Pedido
         </button>
       </div>
@@ -154,7 +154,10 @@
                 <div id="mensajeFiltro" class="text-start mt-3 mb-0 text-muted">
                   Puedes filtrar los productos por categorías.
                 </div>
-                <div id="catalogoContainer" class="container my-1"></div>
+                <div
+                  id="catalogoContainer"
+                  class="container my-1 collapsed"
+                ></div>
               </div>
             </div>
           </div>
@@ -162,76 +165,79 @@
 
           <!-- ENTRADAS & EVENTOS -->
           <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button
-                class="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#collapseEntradasCliente"
-              >
-                🎟️ Entradas & Eventos
-              </button>
-            </h2>
-            <div
-              id="collapseEntradasCliente"
-              class="accordion-collapse collapse"
-              data-bs-parent="#accordionCliente"
-            >
-              <div class="accordion-body d-grid gap-2">
+            <div class="accordion-item">
+              <h2 class="accordion-header">
                 <button
-                  class="btn btn-outline-dark position-relative"
-                  id="btnProximosEventos"
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseEntradasEventos"
                 >
-                  Ver próximos eventos
-
-                  <span
-                    id="iconoEventosDisponibles"
-                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                  >
-                    <span id="contadorEventosDisponibles">0</span>
-                  </span>
+                  🎟️ Entradas & Eventos
                 </button>
+              </h2>
 
-                <div id="containerEventos" class="container my-3 d-none">
-                  <hr class="my-4" />
-                  <h6 class="fw-semibold mb-3">Próximos eventos</h6>
-                  <div id="listaEventos" class="mt-2"></div>
-                </div>
+              <div
+                id="collapseEntradasEventos"
+                class="accordion-collapse collapse"
+                data-bs-parent="#accordionCliente"
+              >
+                <div class="accordion-body d-flex flex-column gap-3">
+                  <!-- Fila de botones -->
+                  <div class="d-flex justify-content-center gap-3">
+                    <!-- Botón Eventos -->
+                    <button
+                      class="btn btn-outline-dark position-relative"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#containerEventos"
+                    >
+                      Ver próximos eventos
+                      <span
+                        id="iconoEventosDisponibles"
+                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                      >
+                        <span id="contadorEventosDisponibles">0</span>
+                      </span>
+                    </button>
+                    <!-- Botón Entradas -->
+                    <button
+                      class="btn btn-outline-dark position-relative"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#containerEntradas"
+                    >
+                      Mis entradas
+                      <span
+                        id="iconoMisEntradas"
+                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                      >
+                        <span id="contadorMisEntradas">0</span>
+                      </span>
+                    </button>
+                  </div>
 
-                <button class="btn btn-outline-dark" id="btnMisEntradas">
-                  Mis entradas
-                </button>
-                <div id="containerEntradas" class="container my-3 d-none">
-                  <hr class="my-4" />
-                  <h6 class="fw-semibold mb-3">Mis entradas</h6>
+                  <!-- Contenedor EVENTOS -->
                   <div
-                    id="listaEntradas"
-                    class="d-flex flex-column gap-3"
-                  ></div>
-                  <!-- Modal para QR -->
-                  <div id="qrModal" class="modal fade">
-                    <div class="modal-dialog modal-dialog-centered">
-                      <div class="modal-content text-center p-3">
-                        <div
-                          id="qrcode"
-                          class="d-flex justify-content-center align-items-center"
-                        ></div>
-                        <p class="text-start w-100" id="ticketInfo"></p>
-                        <a
-                          id="downloadQr"
-                          download="ticket.png"
-                          style="display: none"
-                          class="w-50 d-block mx-auto"
-                          >Descargar QR</a
-                        >
-                        <button
-                          class="btn btn-outline-dark w-50 mt-2 d-block mx-auto"
-                          data-bs-dismiss="modal"
-                        >
-                          Cerrar
-                        </button>
-                      </div>
-                    </div>
+                    id="containerEventos"
+                    class="collapse"
+                    data-bs-parent="#collapseEntradasEventos"
+                  >
+                    <hr class="my-4" />
+                    <h6 class="fw-semibold mb-3">Próximos eventos</h6>
+                    <div id="listaEventos"></div>
+                  </div>
+
+                  <!-- Contenedor ENTRADAS -->
+                  <div
+                    id="containerEntradas"
+                    class="collapse"
+                    data-bs-parent="#collapseEntradasEventos"
+                  >
+                    <hr class="my-4" />
+                    <h6 class="fw-semibold mb-3">Mis entradas</h6>
+                    <div
+                      id="listaEntradas"
+                      class="d-flex flex-column gap-3"
+                    ></div>
                   </div>
                 </div>
               </div>

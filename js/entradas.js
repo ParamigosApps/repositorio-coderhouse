@@ -170,7 +170,7 @@ export async function pedirEntrada(eventoId, e) {
       confirmButtonText:
         e.precio && e.precio > 0 ? "Mercado Pago" : "Solicitar",
       denyButtonText: "Transferencia",
-      cancelButtonText: "Cancelar",
+      cancelButtonText: "Salir",
       customClass: {
         confirmButton: "btn btn-success",
         denyButton: "btn btn-dark",
@@ -179,7 +179,8 @@ export async function pedirEntrada(eventoId, e) {
       buttonsStyling: false,
     });
 
-    if (metodo === null) return; // canceló
+    //
+    if (metodo === undefined) return; // canceló
 
     const cantidad =
       parseInt(document.getElementById("swal-cantidad").value) || 1;
@@ -255,43 +256,48 @@ Titular: ${datos.titularBanco}
           buttonsStyling: false,
         });
       }
-
+      console.log("result es: " + result);
       // ENVIAR AL CLIENTE AL WHATSAPP
-      if (result.isConfirmed || afterCopy.isConfirmed) {
-        if (contacto) {
-          mensaje = encodeURIComponent(
-            `¡Hola, soy ${usuarioNombre}! y solicité ${cantidad} entrada(s) del evento "${e.nombre}" a través de la web. Adjunto comprobante de pago.`
-          );
+      if (
+        (result && result.isConfirmed) ||
+        (afterCopy && afterCopy.isConfirmed)
+      ) {
+        if (result.isConfirmed || afterCopy.isConfirmed) {
+          if (contacto) {
+            mensaje = encodeURIComponent(
+              `¡Hola, soy ${usuarioNombre}! y solicité ${cantidad} entrada(s) del evento "${e.nombre}" a través de la web. Adjunto comprobante de pago.`
+            );
 
-          window.open(
-            `https://wa.me/${contacto.whatsappContacto}?text=${mensaje}`,
-            "_blank"
-          );
+            window.open(
+              `https://wa.me/${contacto.whatsappContacto}?text=${mensaje}`,
+              "_blank"
+            );
 
-          await crearSolicitudPendiente(eventoId, usuarioId, entradaBase);
-          return Swal.fire(
-            "Solicitud enviada",
-            "Se registró la solicitud y puedes compartir el comprobante ahora.",
-            "success"
-          );
-          actualizarContadorMisEntradas();
-        } else {
-          await crearSolicitudPendiente(eventoId, usuarioId, entradaBase);
-          return Swal.fire({
-            title: "Error al redirigir a Whatsapp",
-            text: "Su pedido fue generado. Comuniquese con un administrador.",
-            showConfirmButton: true,
-            confirmButtonText: "Salir",
-            customClass: { confirmButton: "btn btn-dark" },
-          });
-          actualizarContadorMisEntradas();
+            await crearSolicitudPendiente(eventoId, usuarioId, entradaBase);
+            return Swal.fire(
+              "Solicitud enviada",
+              "Se registró la solicitud y puedes compartir el comprobante ahora.",
+              "success"
+            );
+            actualizarContadorMisEntradas();
+          } else {
+            await crearSolicitudPendiente(eventoId, usuarioId, entradaBase);
+            return Swal.fire({
+              title: "Error al redirigir a Whatsapp",
+              text: "Su pedido fue generado. Comuniquese con un administrador.",
+              showConfirmButton: true,
+              confirmButtonText: "Salir",
+              customClass: { confirmButton: "btn btn-dark" },
+            });
+            actualizarContadorMisEntradas();
+          }
+        } else if (afterCopy.isDenied) {
+          return;
         }
-      } else if (afterCopy.isDenied) {
-        console.log("cancelo la orden con boton");
+      } else {
+        console.log("Cancelando orden");
         return;
       }
-
-      return Swal.fire("Cancelado", "No se generó ninguna orden.", "info");
     }
 
     // --------------------------- MERCADO PAGO ---------------------------

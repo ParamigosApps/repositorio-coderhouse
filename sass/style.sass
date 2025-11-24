@@ -112,6 +112,9 @@ header
     background-color: #6bd5ff
     transform: scale(1.08)
 
+
+
+
 // ------------------------------ FOOTER ------------------------------- //
 .footer 
   background-color: #313131
@@ -777,7 +780,7 @@ $qr-video-border-color: #343a40
   border: 1px solid #ccc
 
   // MENU ADMIN EMERGENTE DE ENTRADAS PENDIENTES DE APROBACION
-#iconoEntradasPendientes, #iconoEventosDisponibles, #iconoMisEntradas
+#iconoEntradasPendientes, #iconoEventosDisponibles, #iconoMisEntradas, #iconoPedidosPendientes,  #iconoPedidosPagos
   width: 20px
   height: 20px
   font-size: 12px
@@ -786,13 +789,8 @@ $qr-video-border-color: #343a40
   align-items: center
   background-color: #242
 
-#iconoMisEntradas
-   left: 118px !important
-
-#iconoEventosDisponibles
-   left: 180px !important
-
-
+#iconoPedidosPendientes, #iconoMisEntradas
+  background-color: #1e88e5
 
 // CARRITO DESPLEGABLE
 /* carrito panel */
@@ -885,6 +883,9 @@ header .navbar-brand
   left: 50%
   transform: translateX(-50%)
   z-index: 1
+
+#carritoItems
+  height: 100px
 
 // Icono del carrito en el header
 #carritoIcono
@@ -1282,3 +1283,13 @@ body.qr-body
   &:hover
     background: #1565c0 !important
     transform: scale(1.10) !important
+
+
+  // admin.html
+
+  // input redes sociales
+  .disabled-input 
+  background-color: #e9ecef
+  cursor: not-allowed
+  opacity: 0.7
+

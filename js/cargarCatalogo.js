@@ -169,7 +169,6 @@ class Producto {
 // ------------------------------ RENDER CATALOGO ------------------------------ //
 export function renderizarCatalogo(filtro = "Todos") {
   catalogoContainer.innerHTML = "";
-
   const categorias = {};
   productos.forEach((p) => {
     if (!categorias[p.categoria]) categorias[p.categoria] = [];
@@ -202,11 +201,11 @@ export function renderizarCatalogo(filtro = "Todos") {
 // ------------------------------ CARGAR CATALOGO ------------------------------ //
 export async function cargarCatalogo() {
   if (!catalogoContainer) return;
+  catalogoContainer.classList.add("collapse");
   catalogoContainer.innerHTML = "<p>Cargando productos...</p>";
   if (catalogoContainer.classList.contains("collapse")) {
     console.log("Puedes filtrar los productos por categorías.");
-  } else console.log("no se muestra.");
-
+  }
   try {
     const snapshot = await getDocs(collection(db, "productos"));
     productos = snapshot.docs.map((doc) => {

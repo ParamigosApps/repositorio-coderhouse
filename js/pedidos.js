@@ -155,11 +155,9 @@ export async function crearPedido(
 
     // El ID de Firestore será nuestro ticketId
     const ticketId = docRef.id;
-
-    // Opcional: actualizar el mismo documento para guardar ticketId en el campo
     await docRef.update({ ticketId });
 
-    return ticketId; // Devuelve el ticketId para generar el QR
+    return ticketId;
   } catch (err) {
     console.error("❌ Error creando pedido:", err);
     throw err;
@@ -174,14 +172,18 @@ export async function obtenerPedidosPorEstado(usuarioId, estado) {
     const pedidosSnap = await getDocs(collection(db, "compras"));
     const pedidos = [];
 
-    pedidosSnap.forEach((doc) => {
-      const data = doc.data();
+    pedidosSnap.forEach((docu) => {
+      const data = docu.data();
       if (data.usuarioId !== usuarioId) return;
-      if (!estado || data.estado === estado)
-        pedidos.push({ id: doc.id, ...data, fecha: data.fecha });
+
+      if (!estado || data.estado === estado) {
+        pedidos.push({ id: docu.id, ...data });
+      }
     });
 
+    // Ordenar por fecha descendente
     pedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
     return pedidos;
   } catch (err) {
     console.error("❌ Error obteniendo pedidos:", err);
@@ -214,3 +216,29 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+export async function actualizarContadoresPedidos(usuarioId) {
+  const contadorPedidosPagos = document.getElementById("contadorPedidosPagos");
+  const contadorPedidosPendientes = document.getElementById(
+    "contadorPedidosPendientes"
+  );
+
+  if (!contadorPedidosPagos || !contadorPedidosPendientes) {
+    console.warn("⚠ No se encontraron los elementos de contadores.");
+    return;
+  }
+
+  try {
+    const pedidosPagos = await obtenerPedidosPorEstado(usuarioId, "pagado");
+    const pedidosPendientes = await obtenerPedidosPorEstado(
+      usuarioId,
+      "pendiente"
+    );
+
+    contadorPedidosPagos.textContent = pedidosPagos.length;
+    contadorPedidosPendientes.textContent = pedidosPendientes.length;
+    console.log(pedidosPagos.length + "  aaa  " + pedidosPendientes.length);
+  } catch (err) {
+    console.error("❌ Error actualizando contadores:", err);
+  }
+}

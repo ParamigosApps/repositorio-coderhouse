@@ -177,7 +177,7 @@ export async function cargarEventosAdmin() {
             : ""
         }
         <button
-        class="btn btn-sm btn-danger mt-1 btnEliminar w-25 d-block mx-auto"
+        class="btn btn-sm btn-danger mt-1 btnEliminar d-block mx-auto" style="font-size: 1.4rem"
         data-eventoid="${id}">
         🗑️ Eliminar
         </button>
@@ -454,35 +454,30 @@ const btnGuardarContacto = document.getElementById("btnGuardarContacto");
 btnGuardarContacto?.addEventListener("click", guardarDatosContacto);
 
 async function guardarDatosContacto() {
-  const whatsappContacto =
-    document.getElementById("whatsappContacto")?.value || "";
-  const instagramContacto =
-    document.getElementById("instagramContacto")?.value || "";
-  const tiktokContacto = document.getElementById("tiktokContacto")?.value || "";
+  const data = {
+    toggleWhatsapp: document.getElementById("toggleWhatsapp").checked,
+    toggleInstagram: document.getElementById("toggleInstagram").checked,
+    toggleTiktok: document.getElementById("toggleTiktok").checked,
+    toggleX: document.getElementById("toggleX").checked,
+    toggleFacebook: document.getElementById("toggleFacebook").checked,
+    toggleWeb: document.getElementById("toggleWeb").checked,
 
-  await setDoc(doc(db, "configuracion", "social"), {
-    whatsappContacto,
-    instagramContacto,
-    tiktokContacto,
-  });
+    whatsappContacto: document.getElementById("whatsappContacto").value.trim(),
+    instagramContacto: document
+      .getElementById("instagramContacto")
+      .value.trim(),
+    tiktokContacto: document.getElementById("tiktokContacto").value.trim(),
+    xContacto: document.getElementById("xContacto").value.trim(),
+    facebookContacto: document.getElementById("facebookContacto").value.trim(),
+    webContacto: document.getElementById("webContacto").value.trim(),
+  };
+
+  await setDoc(doc(db, "configuracion", "social"), data);
 
   Swal.fire({
     icon: "success",
-    title: "Contactos guardados",
-    html: `
-      <div style="text-align:left;">
-        <p><strong>Whatsapp:</strong> ${escapeHtml(
-          whatsappContacto || "Campo vacío"
-        )}</p>
-        <p><strong>Instagram:</strong> ${escapeHtml(
-          instagramContacto || "Campo vacío"
-        )}</p>
-        <p><strong>TikTok:</strong> ${escapeHtml(
-          tiktokContacto || "Campo vacío"
-        )}</p>
-      </div>
-    `,
-    confirmButtonText: "Aceptar",
+    title: "Datos guardados",
+    text: "Los datos de contacto se guardaron correctamente",
   });
 }
 
@@ -546,27 +541,50 @@ async function ObtenerDatosGuardadosDB() {
   }
 
   // DATOS CONTACTO
-  const docRefCont = doc(db, "configuracion", "social");
-  const docSnapCont = await getDoc(docRefCont);
 
-  if (docSnapCont.exists()) {
-    const { whatsappContacto, instagramContacto, tiktokContacto } =
-      docSnapCont.data();
+  const docSnapContacto = await getDoc(doc(db, "configuracion", "social"));
+  if (!docSnapContacto.exists()) return;
 
-    const whatsappContactoInput = document.getElementById("whatsappContacto");
-    const instagramContactoInput = document.getElementById("instagramContacto");
-    const tiktokContactoInput = document.getElementById("tiktokContacto");
+  const data = docSnapContacto.data();
 
-    if (whatsappContacto) whatsappContactoInput.value = whatsappContacto;
-    else whatsappContactoInput.placeholder = "Ej: 1112345678";
+  const fields = ["Whatsapp", "Instagram", "Tiktok", "X", "Facebook", "Web"];
 
-    if (tiktokContacto) instagramContactoInput.value = instagramContacto;
-    else instagramContactoInput.tiktokContacto = "Ej: @usuario_ig";
+  fields.forEach((red) => {
+    const toggle = document.getElementById(`toggle${red}`);
+    const input = document.getElementById(`${red.toLowerCase()}Contacto`);
 
-    if (tiktokContacto) tiktokContactoInput.value = tiktokContacto;
-    else tiktokContactoInput.placeholder = "Ej: @usuario_tiktok";
-  }
+    if (!toggle || !input) return;
+
+    toggle.checked = data[`toggle${red}`] ?? false;
+    input.value = data[`${red.toLowerCase()}Contacto`] || "";
+
+    // Aplica estado final
+    toggle.dispatchEvent(new Event("change"));
+  });
 }
+
+// REDES SOCIALES
+// Habilitar / deshabilitar inputs de redes sociales
+document.querySelectorAll(".toggle-red").forEach((toggle) => {
+  toggle.addEventListener("change", () => {
+    const fieldId = toggle.dataset.target;
+    const input = document.getElementById(fieldId);
+
+    if (!input) return;
+
+    if (toggle.checked) {
+      input.disabled = false;
+      input.classList.remove("disabled-input");
+    } else {
+      input.disabled = true;
+      input.classList.add("disabled-input");
+      input.value = ""; // limpia si está deshabilitado
+    }
+  });
+
+  // Aplica estado inicial al cargar
+  toggle.dispatchEvent(new Event("change"));
+});
 
 ObtenerDatosGuardadosDB();
 cargarEntradasPendientes();

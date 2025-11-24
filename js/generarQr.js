@@ -69,7 +69,7 @@ export async function generarEntradaQr({
             <p><strong>Usuario:</strong> ${usuario}</p>
             <p><strong>Fecha:</strong> ${formatearFecha(fecha)}</p>
             <p><strong>Lugar:</strong> ${lugar}</p>
-            <p><strong>Precio:</strong> ${displayPrecio}</p>
+            <p><strong>Preciocaca:</strong> ${displayPrecio}</p>
           `;
       tempDiv.appendChild(info);
 

@@ -24,7 +24,7 @@ export async function crearPedido({
   const usuarioNombre = auth.currentUser.displayName || "Usuario";
 
   const ticketId = `${Date.now()}-${Math.floor(Math.random() * 9999)}`;
-  const fechaCompra = obtenerFechaCompra(); // <-- FECHA REAL
+  const fechaCompra = obtenerFechaCompra();
 
   await addDoc(collection(db, "compras"), {
     usuarioId,

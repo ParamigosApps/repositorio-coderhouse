@@ -803,7 +803,7 @@ div:where(.swal2-container) {
   border: 1px solid #ccc;
 }
 
-#iconoEntradasPendientes, #iconoEventosDisponibles, #iconoMisEntradas {
+#iconoEntradasPendientes, #iconoEventosDisponibles, #iconoMisEntradas, #iconoPedidosPendientes, #iconoPedidosPagos {
   width: 20px;
   height: 20px;
   font-size: 12px;
@@ -813,12 +813,8 @@ div:where(.swal2-container) {
   background-color: #242;
 }
 
-#iconoMisEntradas {
-  left: 118px !important;
-}
-
-#iconoEventosDisponibles {
-  left: 180px !important;
+#iconoPedidosPendientes, #iconoMisEntradas {
+  background-color: #1e88e5;
 }
 
 /* carrito panel */
@@ -913,6 +909,10 @@ header .navbar-brand {
   left: 50%;
   transform: translateX(-50%);
   z-index: 1;
+}
+
+#carritoItems {
+  height: 100px;
 }
 
 #carritoIcono {
@@ -1336,6 +1336,9 @@ body.qr-body {
   border: none !important;
   cursor: pointer !important;
   transition: 0.15s !important;
+  background-color: #e9ecef;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 .swal2-popup .btn-swal-cantidad:hover {
   background: #1565c0 !important;

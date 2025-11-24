@@ -52,13 +52,13 @@
       <table class="carrito-table w-100">
         <thead>
           <tr>
-            <th class="text-start small">Productos añadidos</th>
+            <th class="text-start small px-2 py-2">Productos añadidos</th>
             <th class="TituloCarrito text-center" px-2 py-2>Precio</th>
             <th class="TituloCarrito text-center" px-4 py-3>Subtotal</th>
             <th class="TituloCarrito text-center" px-4 py-3>Acciones</th>
           </tr>
         </thead>
-        <tbody id="carritoItems">
+        <tbody id="carritoItems" class="px-2 py-2">
           <!-- items generados por JS -->
         </tbody>
       </table>
@@ -74,15 +74,56 @@
           Confirmar Pedido
         </button>
       </div>
-      <section id="container-pedidos">
-        <div class="lista-pedidos" id="listaPedidosPagos">
-          <h3>Pagados</h3>
+      <section id="container-pedidos" class="p-3">
+        <!-- PAGADOS -->
+        <button
+          class="btn btn-outline-dark w-100 mb-2 position-relative"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapsePagados"
+        >
+          Pedidos <strong>pagados</strong>
+          <span
+            id="iconoPedidosPagos"
+            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success"
+          >
+            <span id="contadorPedidosPagos">0</span>
+          </span>
+        </button>
+        <div id="collapsePagados" class="collapse">
+          <div class="lista-pedidos" id="listaPedidosPagos"></div>
         </div>
-        <div class="lista-pedidos" id="listaPedidosPendientes">
-          <h3>Pendientes</h3>
+
+        <!-- PENDIENTES -->
+        <button
+          class="btn btn-outline-dark w-100 mb-2 position-relative"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapsePendientes"
+        >
+          Pedidos <strong>pendientes</strong>
+          <span
+            id="iconoPedidosPendientes"
+            class="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+          >
+            <span id="contadorPedidosPendientes">0</span>
+          </span>
+        </button>
+        <div id="collapsePendientes" class="collapse">
+          <div class="lista-pedidos" id="listaPedidosPendientes"></div>
         </div>
-        <div class="lista-pedidos" id="listaPedidosRetirados">
-          <h3>Retirados</h3>
+
+        <!-- RETIRADOS -->
+        <button
+          class="btn btn-outline-dark w-100 mb-2"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseRetirados"
+        >
+          Pedidos <strong>retirados</strong>
+        </button>
+        <div id="collapseRetirados" class="collapse">
+          <div class="lista-pedidos" id="listaPedidosRetirados"></div>
         </div>
       </section>
     </aside>
@@ -115,7 +156,10 @@
             >
               <div class="accordion-body d-grid gap-3">
                 <div class="col-12">
-                  <button id="btnCatalogoCompleto" class="btn btn-dark w-100">
+                  <button
+                    id="btnCatalogoCompleto"
+                    class="btn btn-outline-dark w-100"
+                  >
                     Ver catálogo completo
                   </button>
                 </div>
@@ -208,7 +252,7 @@
                       Mis entradas
                       <span
                         id="iconoMisEntradas"
-                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill"
                       >
                         <span id="contadorMisEntradas">0</span>
                       </span>
@@ -269,7 +313,7 @@
             </div>
           </div>
 
-          <!-- CONTACTO -->
+          <!-- Redes Sociales -->
           <div class="accordion-item">
             <h2 class="accordion-header">
               <button
@@ -281,16 +325,14 @@
                 📞 Redes Sociales
               </button>
             </h2>
+
             <div
               id="collapseRedes"
               class="accordion-collapse collapse"
               data-bs-parent="#accordionCliente"
             >
-              <div class="accordion-body d-grid gap-2">
-                <button class="btn btn-outline-dark">Instagram</button>
-                <button class="btn btn-outline-dark">TikTok</button>
-                <button class="btn btn-outline-dark">X</button>
-                <button class="btn btn-outline-dark">Página web</button>
+              <div id="redesContainer" class="accordion-body d-grid gap-2">
+                <!-- Botones dinámicos (se llenan con JS dependiendo de los toggles) -->
               </div>
             </div>
           </div>

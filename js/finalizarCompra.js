@@ -7,7 +7,10 @@ import {
 import { auth } from "./firebase.js";
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
 import { crearPedido, mostrarQrCompra } from "./compras.js"; // <-- ahora usamos crearPedido unificado
-import { mostrarTodosLosPedidos } from "./pedidos.js";
+import {
+  actualizarContadoresPedidos,
+  mostrarTodosLosPedidos,
+} from "./pedidos.js";
 
 export async function finalizarCompra() {
   try {
@@ -76,9 +79,11 @@ export async function finalizarCompra() {
 
       // Limpiar carrito
       localStorage.removeItem("carrito");
+
       actualizarCarritoVisual();
       mostrarCarrito();
-      mostrarTodosLosPedidos(auth.currentUser.uid);
+      mostrarTodosLosPedidos();
+      actualizarContadoresPedidos(auth.currentUser.uid);
       //document.getElementById("carritoPanel")?.classList.remove("open");
       //document.getElementById("carritoOverlay")?.setAttribute("hidden", true);
       return;

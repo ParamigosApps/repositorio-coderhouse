@@ -203,9 +203,6 @@ export async function cargarCatalogo() {
   if (!catalogoContainer) return;
   catalogoContainer.classList.add("collapse");
   catalogoContainer.innerHTML = "<p>Cargando productos...</p>";
-  if (catalogoContainer.classList.contains("collapse")) {
-    console.log("Puedes filtrar los productos por categorías.");
-  }
   try {
     const snapshot = await getDocs(collection(db, "productos"));
     productos = snapshot.docs.map((doc) => {

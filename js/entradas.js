@@ -20,6 +20,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
 const contadorElem = document.getElementById("contadorEntradasPendientes");
+let cantidadEntradasCargadas = null;
 
 // -------------------------- CREAR ENTRADA --------------------------
 export async function crearEntrada(
@@ -70,9 +71,8 @@ export async function crearEntrada(
         "Envía el comprobante para que un administrador apruebe la solicitud.",
         "success"
       );
-      //console.log(ticketId + "   id" + id);
     }
-
+    cargarEntradas();
     return docRef;
   } catch (err) {
     console.error("Error creando entrada:", err);
@@ -142,7 +142,7 @@ export async function pedirEntrada(eventoId, e) {
         title: "Límite de entradas alcanzado",
         html: `
           <p>Has alcanzado el máximo de <strong>${entradasPorUsuario}</strong> entradas por usuario para este evento.</p>
-          <p>Entradas compradas: <strong>${entradasCompradas}</strong></p>
+          <p>Entradas adquiridas: <strong>${entradasCompradas}</strong></p>
           <p>Pendientes de aprobación: <strong>${pendientes}</strong></p>
           <p>Contacta al organizador ante cualquier inquietud o espera la aprobación de las solicitudes pendientes.</p>
         `,
@@ -486,25 +486,28 @@ export async function cargarEntradas() {
   const contenedor = document.getElementById("listaEntradas");
   if (!contenedor) return console.warn("⚠ listaEntradas no encontrado");
 
-  contenedor.innerHTML = `<p class="text-secondary mt-3 text-center">Cargando entradas...</p>`;
-
   try {
     const usuarioId = auth.currentUser?.uid;
     if (!usuarioId) {
       contenedor.innerHTML = `<p class="text-danger mt-3 text-center">Debes iniciar sesión para ver tus entradas.</p>`;
       return;
-    } else {
-      actualizarContadorMisEntradas();
-      contenedor.innerHTML = "";
     }
 
     const q = query(
       collection(db, "entradas"),
       where("usuarioId", "==", usuarioId)
     );
+
+    actualizarContadorMisEntradas();
     const snapshot = await getDocs(q);
 
-    contenedor.innerHTML = "";
+    if (cantidadEntradasCargadas === snapshot.size) {
+      contenedor.innerHTML = "";
+      console.log("✔ No hubo cambios en las entradas. No se recarga.");
+      return; // 🔥 No volvemos a renderizar
+    }
+
+    contenedor.innerHTML = `<p class="text-secondary mt-3 text-center">Cargando entradas...</p>`;
 
     if (snapshot.empty) {
       contenedor.innerHTML = `<p class="text-secondary text-center">Todavía no generaste entradas.</p>`;
@@ -525,6 +528,7 @@ export async function cargarEntradas() {
       }
     });
 
+    contenedor.innerHTML = "";
     // Renderizar entradas agrupadas
     Object.values(entradasMap).forEach((entrada) => {
       const div = document.createElement("div");

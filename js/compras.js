@@ -1,7 +1,8 @@
 // /js/compras.js
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
 import { auth, db } from "./firebase.js";
-import { formatearFecha, obtenerFechaCompra } from "./utils.js";
+import { obtenerFechaCompra } from "./utils.js";
+import { mostrarTodosLosPedidos } from "./pedidos.js";
 import {
   addDoc,
   collection,
@@ -62,7 +63,7 @@ export async function mostrarQrCompra({
       <p><strong>Ticket:</strong> ${ticketId}</p>
       <p><strong>Cliente:</strong> ${usuarioNombre}</p>
       <p><strong>Lugar:</strong> ${lugar}</p>
-      <p><strong>${fechaCompra}</strong></p>   <!-- FIX -->
+      <p><strong>Fecha: </strong>${fechaCompra}</p>  
       <p><strong>Total:</strong> $${total}</p>
       <hr>
       <div id="qrCompraContainer" style="display:flex;justify-content:center;"></div>
@@ -89,4 +90,6 @@ export async function mostrarQrCompra({
     customClass: { confirmButton: "btn btn-dark" },
     buttonsStyling: false,
   });
+
+  mostrarTodosLosPedidos(auth.currentUser.uid);
 }

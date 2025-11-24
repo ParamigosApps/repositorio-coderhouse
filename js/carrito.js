@@ -1,14 +1,13 @@
 // /js/carrito.js
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
-import { mostrarMensaje } from "./utils.js";
-import { mostrarTodosLosPedidos } from "./pedidos.js";
+import { mostrarTodosLosPedidos, obtenerPedidosPorEstado } from "./pedidos.js";
 import { auth } from "./firebase.js";
 
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-const carritoItems = document.getElementById("carritoItems");
+const carritoItems = document.getElementById("carritoItemsMensaje");
 const contadorCarrito = document.getElementById("carritoContador");
 const montoTotalCarrito = document.getElementById("MontoTotalCarrito");
-const btnFinalizarCompra = document.getElementById("btn-comprar");
+const btnFinalizarCompra = document.getElementById("btnConfirmarPedido");
 const carritoIcono = document.getElementById("carritoIcono");
 const carritoPanel = document.getElementById("carritoPanel");
 const carritoOverlay = document.getElementById("carritoOverlay");
@@ -24,14 +23,27 @@ export function calcularTotal() {
   }, 0);
 }
 
-export function mostrarCarrito() {
+export async function mostrarCarrito() {
   if (!carritoItems) return;
   carritoItems.innerHTML = "";
 
   if (carrito.length === 0) {
-    carritoItems.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Tu carrito está vacío 🛒</td></tr>`;
+    carritoItems.innerHTML = `Tu carrito está vacío 🛒.`;
     if (montoTotalCarrito) montoTotalCarrito.textContent = "$0";
     if (btnFinalizarCompra) btnFinalizarCompra.style.display = "none";
+
+    if (!auth.currentUser) {
+      console.warn("⚠ No hay usuario logueado todavía");
+      return;
+    }
+    const uid = auth.currentUser.uid;
+
+    const resultado = await qrPendientesEnCarrito(uid);
+
+    if (resultado) {
+      if (resultado.qrGenerados <= 1)
+        carritoItems.innerHTML = `Tu carrito está vacío 🛒. ¡Tienes pedidos QR generados!`;
+    }
     return;
   }
 
@@ -108,9 +120,6 @@ export function agregarProducto(producto) {
 
   mostrarCarrito();
   actualizarCarritoVisual();
-  mostrarMensaje(
-    `Añadiste ${cantidadAAgregar} unidad(es) de ${producto.nombre} al carrito`
-  );
 }
 
 // ==================== SUMAR / QUITAR UNIDADES ====================
@@ -118,18 +127,52 @@ if (carritoItems) {
   carritoItems.addEventListener("click", (e) => {
     const index = Number(e.target.dataset.index);
     if (Number.isNaN(index)) return;
+
     const producto = carrito[index];
     if (!producto) return;
 
     const claveStock = `stock-${producto.id}`;
     let stockActual = JSON.parse(localStorage.getItem(claveStock)) || 0;
 
+    // ---- ELIMINAR o QUITAR UNA UNIDAD ----
     if (e.target.classList.contains("btn-danger")) {
-      if (producto.enCarrito === 1) carrito.splice(index, 1);
-      else producto.enCarrito -= 1;
+      if (producto.enCarrito === 1) {
+        carrito.splice(index, 1);
+
+        Toastify({
+          text: `Eliminaste ${producto.nombre} del carrito`,
+          duration: 2000,
+          gravity: "bottom",
+          position: "center",
+          style: {
+            background: "#ee0202db", // 🔥 SIEMPRE USAR "background"
+            width: "80%",
+            margin: "0 auto",
+            textAlign: "center",
+          },
+        }).showToast();
+      } else {
+        producto.enCarrito -= 1;
+
+        Toastify({
+          text: `Quitaste una unidad de ${producto.nombre}`,
+          duration: 1500,
+          gravity: "bottom",
+          position: "center",
+          style: {
+            background: "#ee0202db", // 🔥 mismo atributo
+            width: "80%",
+            margin: "0 auto",
+            textAlign: "center",
+          },
+        }).showToast();
+      }
 
       stockActual += 1;
-    } else if (e.target.classList.contains("btn-success")) {
+    }
+
+    // ---- AGREGAR UNA UNIDAD ----
+    else if (e.target.classList.contains("btn-success")) {
       if (stockActual <= 0) {
         return Swal.fire(
           "No hay más stock",
@@ -137,10 +180,25 @@ if (carritoItems) {
           "error"
         );
       }
+
       producto.enCarrito += 1;
       stockActual -= 1;
+
+      Toastify({
+        text: `Añadiste una unidad más de ${producto.nombre}`,
+        duration: 1500,
+        gravity: "bottom",
+        position: "center",
+        style: {
+          background: "#1e88e5", // 💙 tu color azul
+          width: "80%",
+          margin: "0 auto",
+          textAlign: "center",
+        },
+      }).showToast();
     }
 
+    // Guardar cambios
     localStorage.setItem(claveStock, JSON.stringify(stockActual));
     localStorage.setItem("carrito", JSON.stringify(carrito));
 
@@ -175,9 +233,33 @@ document.addEventListener("DOMContentLoaded", async () => {
   auth.onAuthStateChanged(async (user) => {
     if (user) {
       await mostrarTodosLosPedidos(user.uid);
+      await mostrarCarrito(user.uid);
     }
   });
 
   mostrarCarrito();
   actualizarCarritoVisual();
 });
+
+export async function qrPendientesEnCarrito(usuarioId) {
+  if (!usuarioId) {
+    console.warn("❌ qrPendientesEnCarrito: usuarioId es undefined");
+    return { pagos: 0, pendientes: 0 };
+  }
+
+  try {
+    const pedidosPagos = await obtenerPedidosPorEstado(usuarioId, "pagado");
+    const pedidosPendientes = await obtenerPedidosPorEstado(
+      usuarioId,
+      "pendiente"
+    );
+
+    let valor = pedidosPagos.length + pedidosPendientes.length;
+    return {
+      qrGenerados: valor,
+    };
+  } catch (err) {
+    console.error("❌ Error en qrPendientesEnCarrito:", err);
+    return { pagos: 0, pendientes: 0 };
+  }
+}

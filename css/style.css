@@ -1,3 +1,4 @@
+@charset "UTF-8";
 * {
   box-sizing: border-box;
   margin: 0;
@@ -1343,6 +1344,27 @@ body.qr-body {
 .swal2-popup .btn-swal-cantidad:hover {
   background: #1565c0 !important;
   transform: scale(1.1) !important;
+}
+.btn-collapse {
+  position: relative;
+}
+
+.btn-collapse .flecha {
+  position: absolute;
+  right: 10px;
+  top: 45%;
+  transform: translateY(-50%) rotate(0deg);
+  transition: transform 0.3s ease;
+  font-size: 2rem;
+  content: "";
+}
+
+.btn-collapse .flecha::after {
+  content: "▾";
+}
+
+.btn-collapse:not(.collapsed) .flecha {
+  transform: translateY(-50%) rotate(180deg);
 }
 
 /*# sourceMappingURL=style.css.map */

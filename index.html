@@ -58,7 +58,15 @@
             <th class="TituloCarrito text-center" px-4 py-3>Acciones</th>
           </tr>
         </thead>
+
+        <!-- items generados por JS -->
+        <tr></tr>
         <tbody id="carritoItems" class="px-2 py-2">
+          <th
+            id="carritoItemsMensaje"
+            colspan="4"
+            class="text-center text-muted py-3"
+          ></th>
           <!-- items generados por JS -->
         </tbody>
       </table>
@@ -77,12 +85,14 @@
       <section id="container-pedidos" class="p-3">
         <!-- PAGADOS -->
         <button
-          class="btn btn-outline-dark w-100 mb-2 position-relative"
+          class="btn btn-outline-dark w-100 mb-2 position-relative collapsed btn-collapse"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#collapsePagados"
         >
           Pedidos <strong>pagados</strong>
+          <span class="flecha"></span>
+
           <span
             id="iconoPedidosPagos"
             class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success"
@@ -96,12 +106,13 @@
 
         <!-- PENDIENTES -->
         <button
-          class="btn btn-outline-dark w-100 mb-2 position-relative"
+          class="btn btn-outline-dark w-100 mb-2 position-relative collapsed btn-collapse"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#collapsePendientes"
         >
           Pedidos <strong>pendientes</strong>
+          <span class="flecha"></span>
           <span
             id="iconoPedidosPendientes"
             class="position-absolute top-0 start-100 translate-middle badge rounded-pill"
@@ -115,12 +126,12 @@
 
         <!-- RETIRADOS -->
         <button
-          class="btn btn-outline-dark w-100 mb-2"
+          class="btn btn-outline-dark w-100 mb-2 position-relative collapsed btn-collapse"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#collapseRetirados"
         >
-          Pedidos <strong>retirados</strong>
+          Pedidos <strong>retirados</strong><span class="flecha"></span>
         </button>
         <div id="collapseRetirados" class="collapse">
           <div class="lista-pedidos" id="listaPedidosRetirados"></div>
@@ -306,9 +317,39 @@
               data-bs-parent="#accordionCliente"
             >
               <div class="accordion-body d-grid gap-2">
-                <button class="btn btn-outline-dark">Ver mapa</button>
-                <button class="btn btn-outline-dark">Horarios</button>
-                <button class="btn btn-outline-dark">Cómo llegar</button>
+                <button
+                  class="btn btn-outline-dark position-relative"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#containerMapa"
+                  aria-expanded="false"
+                  aria-controls="containerMapa"
+                >
+                  Ver mapa
+                </button>
+
+                <div id="containerMapa" class="collapse">
+                  <section class="d-flex justify-content-center mt-2">
+                    <iframe
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3282.022302640099!2d-58.3816022!3d-34.6037037!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4aa9f0a6da5edb%3A0x11bead4e234e558b!2sObelisco+de+Buenos+Aires!5e0!3m2!1ses!2sar!4v1699999999999"
+                      width="400"
+                      height="320"
+                      style="border: 0"
+                      allowfullscreen=""
+                      loading="lazy"
+                      referrerpolicy="no-referrer-when-downgrade"
+                      padding="4px"
+                    ></iframe>
+                  </section>
+                </div>
+
+                <button
+                  class="btn btn-outline-dark"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#contenedorHorarios"
+                >
+                  Horarios
+                </button>
+                <div id="contenedorHorarios" class="collapse"></div>
               </div>
             </div>
           </div>

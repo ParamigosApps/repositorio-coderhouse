@@ -62,14 +62,13 @@ export async function generarEntradaQr({
       tempDiv.style.textAlign = "center";
 
       const info = document.createElement("div");
-      const displayPrecio = !precio || precio < 1 ? "Gratis" : `$${precio}`;
       info.innerHTML = `
             <h5>🎟 ${nombreEvento}</h5>
             <p><strong>ID:</strong> ${ticketId}</p>
             <p><strong>Usuario:</strong> ${usuario}</p>
             <p><strong>Fecha:</strong> ${formatearFecha(fecha)}</p>
             <p><strong>Lugar:</strong> ${lugar}</p>
-            <p><strong>Preciocaca:</strong> ${displayPrecio}</p>
+            <p><strong>Precio:</strong> ${precio}</p>
           `;
       tempDiv.appendChild(info);
 

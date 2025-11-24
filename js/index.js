@@ -1,4 +1,4 @@
-import { db } from "./firebase.js";
+import { db, auth } from "./firebase.js";
 import {
   doc,
   getDoc,
@@ -7,23 +7,25 @@ import {
 import { cargarEventos } from "/js/cargarEventos.js";
 import { renderizarCatalogo } from "./cargarCatalogo.js";
 import { cargarEntradas, actualizarContadorMisEntradas } from "./entradas.js";
-import { actualizarContadoresPedidos } from "./pedidos.js";
+import {
+  actualizarContadoresPedidos,
+  mostrarTodosLosPedidos,
+} from "./pedidos.js";
 
 const listaEventos = document.getElementById("listaEventos");
 const listaEntradas = document.getElementById("listaEntradas");
 const userId = localStorage.getItem("userId");
 
-// Carga inicial
-ObtenerDatosGuardadosDB();
-cargarEventos(listaEventos);
-cargarEntradas(listaEntradas, userId);
-actualizarContadorMisEntradas(userId);
-actualizarContadoresPedidos(userId);
 document.addEventListener("DOMContentLoaded", () => {
   // ------------ CATALOGO ---------------
   const btnCatalogoCompleto = document.getElementById("btnCatalogoCompleto");
   const btnCategorias = document.querySelectorAll(".btn-categoria");
   const catalogoContainer = document.getElementById("catalogoContainer");
+
+  // Carga inicial
+  ObtenerDatosGuardadosDB();
+  cargarEventos(listaEventos);
+  cargarRedes();
 
   btnCategorias.forEach((btn) =>
     btn.addEventListener("click", () => {
@@ -35,7 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
     btnCatalogoCompleto.addEventListener("click", () => {
       catalogoContainer.classList.toggle("collapse");
       if (!catalogoContainer.classList.contains("collapse")) {
-        //initAdminProductos();
         renderizarCatalogo();
       }
     });
@@ -78,16 +79,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnProximosEventos = document.getElementById("btnProximosEventos");
   const btnMisEntradas = document.getElementById("btnMisEntradas");
 
-  const containerEventos = document.getElementById("containerEventos");
-  const containerEntradas = document.getElementById("containerEntradas");
+  const containerEntradasyEventos = document.getElementById(
+    "collapseEntradasEventos"
+  );
 
   // Instancias Bootstrap
-  const bsEventos = bootstrap.Collapse.getOrCreateInstance(containerEventos, {
-    toggle: false,
-  });
-  const bsEntradas = bootstrap.Collapse.getOrCreateInstance(containerEntradas, {
-    toggle: false,
-  });
+  const bsEventos = bootstrap.Collapse.getOrCreateInstance(
+    containerEntradasyEventos,
+    {
+      toggle: false,
+    }
+  );
 
   // Abrir eventos → cerrar entradas
   btnProximosEventos?.addEventListener("click", () => {
@@ -102,11 +104,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Cargar datos al abrir
-  containerEventos.addEventListener("shown.bs.collapse", () => {
+  containerEntradasyEventos.addEventListener("shown.bs.collapse", () => {
     cargarEventos(listaEventos);
-  });
-
-  containerEntradas.addEventListener("shown.bs.collapse", () => {
     cargarEntradas(listaEntradas, userId);
   });
 });
@@ -155,7 +154,7 @@ async function cargarRedes() {
 
   if (r.toggleWeb && r.webContacto)
     botones.push(`<button class="btn btn-outline-dark"
-      onclick="window.open('${r.webContacto}','_blank')">Página web</button>`);
+      onclick="window.open('https://${r.webContacto}','_blank')">Página web`);
 
   cont.innerHTML = botones.join("");
 }
@@ -181,10 +180,10 @@ async function ObtenerDatosGuardadosDB() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const userId = localStorage.getItem("userId");
-  if (userId) {
-    actualizarContadoresPedidos(userId);
-  }
-  cargarRedes();
+auth.onAuthStateChanged(async (user) => {
+  if (!user) return;
+  await mostrarTodosLosPedidos(user.uid);
+  await actualizarContadoresPedidos(user.uid);
+  await cargarEntradas(listaEntradas, user.uid);
+  await actualizarContadorMisEntradas(user.uid);
 });

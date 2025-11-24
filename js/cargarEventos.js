@@ -7,6 +7,8 @@ import {
   getDocs,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
+let cantidadEventosCargados = null;
+
 export async function cargarEventos() {
   const listaEventos = document.getElementById("listaEventos");
 
@@ -15,28 +17,37 @@ export async function cargarEventos() {
     return;
   }
 
-  listaEventos.innerHTML = `
-    <p class="text-center text-secondary mt-3">Cargando eventos...</p>
-  `;
-
   try {
     const snapshot = await getDocs(collection(db, "eventos"));
-    listaEventos.innerHTML = "";
+
+    // 🛑 VERIFICAR SI LA CANTIDAD DE EVENTOS YA ES LA MISMA
+    if (cantidadEventosCargados === snapshot.size) {
+      console.log("✔ No hubo cambios en los eventos. No se recarga.");
+      return; // 🔥 No volvemos a renderizar
+    }
+
+    // Actualizar valor almacenado
+    cantidadEventosCargados = snapshot.size;
+
+    listaEventos.innerHTML = `
+      <p class="text-center text-secondary mt-3">Cargando eventos...</p>
+    `;
 
     if (snapshot.empty) {
-      console.warn("⚠ No hay eventos cargados en Firestore.");
       listaEventos.innerHTML = `
         <p class="text-center text-secondary mt-3">No hay eventos disponibles.</p>
       `;
       return;
     }
 
-    // ACTUALIZAR CONTADOR DE EVENTOS DISPONIBLES
-
+    // ACTUALIZAR CONTADOR
     let contadorEventosDisponibles = document.getElementById(
       "contadorEventosDisponibles"
     );
     contadorEventosDisponibles.textContent = snapshot.size;
+
+    // LIMPIAR Y RENDERIZAR
+    listaEventos.innerHTML = "";
 
     snapshot.forEach((docSnap) => {
       const e = docSnap.data();
@@ -87,16 +98,14 @@ export async function cargarEventos() {
               );
             }
           })
-          .catch((err) => {
-            console.error("❌ Error importando entradas.js:", err);
-          });
+          .catch((err) =>
+            console.error("❌ Error importando entradas.js:", err)
+          );
       });
     });
   } catch (error) {
     console.error("❌ Error cargando eventos:", error);
-    listaEventos.innerHTML = `
-      <p class="text-danger text-center mt-3">Error al cargar eventos.</p>
-    `;
+    listaEventos.innerHTML = `<p class="text-danger text-center mt-3">Error al cargar eventos.</p>`;
   }
 }
 

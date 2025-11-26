@@ -83,10 +83,15 @@
                         required
                       />
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-2">
                       <label for="nombreEvento" class="form-label fw-semibold"
                         >Imagen del evento (opcional)
                       </label>
+                      <div class="form-text text-muted mb-1">
+                        Tamaño recomendado: <strong>1200×675 px</strong
+                        ><br />Peso recomendado: &lt; <strong>1MB</strong> –
+                        Máximo permitido: 4 MB.
+                      </div>
                       <input
                         type="file"
                         id="imagenEvento"
@@ -187,6 +192,23 @@
                         min="1"
                         max="8"
                         value="2"
+                        required
+                      />
+                    </div>
+                    <div class="mb-3">
+                      <label
+                        for="entradasPorEvento"
+                        class="form-label fw-semibold"
+                        >Entradas máximas por evento
+                        <span style="color: red">*</span></label
+                      >
+                      <input
+                        type="number"
+                        id="entradasPorEvento"
+                        class="form-control"
+                        min="30"
+                        max="10000"
+                        value="300"
                         required
                       />
                     </div>
@@ -492,7 +514,7 @@
                   <label class="form-label small mb-1 mt-2"
                     >Contraseña <span style="color: red">*</span></label
                   >
-                  <div class="input-group">
+                  <form class="input-group">
                     <input
                       type="password"
                       id="contraseñaEmpleado"
@@ -506,7 +528,7 @@
                     >
                       👁️
                     </button>
-                  </div>
+                  </form>
                   <label class="form-label small mb-1 mt-2"
                     >Permisos del empleado
                     <span style="color: red">*</span></label

@@ -46,10 +46,41 @@ function escapeHtml(text) {
 const esAdmin = localStorage.getItem("esAdmin") === "true";
 let loginSettingsActual = null;
 
+function validarHorario(valor) {
+  if (!valor) return true;
+  return /^([01]\d|2[0-3]):([0-5]\d)$/.test(valor);
+}
+
+// ==========================================================
+// VALIDAR IMAGEN DEL EVENTO (5 MB, JPG/PNG/WEBP)
+// ==========================================================
+function validarImagen(file, mensajeError) {
+  if (!file) return true; // opcional
+
+  const formatos = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+  const maxSize = 4 * 1024 * 1024;
+
+  if (!formatos.includes(file.type)) {
+    mensajeError.textContent = "⚠️ La imagen debe ser JPG, PNG o WEBP.";
+    mensajeError.style.display = "block";
+    return false;
+  }
+
+  if (file.size > maxSize) {
+    mensajeError.textContent = "⚠️ La imagen no debe superar los 4 MB.";
+    mensajeError.style.display = "block";
+    return false;
+  }
+
+  return true;
+}
+
 // ==========================================================
 //  SUBIR IMAGEN A FIREBASE STORAGE
 // ==========================================================
 async function subirImagenAStorage(file, id) {
+  if (!file) return { url: null, path: null }; // ← evita errores
+
   const path = `eventos/${id}/${file.name}`;
   const storageRef = ref(storage, path);
 
@@ -68,10 +99,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnGuardarEvento = document.getElementById("btnGuardarEvento");
   const mensajeError = document.getElementById("mensajeError");
 
-  const validarHorario = (valor) => {
-    if (!valor) return true;
-    return /^([01]\d|2[0-3]):([0-5]\d)$/.test(valor);
-  };
+  // ===============================
+  // VALIDACIÓN DE IMAGEN (5 MB + formatos permitidos)
+  // ===============================
+  function validarImagen(file, mensajeError) {
+    if (!file) return true; // es opcional
+
+    const formatosPermitidos = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+    ];
+    const maxSize = 5 * 1024 * 1024; // 5 MB
+
+    if (!formatosPermitidos.includes(file.type)) {
+      mensajeError.textContent = "⚠️ La imagen debe ser JPG, JPEG, PNG o WEBP.";
+      mensajeError.style.display = "block";
+      return false;
+    }
+
+    if (file.size > maxSize) {
+      mensajeError.textContent = "⚠️ La imagen no debe superar los 4 MB.";
+      mensajeError.style.display = "block";
+      return false;
+    }
+
+    return true;
+  }
 
   if (btnGuardarEvento) {
     btnGuardarEvento.addEventListener("click", async () => {
@@ -91,13 +146,12 @@ document.addEventListener("DOMContentLoaded", () => {
         .getElementById("descripcionEvento")
         ?.value.trim();
 
-      const entradasPorUsuarioInput = document.getElementById(
-        "entradasPorUsuarioEvento"
-      );
       const entradasPorUsuario =
-        parseInt(entradasPorUsuarioInput?.value.trim()) || 4;
+        parseInt(
+          document.getElementById("entradasPorUsuarioEvento")?.value.trim()
+        ) || 4;
 
-      if (mensajeError) mensajeError.style.display = "none";
+      mensajeError.style.display = "none";
 
       // VALIDACIONES
       if (!nombre || !fecha || !lugar || !descripcion) {
@@ -113,12 +167,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      if (!inputImagen.files || inputImagen.files.length === 0) {
-        mensajeError.textContent = "⚠️ Sube una imagen.";
-        mensajeError.style.display = "block";
-        return;
-      }
-
       if (!validarHorario(horarioDesde) || !validarHorario(horarioHasta)) {
         mensajeError.textContent =
           "⚠️ El horario debe ser válido (00:00 a 23:59).";
@@ -126,12 +174,25 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      const file = inputImagen.files?.[0];
+      if (!validarImagen(file, mensajeError)) return;
+
       const horario = `Desde ${horarioDesde || "-"}hs hasta ${
         horarioHasta || "-"
       }hs.`;
 
+      // Validar entradas máximas
+      const entradasMaximas =
+        parseInt(document.getElementById("entradasPorEvento")?.value.trim()) ||
+        null;
+
+      if (!entradasMaximas || entradasMaximas < 10 || entradasMaximas > 50000) {
+        mensajeError.textContent =
+          "⚠️ Ingresá un valor válido para las entradas máximas (entre 10 y 50.000).";
+        mensajeError.style.display = "block";
+        return;
+      }
       try {
-        // 1️⃣ Crear evento
         const docRef = await addDoc(collection(db, "eventos"), {
           nombre,
           fecha,
@@ -140,14 +201,15 @@ document.addEventListener("DOMContentLoaded", () => {
           precio: precio || 0,
           descripcion,
           entradasPorUsuario,
+          entradasMaximasEvento: entradasMaximas,
           creadoEn: serverTimestamp(),
         });
 
-        // 2️⃣ Subir Imagen
-        const file = inputImagen.files[0];
-        const subida = await subirImagenAStorage(file, docRef.id);
+        // 2️⃣ Subir imagen opcional
+        let subida = { url: null, path: null };
+        if (file) subida = await subirImagenAStorage(file, docRef.id);
 
-        // 3️⃣ Guardar URL
+        // 3️⃣ Guardar datos finales
         await updateDoc(doc(db, "eventos", docRef.id), {
           imagen: subida.url,
           imagenPath: subida.path,

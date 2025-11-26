@@ -1,4 +1,7 @@
-// /js/pedidos.js
+// ======================================================
+// P E D I D O S   –   SISTEMA CENTRALIZADO
+// ======================================================
+
 import { db, auth } from "./firebase.js";
 import {
   collection,
@@ -8,30 +11,145 @@ import {
   doc,
   query,
   where,
+  updateDoc,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+
 import { generarCompraQr } from "./generarQr.js";
+import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
 
-export async function obtenerPedidosPorUsuario(usuarioId) {
+// ======================================================
+// 1. HELPERS INTERNOS
+// ======================================================
+
+// Obtiene todos los pedidos de un usuario
+async function _traerPedidosRaw(usuarioId) {
   const pedidos = [];
-  const querySnap = await getDocs(collection(db, "compras"));
 
-  querySnap.forEach((doc) => {
-    const data = doc.data();
+  const snap = await getDocs(collection(db, "compras"));
+  snap.forEach((docSnap) => {
+    const data = docSnap.data();
     if (data.usuarioId === usuarioId) {
-      pedidos.push({
-        id: doc.id,
-        ...data,
-        fecha: data.fecha,
-      });
+      pedidos.push({ id: docSnap.id, ...data });
     }
   });
 
-  // Ordenar por fecha descendente
-  pedidos.sort((a, b) => b.fecha - a.fecha);
-
+  pedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
   return pedidos;
 }
 
+// Cuenta pedidos pendientes del usuario
+async function _contarPendientes(usuarioId) {
+  const q = query(
+    collection(db, "compras"),
+    where("usuarioId", "==", usuarioId),
+    where("estado", "==", "pendiente")
+  );
+
+  const snap = await getDocs(q);
+  return snap.size;
+}
+
+// ======================================================
+// 2. REGLAS DEL SISTEMA
+// ======================================================
+
+// 🔥 Bloquea al usuario si ya tiene 3 pedidos pendientes
+export async function verificarLimitePedidosPendientes(usuarioId) {
+  const pendientes = await _contarPendientes(usuarioId);
+  return pendientes >= 3;
+}
+
+// ======================================================
+// 3. CREAR PEDIDO
+// ======================================================
+export async function crearPedido({
+  carrito,
+  total,
+  lugar = "Tienda",
+  pagado,
+}) {
+  try {
+    const usuarioId = auth.currentUser?.uid;
+    const usuarioNombre = auth.currentUser?.displayName || "Usuario";
+
+    if (!usuarioId) throw new Error("Usuario no logueado");
+
+    // ------------------------------------------------------
+    // 🔥 LÍMITE DE 3 PENDIENTES
+    // ------------------------------------------------------
+    const tieneLimite = await verificarLimitePedidosPendientes(usuarioId);
+
+    if (!pagado && tieneLimite) {
+      return null; // no mostrar ningún Swal acá
+    }
+
+    // ------------------------------------------------------
+    // ✔ CREAR PEDIDO
+    // ------------------------------------------------------
+    const docRef = await addDoc(collection(db, "compras"), {
+      usuarioId,
+      usuarioNombre,
+      items: carrito,
+      total,
+      fecha: new Date().toISOString(),
+      estado: pagado ? "pagado" : "pendiente",
+      pagado,
+      lugar,
+      usado: false,
+    });
+
+    // Guardar ticketId
+    await updateDoc(doc(db, "compras", docRef.id), {
+      ticketId: docRef.id,
+    });
+
+    return docRef.id;
+  } catch (err) {
+    console.error("❌ Error creando pedido:", err);
+    return null;
+  }
+}
+
+// ======================================================
+// 4. OBTENER PEDIDOS
+// ======================================================
+export async function obtenerPedidosPorUsuario(usuarioId) {
+  return await _traerPedidosRaw(usuarioId);
+}
+
+export async function obtenerPedidosPorEstado(usuarioId, estado) {
+  try {
+    const q = query(
+      collection(db, "compras"),
+      where("usuarioId", "==", usuarioId),
+      where("estado", "==", estado)
+    );
+
+    const snap = await getDocs(q);
+
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.error("❌ Error obteniendo pedidos:", err);
+    return [];
+  }
+}
+
+// ======================================================
+// 5. ELIMINAR PEDIDO
+// ======================================================
+export async function eliminarPedido(pedidoId) {
+  try {
+    await deleteDoc(doc(db, "compras", pedidoId));
+    return true;
+  } catch (err) {
+    console.error("❌ Error eliminando pedido:", err);
+    return false;
+  }
+}
+
+// ======================================================
+// 6. MOSTRAR PEDIDOS EN LA UI
+// ======================================================
 export async function mostrarTodosLosPedidos(usuarioId) {
   if (!usuarioId) return;
 
@@ -39,24 +157,26 @@ export async function mostrarTodosLosPedidos(usuarioId) {
   const contPagos = document.getElementById("listaPedidosPagos");
   const contRetirados = document.getElementById("listaPedidosRetirados");
 
-  if (contPendientes || contPagos || contRetirados) {
-    const pedidos = await obtenerPedidosPorUsuario(usuarioId);
+  if (!contPendientes && !contPagos && !contRetirados) return;
 
-    const pendientes = pedidos.filter((p) => p.estado === "pendiente");
-    const pagados = pedidos.filter((p) => p.estado === "pagado");
-    const retirados = pedidos.filter((p) => p.estado === "retirado");
+  const pedidos = await obtenerPedidosPorUsuario(usuarioId);
 
-    mostrarPedidosUI(contPendientes, pendientes);
-    mostrarPedidosUI(contPagos, pagados);
-    mostrarPedidosUI(contRetirados, retirados);
-  }
+  const pendientes = pedidos.filter((p) => p.estado === "pendiente");
+  const pagados = pedidos.filter((p) => p.estado === "pagado");
+  const retirados = pedidos.filter((p) => p.estado === "retirado");
+
+  mostrarPedidosUI(contPendientes, pendientes);
+  mostrarPedidosUI(contPagos, pagados);
+  mostrarPedidosUI(contRetirados, retirados);
 }
 
 function mostrarPedidosUI(contenedor, pedidos) {
+  if (!contenedor) return;
+
   contenedor.innerHTML = "";
   let estado = "";
 
-  if (contenedor.id === "listaPedidosPendientes") estado = "Pendientes de pago";
+  if (contenedor.id === "listaPedidosPendientes") estado = "Pendientes";
   else if (contenedor.id === "listaPedidosPagos") estado = "Pagados";
   else if (contenedor.id === "listaPedidosRetirados") estado = "Retirados";
 
@@ -76,22 +196,21 @@ function mostrarPedidosUI(contenedor, pedidos) {
         : "#bcb8b9bb";
 
     div.innerHTML = `
-    <strong>ID:</strong> ${pedido.id}<br>
-    <strong>Total:</strong> $${pedido.total}<br>
-    <strong>Fecha:</strong> ${pedido.fecha}<br>
-    <strong>Estado:</strong> ${pedido.estado}<br>
+      <strong>ID:</strong> ${pedido.id}<br>
+      <strong>Total:</strong> $${pedido.total}<br>
+      <strong>Fecha:</strong> ${pedido.fecha}<br>
+      <strong>Estado:</strong> ${pedido.estado}<br>
 
-    ${
-      pedido.estado !== "retirado"
-        ? `<button class="btn btn-sm btn-dark mt-2 ver-qr">Ver QR</button>`
-        : ``
-    }
+      ${
+        pedido.estado !== "retirado"
+          ? `<button class="btn btn-sm btn-dark mt-2 ver-qr">Ver QR</button>`
+          : ``
+      }
 
-    <div class="detalles-pedido" style="display:none;margin-top:10px;"></div>
-    <button class="btn btn-sm btn-danger position-absolute top-0 end-0">X</button>
-  `;
+      <button class="btn btn-sm btn-danger position-absolute top-0 end-0">X</button>
+    `;
 
-    // Botón eliminar
+    // Eliminar
     div.querySelector(".btn-danger").addEventListener("click", async (e) => {
       e.stopPropagation();
 
@@ -109,46 +228,16 @@ function mostrarPedidosUI(contenedor, pedidos) {
         buttonsStyling: false,
       });
 
-      // ❌ Canceló
       if (!result.isConfirmed) return;
 
-      // ✅ Eliminar en Firestore
-      await deleteDoc(doc(db, "compras", pedido.id));
+      await eliminarPedido(pedido.id);
       div.remove();
 
-      // 🔄 Actualizar listas
       mostrarTodosLosPedidos(auth.currentUser.uid);
-      if (auth.currentUser) actualizarContadoresPedidos(auth.currentUser.uid);
-
-      Toastify({
-        text: "Pedido eliminado",
-        duration: 2500,
-        gravity: "top",
-        position: "right",
-        style: {
-          background: "#1e88e5",
-          color: "white",
-          fontWeight: "bold",
-          width: "80%", // ancho del toast
-          margin: "0 auto", // centrar horizontalmente
-          textAlign: "center", // centrar texto
-        },
-      }).showToast();
+      actualizarContadoresPedidos(auth.currentUser.uid);
     });
 
-    // Toggle detalles
-    div.addEventListener("click", (e) => {
-      if (
-        e.target.classList.contains("ver-qr") ||
-        e.target.classList.contains("btn-danger")
-      )
-        return;
-      const detalles = div.querySelector(".detalles-pedido");
-      detalles.style.display =
-        detalles.style.display === "none" ? "block" : "none";
-    });
-
-    // Ver QR (solo si existe el botón)
+    // Ver QR
     const btnQr = div.querySelector(".ver-qr");
     if (btnQr) {
       btnQr.addEventListener("click", (e) => {
@@ -157,7 +246,7 @@ function mostrarPedidosUI(contenedor, pedidos) {
           carrito: pedido.items,
           usuarioId: pedido.usuarioId,
           nombreUsuario: pedido.usuarioNombre,
-          lugar: "Tienda",
+          lugar: pedido.lugar,
           total: pedido.total,
           ticketId: pedido.id,
           fecha: pedido.fecha,
@@ -170,110 +259,28 @@ function mostrarPedidosUI(contenedor, pedidos) {
   });
 }
 
-// Ejecutar cuando cambia el estado del usuario
+// ======================================================
+// 7. CONTADORES
+// ======================================================
+export async function actualizarContadoresPedidos(usuarioId) {
+  if (!usuarioId) return;
+
+  const pagosEl = document.getElementById("contadorPedidosPagos");
+  const pendientesEl = document.getElementById("contadorPedidosPendientes");
+
+  const pagos = await obtenerPedidosPorEstado(usuarioId, "pagado");
+  const pendientes = await obtenerPedidosPorEstado(usuarioId, "pendiente");
+
+  if (pagosEl) pagosEl.textContent = pagos.length;
+  if (pendientesEl) pendientesEl.textContent = pendientes.length;
+}
+
+// ======================================================
+// 8. LISTENER DE AUTH
+// ======================================================
 auth.onAuthStateChanged((user) => {
   if (user) {
     mostrarTodosLosPedidos(user.uid);
+    actualizarContadoresPedidos(user.uid);
   }
 });
-
-export async function crearPedido(
-  usuarioId,
-  carrito,
-  total,
-  nombreUsuario,
-  estado = "pendiente",
-  pagado = false
-) {
-  try {
-    const docRef = await addDoc(collection(db, "compras"), {
-      usuarioId,
-      usuarioNombre: nombreUsuario,
-      items: carrito,
-      total,
-      fecha: new Date().toISOString(),
-      estado,
-      usado: false,
-      pagado,
-    });
-
-    // El ID de Firestore será nuestro ticketId
-    const ticketId = docRef.id;
-    await docRef.update({ ticketId });
-
-    return ticketId;
-  } catch (err) {
-    console.error("❌ Error creando pedido:", err);
-    throw err;
-  }
-}
-
-export async function obtenerPedidosPorEstado(usuarioId, estado) {
-  try {
-    if (!usuarioId) {
-      console.warn("❌ obtenerPedidosPorEstado: usuarioId es undefined");
-      return [];
-    }
-
-    if (!estado) {
-      console.warn("❌ obtenerPedidosPorEstado: estado es undefined");
-      return [];
-    }
-    const ref = collection(db, "compras");
-
-    const q = query(
-      ref,
-      where("usuarioId", "==", usuarioId),
-      where("estado", "==", estado)
-    );
-
-    const snap = await getDocs(q);
-
-    const pedidos = snap.docs.map((d) => ({
-      id: d.id,
-      ...d.data(),
-    }));
-
-    return pedidos;
-  } catch (err) {
-    console.error("❌ Error obteniendo pedidos:", err);
-    return [];
-  }
-}
-
-export async function eliminarPedido(pedidoId) {
-  try {
-    await deleteDoc(doc(db, "compras", pedidoId));
-    return true;
-  } catch (err) {
-    console.error("❌ Error eliminando pedido:", err);
-    return false;
-  }
-}
-
-export async function actualizarContadoresPedidos(usuarioId) {
-  if (!usuarioId) {
-    console.warn("❌ actualizarContadoresPedidos: usuarioId es undefined");
-    return;
-  }
-
-  const contadorPedidosPagos = document.getElementById("contadorPedidosPagos");
-  const contadorPedidosPendientes = document.getElementById(
-    "contadorPedidosPendientes"
-  );
-
-  if (!contadorPedidosPagos || !contadorPedidosPendientes) return;
-
-  try {
-    const pedidosPagos = await obtenerPedidosPorEstado(usuarioId, "pagado");
-    const pedidosPendientes = await obtenerPedidosPorEstado(
-      usuarioId,
-      "pendiente"
-    );
-
-    contadorPedidosPagos.textContent = pedidosPagos.length;
-    contadorPedidosPendientes.textContent = pedidosPendientes.length;
-  } catch (err) {
-    console.error("❌ Error actualizando contadores:", err);
-  }
-}

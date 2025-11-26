@@ -1,4 +1,6 @@
-// /js/entradas.js
+// ======================================================
+// 1. IMPORTS
+// ======================================================
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
 import { generarEntradaQr } from "./generarQr.js";
 import { db, auth } from "./firebase.js";
@@ -19,10 +21,15 @@ import {
   updateDoc,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
+// ======================================================
+// 2. VARIABLES GLOBALES
+// ======================================================
 const contadorElem = document.getElementById("contadorEntradasPendientes");
 let cantidadEntradasCargadas = null;
 
-// -------------------------- CREAR ENTRADA --------------------------
+// ======================================================
+// 3. CREAR ENTRADA
+// ======================================================
 export async function crearEntrada(
   eventoId,
   entradaData,
@@ -50,7 +57,6 @@ export async function crearEntrada(
     );
 
     if (pagado && !modoAdmin) {
-      // Solo mostramos QR al usuario, no al admin
       const valorEntrada =
         !entradaData.precio || entradaData.precio < 1
           ? "Entrada gratuita"
@@ -72,6 +78,7 @@ export async function crearEntrada(
         "success"
       );
     }
+
     cargarEntradas();
     return docRef;
   } catch (err) {
@@ -79,10 +86,15 @@ export async function crearEntrada(
     Swal.fire("Error", "No se pudo guardar la entrada.", "error");
   }
 }
-// -------------------------- PEDIR ENTRADA --------------------------
+
+// ======================================================
+// 4. PEDIR ENTRADA (FUNCIÓN PRINCIPAL)
+// ======================================================
 export async function pedirEntrada(eventoId, e) {
   try {
-    // --------------------------- VALIDAR LOGIN ---------------------------
+    // --------------------------------------------------
+    // 4.1 VALIDAR LOGIN
+    // --------------------------------------------------
     if (!auth.currentUser) {
       const usuarioCollapseEl = document.getElementById("collapseUsuario");
       new bootstrap.Collapse(usuarioCollapseEl, { toggle: true });
@@ -90,7 +102,7 @@ export async function pedirEntrada(eventoId, e) {
 
       return Swal.fire({
         title: "Debes iniciar sesión",
-        text: "Solo los usuarios con Google Sign-In pueden comprar entradas.",
+        text: "Solo usuarios con Google pueden comprar entradas.",
         icon: "warning",
         confirmButtonText: "Iniciar sesión",
         customClass: { confirmButton: "btn btn-dark" },
@@ -101,15 +113,82 @@ export async function pedirEntrada(eventoId, e) {
     const usuarioId = auth.currentUser.uid;
     const usuarioNombre = auth.currentUser.displayName || "Usuario";
 
-    // --------------------------- OBTENER EVENTO ---------------------------
+    // --------------------------------------------------
+    // 4.2 OBTENER EVENTO
+    // --------------------------------------------------
     const eventoRef = doc(db, "eventos", eventoId);
     const eventoSnap = await getDoc(eventoRef);
-    if (!eventoSnap.exists())
+
+    if (!eventoSnap.exists()) {
       return Swal.fire("Error", "No se encontró el evento.", "error");
+    }
 
-    const entradasPorUsuario = eventoSnap.data().entradasPorUsuario || 4;
+    const eventoData = eventoSnap.data();
 
-    // --------------------------- CALCULAR ENTRADAS EXISTENTES ---------------------------
+    // --------------------------------------------------
+    // 4.3 VALIDAR CUPOS TOTALES DEL EVENTO
+    // --------------------------------------------------
+    const entradasMaximasEvento = eventoData.entradasMaximasEvento || null;
+    let cupoRestante = null;
+
+    if (entradasMaximasEvento) {
+      const totalVendidasSnap = await getDocs(
+        query(collection(db, "entradas"), where("eventoId", "==", eventoId))
+      );
+
+      const totalVendidas = totalVendidasSnap.docs.reduce(
+        (acc, d) => acc + (d.data().cantidad || 1),
+        0
+      );
+
+      const totalPendientesSnap = await getDocs(
+        query(
+          collection(db, "entradasPendientes"),
+          where("eventoId", "==", eventoId)
+        )
+      );
+
+      const totalPendientes = totalPendientesSnap.docs.reduce(
+        (acc, d) => acc + (d.data().cantidad || 1),
+        0
+      );
+
+      const totalEvento = totalVendidas + totalPendientes;
+
+      cupoRestante = entradasMaximasEvento - totalEvento;
+
+      if (cupoRestante <= 0) {
+        return Swal.fire({
+          title: "Cupo completo",
+          html: `
+            <p>Este evento alcanzó su capacidad máxima de 
+            <strong>${entradasMaximasEvento}</strong> entradas.</p>
+          `,
+          icon: "error",
+          confirmButtonText: "Aceptar",
+          customClass: { confirmButton: "btn btn-dark" },
+          buttonsStyling: false,
+        });
+      }
+
+      // Últimas 3 entradas → aviso
+      if (cupoRestante <= 3) {
+        await Swal.fire({
+          title: "¡Últimas entradas!",
+          html: `<p>Quedan solo <strong>${cupoRestante}</strong> entradas disponibles.</p>`,
+          icon: "warning",
+          timer: 3000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+      }
+    }
+
+    // --------------------------------------------------
+    // 4.4 VALIDAR LÍMITE POR USUARIO
+    // --------------------------------------------------
+    const entradasPorUsuario = eventoData.entradasPorUsuario || 4;
+
     const entradasCompradasSnap = await getDocs(
       query(
         collection(db, "entradas"),
@@ -117,6 +196,7 @@ export async function pedirEntrada(eventoId, e) {
         where("usuarioId", "==", usuarioId)
       )
     );
+
     const entradasCompradas = entradasCompradasSnap.docs.reduce(
       (acc, d) => acc + (d.data().cantidad || 1),
       0
@@ -129,6 +209,7 @@ export async function pedirEntrada(eventoId, e) {
         where("usuarioId", "==", usuarioId)
       )
     );
+
     const pendientes = pendientesSnap.docs.reduce(
       (acc, d) => acc + (d.data().cantidad || 1),
       0
@@ -136,15 +217,13 @@ export async function pedirEntrada(eventoId, e) {
 
     const totalActual = entradasCompradas + pendientes;
 
-    // --------------------------- VALIDAR LÍMITE TOTAL ---------------------------
     if (totalActual >= entradasPorUsuario) {
       return Swal.fire({
         title: "Límite de entradas alcanzado",
         html: `
-          <p>Has alcanzado el máximo de <strong>${entradasPorUsuario}</strong> entradas por usuario para este evento.</p>
-          <p>Entradas adquiridas: <strong>${entradasCompradas}</strong></p>
-          <p>Pendientes de aprobación: <strong>${pendientes}</strong></p>
-          <p>Contacta al organizador ante cualquier inquietud o espera la aprobación de las solicitudes pendientes.</p>
+          <p>Máximo permitido: <strong>${entradasPorUsuario}</strong>.</p>
+          <p>Compradas: <strong>${entradasCompradas}</strong></p>
+          <p>Pendientes: <strong>${pendientes}</strong></p>
         `,
         icon: "warning",
         confirmButtonText: "Aceptar",
@@ -153,22 +232,77 @@ export async function pedirEntrada(eventoId, e) {
       });
     }
 
-    // --------------------------- ENTRADAS GRATIS O PAGADAS ---------------------------
-    const maxEntradas = entradasPorUsuario - totalActual;
+    // --------------------------------------------------
+    // 4.5 CALCULAR MAX ENTRADAS FINALES
+    // --------------------------------------------------
+    let maxEntradasUsuario = entradasPorUsuario - totalActual;
+
+    let maxEntradasFinal = cupoRestante
+      ? Math.min(maxEntradasUsuario, cupoRestante)
+      : maxEntradasUsuario;
+
+    // --------------------------------------------------
+    // 4.6 SELECCIÓN DE CANTIDAD (SWEETALERT)
+    // --------------------------------------------------
     const valorEntrada = !e.precio || e.precio < 1 ? "Gratis" : `$${e.precio}`;
+
+    // calcular porcentaje restante
+    const porcentajeRestante =
+      cupoRestante && entradasMaximasEvento
+        ? (cupoRestante / entradasMaximasEvento) * 100
+        : 100;
+
+    // mostrar aviso solo si queda menos del 30%
+    const mostrarEntradasDisponibles = porcentajeRestante <= 30;
+
+    // colores según urgencia
+    let colorAviso = "";
+    if (porcentajeRestante <= 10) {
+      colorAviso = "red";
+    } else if (porcentajeRestante <= 30) {
+      colorAviso = "orange";
+    }
+
+    let htmlSwal = `
+  <p>Valor de entrada: <strong>${valorEntrada}</strong></p>
+`;
+
+    // mensaje visual de urgencia
+    if (mostrarEntradasDisponibles) {
+      htmlSwal += `
+    <div style="
+      padding: 8px 12px;
+      background-color: ${colorAviso === "red" ? "#ffdddd" : "#fff4d4"};
+      border-left: 4px solid ${colorAviso === "red" ? "#d8000c" : "#ffae00"};
+      border-radius: 6px;
+      margin-bottom: 8px;
+    ">
+      <strong style="color: ${colorAviso === "red" ? "#d8000c" : "#a86b00"};">
+        ${
+          colorAviso === "red"
+            ? "⚠️ Últimas entradas"
+            : "⚠️ Entradas casi agotadas"
+        }
+      </strong>
+      <p style="margin: 4px 0 0 0; font-size: 0.9rem;">
+        Solo quedan <strong>${maxEntradasFinal}</strong> entradas disponibles.
+      </p>
+    </div>
+  `;
+    }
+
+    htmlSwal += `
+  <label for="swal-cantidad">Cantidad (máx ${maxEntradasFinal}):</label>
+  <input type="number" id="swal-cantidad" class="swal2-input"
+         min="1" max="${maxEntradasFinal}" value="1">
+`;
 
     const { value: metodo, isDenied } = await Swal.fire({
       title: e.nombre,
-      html: `
-    <p>Valor de entrada: <strong>${valorEntrada}</strong></p>
-    <label for="swal-cantidad">Cantidad (máx ${maxEntradas}):</label>
-    <input type="number" id="swal-cantidad" class="swal2-input"
-           min="1" max="${maxEntradas}" value="1">
-  `,
+      html: htmlSwal,
       showCancelButton: true,
-      showDenyButton: e.precio && e.precio > 0, // ✅ Solo mostrar si es pagada
-      confirmButtonText:
-        e.precio && e.precio > 0 ? "Mercado Pago" : "Solicitar",
+      showDenyButton: e.precio > 0,
+      confirmButtonText: e.precio > 0 ? "Mercado Pago" : "Solicitar",
       denyButtonText: "Transferencia",
       cancelButtonText: "Salir",
       customClass: {
@@ -179,20 +313,22 @@ export async function pedirEntrada(eventoId, e) {
       buttonsStyling: false,
     });
 
-    //
-    if (metodo === undefined) return; // canceló
+    if (metodo === undefined) return;
 
     const cantidad =
       parseInt(document.getElementById("swal-cantidad").value) || 1;
 
-    if (cantidad > maxEntradas) {
+    if (cantidad > maxEntradasFinal) {
       return Swal.fire({
         icon: "warning",
         title: "Límite superado",
-        text: `Solo puedes solicitar ${maxEntradas} entradas.`,
+        text: `Solo puedes solicitar ${maxEntradasFinal} entradas.`,
       });
     }
 
+    // --------------------------------------------------
+    // 4.7 BASE DE DATOS
+    // --------------------------------------------------
     const entradaBase = {
       nombre: e.nombre,
       precio: Number(e.precio),
@@ -202,23 +338,28 @@ export async function pedirEntrada(eventoId, e) {
       cantidad,
     };
 
-    // --------------------------- ENTRADAS GRATIS ---------------------------
+    // --------------------------------------------------
+    // 4.8 ENTRADAS GRATIS
+    // --------------------------------------------------
     if (!e.precio || e.precio < 1) {
       return await crearEntrada(eventoId, entradaBase);
     }
 
-    // --------------------------- PAGO POR TRANSFERENCIA ---------------------------
+    // --------------------------------------------------
+    // 4.9 TRANSFERENCIA
+    // --------------------------------------------------
     const contacto = await ObtenerContacto();
     let mensaje = "";
 
     if (isDenied) {
       const datos = await obtenerDatosBancarios();
+
       const cuentaBancaria = `
 Banco: ${datos.nombreBanco}
 CBU: ${datos.cbuBanco}
 Alias: ${datos.aliasBanco}
 Titular: ${datos.titularBanco}
-  `;
+      `;
 
       const result = await Swal.fire({
         title: "Transferencia bancaria",
@@ -240,8 +381,10 @@ Titular: ${datos.titularBanco}
       });
 
       let afterCopy;
+
       if (result.isDenied) {
         await navigator.clipboard.writeText(cuentaBancaria);
+
         afterCopy = await Swal.fire({
           title: "Datos copiados ✔️",
           text: "¿Qué deseas hacer ahora?",
@@ -256,51 +399,46 @@ Titular: ${datos.titularBanco}
           buttonsStyling: false,
         });
       }
-      console.log("result es: " + result);
-      // ENVIAR AL CLIENTE AL WHATSAPP
+
       if (
         (result && result.isConfirmed) ||
         (afterCopy && afterCopy.isConfirmed)
       ) {
-        if (result.isConfirmed || afterCopy.isConfirmed) {
-          if (contacto) {
-            mensaje = encodeURIComponent(
-              `¡Hola, soy ${usuarioNombre}! y solicité ${cantidad} entrada(s) del evento "${e.nombre}" a través de la web. Adjunto comprobante de pago.`
-            );
+        if (contacto) {
+          mensaje = encodeURIComponent(
+            `¡Hola, soy ${usuarioNombre}! Solicité ${cantidad} entrada(s) del evento "${e.nombre}".`
+          );
 
-            window.open(
-              `https://wa.me/${contacto.whatsappContacto}?text=${mensaje}`,
-              "_blank"
-            );
+          window.open(
+            `https://wa.me/${contacto.whatsappContacto}?text=${mensaje}`,
+            "_blank"
+          );
 
-            await crearSolicitudPendiente(eventoId, usuarioId, entradaBase);
-            return Swal.fire(
-              "Solicitud enviada",
-              "Se registró la solicitud y puedes compartir el comprobante ahora.",
-              "success"
-            );
-            actualizarContadorMisEntradas();
-          } else {
-            await crearSolicitudPendiente(eventoId, usuarioId, entradaBase);
-            return Swal.fire({
-              title: "Error al redirigir a Whatsapp",
-              text: "Su pedido fue generado. Comuniquese con un administrador.",
-              showConfirmButton: true,
-              confirmButtonText: "Salir",
-              customClass: { confirmButton: "btn btn-dark" },
-            });
-            actualizarContadorMisEntradas();
-          }
-        } else if (afterCopy.isDenied) {
-          return;
+          await crearSolicitudPendiente(eventoId, usuarioId, entradaBase);
+
+          return Swal.fire(
+            "Solicitud enviada",
+            "Puedes enviar el comprobante ahora.",
+            "success"
+          );
+        } else {
+          await crearSolicitudPendiente(eventoId, usuarioId, entradaBase);
+          return Swal.fire({
+            title: "Error al redirigir a Whatsapp",
+            text: "Su pedido fue generado. Comuniquese con un administrador.",
+            showConfirmButton: true,
+            confirmButtonText: "Salir",
+            customClass: { confirmButton: "btn btn-dark" },
+          });
         }
-      } else {
-        console.log("Cancelando orden");
-        return;
       }
+
+      return;
     }
 
-    // --------------------------- MERCADO PAGO ---------------------------
+    // --------------------------------------------------
+    // 4.10 MERCADO PAGO
+    // --------------------------------------------------
     const res = await fetch("/api/crear-preferencia", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -320,6 +458,7 @@ Titular: ${datos.titularBanco}
     });
 
     const data = await res.json();
+
     if (!data.init_point) {
       return Swal.fire("Error", "No se pudo iniciar el pago.", "error");
     }
@@ -331,7 +470,9 @@ Titular: ${datos.titularBanco}
   }
 }
 
-// -------------------------- ESCUCHAR PAGOS PENDIENTES --------------------------
+// ======================================================
+// 5. ESCUCHAR PAGOS PENDIENTES
+// ======================================================
 export function escucharEntradasPendientes(usuarioId, callback) {
   const q = query(
     collection(db, "pagosProcesados"),
@@ -346,7 +487,10 @@ export function escucharEntradasPendientes(usuarioId, callback) {
     });
   });
 }
-// -------------------------- ACTUALIZAR CONTADOR DE ENTRADAS PENDIENTES DE APROBACION --------------------------
+
+// ======================================================
+// 6. ACTUALIZAR CONTADORES
+// ======================================================
 export async function actualizarContadorEntradasPendientes() {
   const pendientesSnap = await getDocs(
     query(collection(db, "entradasPendientes"))
@@ -361,7 +505,7 @@ export async function actualizarContadorEntradasPendientes() {
 
   if (contadorElem) contadorElem.textContent = cantidadTotal;
 }
-// -------------------------- ACTUALIZAR CONTADOR "MIS ENTRADAS" --------------------------
+
 export async function actualizarContadorMisEntradas() {
   const usuarioId = auth.currentUser?.uid;
   const contadorElem = document.getElementById("contadorMisEntradas");
@@ -382,8 +526,6 @@ export async function actualizarContadorMisEntradas() {
     let total = 0;
     snapshot.forEach((docSnap) => {
       const entrada = docSnap.data();
-
-      // Si no trae cantidad, asumimos 1 por entrada
       total += entrada.cantidad ?? 1;
     });
 
@@ -398,7 +540,10 @@ document
   ?.addEventListener("click", actualizarContadorMisEntradas);
 
 actualizarContadorEntradasPendientes();
-// -------------------------- CREAR SOLICITUDES PENDIENTES --------------------------
+
+// ======================================================
+// 7. CREAR SOLICITUDES PENDIENTES
+// ======================================================
 export async function crearSolicitudPendiente(
   eventoId,
   usuarioId,
@@ -444,7 +589,9 @@ export async function crearSolicitudPendiente(
   }
 }
 
-// -------------------------- REGISTRAR TRANSFERENCIAS PENDIENTES --------------------------
+// ======================================================
+// 8. REGISTRAR TRANSFERENCIA PENDIENTE
+// ======================================================
 export async function registrarTransferencia(
   usuario,
   eventoId,
@@ -468,26 +615,25 @@ export async function registrarTransferencia(
 
     Swal.fire(
       "✅ Registro enviado",
-      "Tu pago por transferencia ha sido registrado. El administrador lo aprobará y recibirás tu entrada.",
+      "Tu pago por transferencia ha sido registrado.",
       "success"
     );
   } catch (err) {
     console.error("Error registrando transferencia:", err);
-    Swal.fire(
-      "Error",
-      "No se pudo registrar tu pago. Intentá nuevamente.",
-      "error"
-    );
+    Swal.fire("Error", "No se pudo registrar el pago.", "error");
   }
 }
 
-// -------------------------- CARGAR ENTRADAS --------------------------
+// ======================================================
+// 9. CARGAR ENTRADAS DEL USUARIO
+// ======================================================
 export async function cargarEntradas() {
   const contenedor = document.getElementById("listaEntradas");
-  if (!contenedor) return console.warn("⚠ listaEntradas no encontrado");
+  if (!contenedor) return;
 
   try {
     const usuarioId = auth.currentUser?.uid;
+
     if (!usuarioId) {
       contenedor.innerHTML = `<p class="text-danger mt-3 text-center">Debes iniciar sesión para ver tus entradas.</p>`;
       return;
@@ -503,8 +649,7 @@ export async function cargarEntradas() {
 
     if (cantidadEntradasCargadas === snapshot.size) {
       contenedor.innerHTML = "";
-      console.log("✔ No hubo cambios en las entradas. No se recarga.");
-      return; // 🔥 No volvemos a renderizar
+      return;
     }
 
     contenedor.innerHTML = `<p class="text-secondary mt-3 text-center">Cargando entradas...</p>`;
@@ -514,8 +659,8 @@ export async function cargarEntradas() {
       return;
     }
 
-    // Agrupar entradas por evento
     const entradasMap = {};
+
     snapshot.forEach((docSnap) => {
       const entrada = docSnap.data();
       const ticketId = docSnap.id;
@@ -529,23 +674,27 @@ export async function cargarEntradas() {
     });
 
     contenedor.innerHTML = "";
-    // Renderizar entradas agrupadas
+
+    // Render
     Object.values(entradasMap).forEach((entrada) => {
       const div = document.createElement("div");
       div.className = "card mb-3 p-3 shadow-sm";
 
       div.innerHTML = `
-        <h5 class="mb-1">${entrada.nombre || "Evento sin nombre"}</h5>
-        <p class="mb-0">📅 ${formatearFecha(entrada.fecha) || "Sin fecha"}</p>
-        <p class="mb-0">📍 ${entrada.lugar || "Lugar a definir"}</p>
-        <p class="mb-0">🕑 ${entrada.horario || "Sin horario definido"}</p>
+        <h5 class="mb-1">${entrada.nombre}</h5>
+        <p class="mb-0">📅 ${formatearFecha(entrada.fecha)}</p>
+        <p class="mb-0">📍 ${entrada.lugar}</p>
+        <p class="mb-0">🕑 ${entrada.horario}</p>
         <p class="mb-0">💲 ${
           entrada.precio === 0 || entrada.precio == null
             ? "Entrada gratuita"
             : `$${entrada.precio}`
         }</p>
         <p class="mb-0">🎫 Cantidad de entradas: ${entrada.tickets.length}</p>
-        <button class="btn btn-dark mt-3 btn-ver-qr mx-auto d-block w-50">Ver QR</button>
+
+        <button class="btn btn-dark mt-3 btn-ver-qr mx-auto d-block w-50">
+          Ver QR
+        </button>
       `;
 
       contenedor.appendChild(div);
@@ -558,22 +707,21 @@ export async function cargarEntradas() {
 
         const info = document.createElement("div");
         info.innerHTML = `
-    <h5>🎟 ${entrada.nombre || "Evento sin nombre"}</h5>
-    <p><strong>Fecha:</strong> ${
-      formatearFecha(entrada.fecha) || "Sin fecha"
-    }</p>
-    <p><strong>Lugar:</strong> ${entrada.lugar || "Lugar a definir"}</p>
-    <p><strong>Horario:</strong> ${
-      entrada.horario || "Sin horario definido"
-    }</p>
-    <p><strong>Precio:</strong> ${
-      entrada.precio === 0 || entrada.precio == null
-        ? "Entrada gratuita"
-        : `$${entrada.precio}`
-    }</p>
-    <p><strong>Cantidad de entradas:</strong> ${entrada.tickets.length}</p>
-    <hr>
-  `;
+          <h5>🎟 ${entrada.nombre}</h5>
+          <p><strong>Fecha:</strong> ${formatearFecha(entrada.fecha)}</p>
+          <p><strong>Lugar:</strong> ${entrada.lugar}</p>
+          <p><strong>Horario:</strong> ${entrada.horario}</p>
+          <p><strong>Precio:</strong> ${
+            entrada.precio === 0 || entrada.precio == null
+              ? "Entrada gratuita"
+              : `$${entrada.precio}`
+          }</p>
+          <p><strong>Cantidad de entradas:</strong> ${
+            entrada.tickets.length
+          }</p>
+          <hr>
+        `;
+
         tempDiv.appendChild(info);
 
         const qrSection = document.createElement("div");
@@ -608,7 +756,6 @@ export async function cargarEntradas() {
           downloadLink.textContent = "Descargar QR";
           downloadLink.className = "btn btn-dark btn-sm";
           downloadLink.style.display = "none";
-          downloadLink.style.margin = "12px 0 4px 0";
 
           ticketDiv.appendChild(qrTitle);
           ticketDiv.appendChild(qrContainer);
@@ -628,7 +775,8 @@ export async function cargarEntradas() {
             const qrDivs = tempDiv.querySelectorAll("[id^='qrcode_']");
             qrDivs.forEach((qrContainer) => {
               const ticketId = qrContainer.id.replace("qrcode_", "");
-              const downloadLink = qrContainer.nextElementSibling; // el <a> sigue al qrContainer
+              const downloadLink = qrContainer.nextElementSibling;
+
               generarEntradaQr({
                 ticketId,
                 nombreEvento: entrada.nombre,
@@ -643,7 +791,7 @@ export async function cargarEntradas() {
                 qrContainer,
                 downloadLink,
                 individual: true,
-                modoAdmin: false, // ⚡ asegurate de poner true si es admin
+                modoAdmin: false,
               });
             });
           },
@@ -656,28 +804,27 @@ export async function cargarEntradas() {
   }
 }
 
+// ======================================================
+// 10. OBTENER DATOS DE CONFIGURACIÓN
+// ======================================================
 export async function obtenerDatosBancarios() {
   const docRef = doc(db, "configuracion", "datosBancarios");
-  const docSnap = await getDoc(docRef);
-
-  if (docSnap.exists()) return docSnap.data();
-
-  // Valores por defecto si no están guardados en Firestore
-  return {};
+  const snap = await getDoc(docRef);
+  return snap.exists() ? snap.data() : {};
 }
+
 export async function ObtenerContacto() {
   const docRef = doc(db, "configuracion", "social");
-  const docSnap = await getDoc(docRef);
+  const snap = await getDoc(docRef);
+  if (!snap.exists()) return null;
 
-  if (!docSnap.exists()) return null;
-
-  const { whatsappContacto, instagramContacto, tiktokContacto } =
-    docSnap.data();
+  const { whatsappContacto, instagramContacto, tiktokContacto } = snap.data();
   return { whatsappContacto, instagramContacto, tiktokContacto };
 }
 
+// ======================================================
+// 11. LISTENER DE AUTH
+// ======================================================
 auth.onAuthStateChanged((user) => {
-  if (user) {
-    actualizarContadorMisEntradas();
-  }
+  if (user) actualizarContadorMisEntradas();
 });

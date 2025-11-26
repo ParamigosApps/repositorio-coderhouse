@@ -4,17 +4,22 @@ import {
   actualizarCarritoVisual,
   calcularTotal,
 } from "./carrito.js";
+
 import { auth } from "./firebase.js";
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
-import { crearPedido, mostrarQrCompra } from "./compras.js"; // <-- ahora usamos crearPedido unificado
+
+import { crearPedido } from "./pedidos.js";
+import { mostrarQrCompra } from "./compras.js";
+
 import {
   actualizarContadoresPedidos,
   mostrarTodosLosPedidos,
 } from "./pedidos.js";
-
 export async function finalizarCompra() {
   try {
-    // Validar login
+    // =====================================================
+    // VALIDAR LOGIN
+    // =====================================================
     if (!auth.currentUser) {
       const { value: confirmacion } = await Swal.fire({
         title: "Debes iniciar sesión",
@@ -39,6 +44,9 @@ export async function finalizarCompra() {
       return;
     }
 
+    // =====================================================
+    // VALIDAR CARRITO
+    // =====================================================
     const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
     if (carrito.length === 0) {
       return Swal.fire("Carrito vacío", "Agrega productos primero", "info");
@@ -46,6 +54,9 @@ export async function finalizarCompra() {
 
     const total = calcularTotal();
 
+    // =====================================================
+    // SELECCIÓN DE MÉTODO DE PAGO
+    // =====================================================
     const { isConfirmed, isDenied, isDismissed } = await Swal.fire({
       title: "Finalizar compra",
       html: `<p>Total a pagar: <strong>$${total}</strong></p>`,
@@ -64,9 +75,10 @@ export async function finalizarCompra() {
 
     if (isDismissed) return;
 
-    // ================= PAGO EN CAJA =================
+    // =====================================================
+    // PAGO EN CAJA
+    // =====================================================
     if (isDenied) {
-      // Guardar pedido en "compras" con pagado: false
       const ticketId = await crearPedido({
         carrito,
         total,
@@ -74,7 +86,22 @@ export async function finalizarCompra() {
         pagado: false,
       });
 
-      // Mostrar QR
+      // ❌ No pudo crear pedido (tiene 3 pendientes)
+      if (!ticketId) {
+        return Swal.fire({
+          title: "No puedes generar más pedidos",
+          html: `
+            <p>Ya tienes <strong>3 pedidos pendientes</strong>.</p>
+            <p>Debes pagar o eliminar alguno antes de crear otro.</p>
+          `,
+          icon: "warning",
+          confirmButtonText: "Aceptar",
+          customClass: { confirmButton: "btn btn-dark" },
+          buttonsStyling: false,
+        });
+      }
+
+      // Mostrar QR solo si ticketId es válido
       await mostrarQrCompra({ carrito, total, ticketId, lugar: "Tienda" });
 
       // Limpiar carrito
@@ -82,16 +109,16 @@ export async function finalizarCompra() {
 
       actualizarCarritoVisual();
       mostrarCarrito();
-      mostrarTodosLosPedidos();
+      mostrarTodosLosPedidos(auth.currentUser.uid);
       actualizarContadoresPedidos(auth.currentUser.uid);
-      //document.getElementById("carritoPanel")?.classList.remove("open");
-      //document.getElementById("carritoOverlay")?.setAttribute("hidden", true);
+
       return;
     }
 
-    // ================= MERCADO PAGO =================
+    // =====================================================
+    // MERCADO PAGO
+    // =====================================================
     if (isConfirmed) {
-      // Primero creamos el pedido con pagado: true
       const ticketId = await crearPedido({
         carrito,
         total,
@@ -99,7 +126,22 @@ export async function finalizarCompra() {
         pagado: true,
       });
 
-      // Crear preferencia en backend
+      // ❌ Límite alcanzado → cancelar flujo
+      if (!ticketId) {
+        return Swal.fire({
+          title: "No puedes generar más pedidos",
+          html: `
+            <p>Ya tienes <strong>3 pedidos pendientes</strong>.</p>
+            <p>Debes pagar o eliminar alguno antes de crear otro.</p>
+          `,
+          icon: "warning",
+          confirmButtonText: "Aceptar",
+          customClass: { confirmButton: "btn btn-dark" },
+          buttonsStyling: false,
+        });
+      }
+
+      // Crear preferencia MP
       const res = await fetch("/api/crear-preferencia", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -111,15 +153,15 @@ export async function finalizarCompra() {
             usuarioId: auth.currentUser.uid,
             productoId: p.id,
           })),
-          ticketId, // pasamos el ticketId al backend por si hace falta
+          ticketId,
         }),
       });
 
       const data = await res.json();
+
       if (!data.init_point)
         return Swal.fire("Error", "No se pudo iniciar el pago.", "error");
 
-      // Redirigir a Mercado Pago
       window.location.href = data.init_point;
     }
   } catch (err) {

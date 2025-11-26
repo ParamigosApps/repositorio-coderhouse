@@ -447,13 +447,15 @@ Titular: ${datos.titularBanco}
           {
             title: e.nombre,
             quantity: cantidad,
-            price: e.precio,
-            fecha: e.fecha,
-            lugar: e.lugar,
-            usuarioId,
-            eventoId,
+            unit_price: Number(e.precio),
           },
         ],
+        metadata: {
+          usuarioId,
+          eventoId,
+          fecha: e.fecha,
+          lugar: e.lugar,
+        },
       }),
     });
 

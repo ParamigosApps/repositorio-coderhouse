@@ -100,13 +100,13 @@ function validarFormulario() {
     !editingProductId &&
     (!inputImagen.files || inputImagen.files.length === 0)
   )
-    return { ok: false, msg: "Subí una imagen" };
+    return { ok: false, msg: "Sube una imagen" };
 
   return { ok: true };
 }
 
 // subir imagen a Storage
-async function subirImagenAStorage(file, productId) {
+export async function subirImagenAStorage(file, productId) {
   const path = `productos/${productId}/${Date.now()}_${file.name}`;
   const refFile = storageRef(storage, path);
   const snapshot = await uploadBytes(refFile, file);

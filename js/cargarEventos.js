@@ -54,35 +54,58 @@ export async function cargarEventos() {
       const id = docSnap.id;
 
       const div = document.createElement("div");
-      div.className = "card mb-3 shadow-sm p-3";
+      div.className = "event-card shadow-sm";
 
-      let valorEntrada =
-        !e.precio || e.precio < 1 ? "Entrada gratis" : `$${e.precio}`;
+      const esGratis = !e.precio || e.precio < 1;
+      const valorEntrada = esGratis ? "Entrada gratis" : `$${e.precio}`;
 
       div.innerHTML = `
-        <h4 class="fw-bold">${e.nombre || "Sin nombre"}</h4>
+  ${
+    e.imagen
+      ? `
+      <div class="ev-img-wrap">
+        <img src="${e.imagen}" class="ev-img" alt="Imagen del evento ${e.nombre}">
+      </div>
+    `
+      : ""
+  }
 
-        <p class="mb-0">📅 <strong>${
-          escapeHtml(formatearFecha(e.fecha)) || "Fecha a confirmar"
-        }</strong></p>
-        <p class="mb-0">📍 ${e.lugar || "Sin lugar"}</p>
-        <p class="mb-0">🕑 ${e.horario || "Sin horario definido"}</p>
-        <p class="mb-0">💲 ${valorEntrada}</p>
-        <p class="mb-0">🎟 Entradas por usuario: ${
-          e.entradasPorUsuario ?? "-"
-        }</p>
-        <p class="mt-2"> 📝 ${e.descripcion || "Sin descripción"}</p>
+  <div class="ev-body">
+    <h3 class="ev-title">${e.nombre || "Evento sin nombre"}</h3>
 
-        ${
-          e.imagen
-            ? `<img src="${e.imagen}" class="img-fluid rounded mt-2" style="max-height:180px;object-fit:cover;">`
-            : ""
-        }
+    <div class="ev-row">
+      <span class="ev-icon">📅</span>
+      <strong>${escapeHtml(formatearFecha(e.fecha))}</strong>
+    </div>
 
-        <button class="btn btn-dark w-100 mt-3 btnComprar" data-eventoid="${id}">
-          Conseguir entrada
-        </button>
-      `;
+    <div class="ev-row">
+      <span class="ev-icon">📍</span>
+      <span>${e.lugar || "Sin lugar"}</span>
+    </div>
+
+    <div class="ev-row">
+      <span class="ev-icon">⏰</span>
+      <span>${e.horario || "Sin horario definido"}</span>
+    </div>
+
+    ${
+      !e.precio || e.precio < 1
+        ? `<div class="ev-badge green">🟢 Entrada gratis</div>`
+        : `<div class="ev-row"><span class="ev-icon">💲</span> $${e.precio}</div>`
+    }
+
+    <div class="ev-row">
+      <span class="ev-icon">🎟</span>
+      <span>Máx. por usuario: ${e.entradasPorUsuario ?? "-"}</span>
+    </div>
+
+    <p class="ev-desc">${e.descripcion || "Sin descripción"}</p>
+
+    <button class="btn btn-dark w-100 ev-btn mt-3 btnComprar" data-eventoid="${id}">
+      Conseguir entrada
+    </button>
+  </div>
+`;
 
       listaEventos.appendChild(div);
 

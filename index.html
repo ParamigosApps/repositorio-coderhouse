@@ -391,15 +391,22 @@
               </button>
             </h2>
 
+            <!-- CONTENEDOR LOGIN/USUARIO -->
             <div
               id="collapseUsuario"
               class="accordion-collapse collapse"
               data-bs-parent="#accordionCliente"
             >
               <div class="accordion-body text-center">
+                <!-- 🚫 Usuario NO logueado -->
                 <div id="noUser">
                   <p class="mb-2"></p>
-                  <button id="btnGoogle" class="google-btn d-block mx-auto">
+
+                  <!-- Botón iniciar con Google -->
+                  <button
+                    id="btnGoogle"
+                    class="google-btn d-block mx-auto mb-2"
+                  >
                     <img
                       src="./Assets/img/google.png"
                       alt="Google"
@@ -407,13 +414,45 @@
                     />
                     <span>Iniciar sesión con Google</span>
                   </button>
+
+                  <!-- Botón iniciar con Facebook -->
+                  <button id="btnFacebook" class="facebook-btn-small">
+                    <span class="facebook-icon-box">
+                      <svg viewBox="0 0 36 36">
+                        <path
+                          fill="#1877F2"
+                          d="M36 18a18 18 0 1 0-20.8 17.8V23.3h-5.2v-5.3h5.2v-4c0-5.1 3-7.9 7.6-7.9 2.2 0 4.5.4 4.5.4v5h-2.5c-2.5 0-3.2 1.6-3.2 3.3v3.3h5.4l-.9 5.3h-4.5v12.5A18 18 0 0 0 36 18"
+                        />
+                        <path
+                          fill="#fff"
+                          d="M25.2 23.3l.9-5.3h-5.4v-3.3c0-1.7.7-3.3 3.2-3.3h2.5v-5s-2.3-.4-4.5-.4c-4.6 0-7.6 2.8-7.6 7.9v4h-5.2v5.3h5.2v12.5c1.1.1 2.3.2 3.5.2s2.4-.1 3.5-.2V23.3h4.5"
+                        />
+                      </svg>
+                    </span>
+                    Iniciar sesión con Facebook
+                  </button>
+                  <div class="login-divider my-3">
+                    <span>o</span>
+                  </div>
+                  <!-- Botón iniciar con Teléfono -->
+                  <button
+                    class="btnTelefonoLogin btn btn-outline-dark mb-3"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#containerTelefono"
+                  >
+                    Iniciar sesión con número de teléfono
+                  </button>
                 </div>
 
+                <!-- 👤 Usuario LOGUEADO -->
                 <div id="userInfo" class="d-none">
                   <p class="mb-2 fw-bold" id="userGreeting">Hola, Usuario</p>
+                  <p id="userPhone" class="mb-2 text-muted d-none"></p>
+
+                  <!-- Logout Google (CON icono) -->
                   <button
-                    id="btnLogout"
-                    class="google-btn logout d-block mx-auto"
+                    id="btnLogoutGoogle"
+                    class="google-btn logout d-none mx-auto"
                   >
                     <img
                       src="./Assets/img/google.png"
@@ -422,8 +461,41 @@
                     />
                     Cerrar sesión
                   </button>
+
+                  <!-- Logout Teléfono (SIN icono) -->
+                  <button
+                    id="btnLogoutPhone"
+                    class="btn btn-dark d-none mx-auto mt-2"
+                  >
+                    Cerrar sesión
+                  </button>
                 </div>
               </div>
+            </div>
+
+            <!-- FORMULARIO LOGIN TELEFONO -->
+            <div id="containerTelefono" class="collapse">
+              <section
+                class="auth-telefono-container mt-2 telefono-row mx-auto"
+              >
+                <input
+                  id="phoneInput"
+                  type="text"
+                  placeholder="+5491123456789"
+                />
+
+                <button class="btn btn-outline-dark" id="btnEnviarCodigo">
+                  Enviar código
+                </button>
+
+                <input id="codeInput" type="text" placeholder="Código SMS" />
+
+                <button class="btn btn-outline-dark" id="btnValidarCodigo">
+                  Validar código
+                </button>
+
+                <div id="recaptcha-container"></div>
+              </section>
             </div>
           </div>
         </div>

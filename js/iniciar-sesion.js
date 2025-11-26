@@ -4,10 +4,14 @@ import { cargarEntradas } from "./entradas.js";
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
 import {
   GoogleAuthProvider,
+  FacebookAuthProvider,
   signInWithPopup,
   onAuthStateChanged,
   signOut,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+
 import {
   doc,
   setDoc,
@@ -15,82 +19,261 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
-const btnGoogle = document.getElementById("btnGoogle");
-const noUser = document.getElementById("noUser");
-const userInfo = document.getElementById("userInfo");
-const userGreeting = document.getElementById("userGreeting");
-const btnLogout = document.getElementById("btnLogout");
+const esAdminPage = window.location.pathname.includes("admin.html");
 
-// Función para mostrar usuario logueado
-function mostrarUsuario(nombre) {
-  if (nombre) {
-    userGreeting.textContent = `Hola, ${nombre}`;
-    noUser.classList.add("d-none");
-    userInfo.classList.remove("d-none");
-  } else {
-    noUser.classList.remove("d-none");
-    userInfo.classList.add("d-none");
-    userGreeting.textContent = "";
+// =====================================================
+//      📌 CARGAR CONFIGURACIÓN DE LOGIN DESDE FIRESTORE
+// =====================================================
+export async function cargarLoginSettings() {
+  try {
+    const docSnap = await getDoc(doc(db, "configuracion", "loginMetodos"));
+    if (!docSnap.exists()) return;
+
+    const loginSettings = docSnap.data();
+
+    // ❗ Actualiza UI solo si NO es admin.html
+    if (!esAdminPage) {
+      actualizarInterfazSegunLoginMetodos(loginSettings);
+    }
+  } catch (e) {
+    console.error("Error cargando login settings:", e);
   }
 }
 
-// Carga inicial desde localStorage
-mostrarUsuario(localStorage.getItem("userName"));
+// =====================================================
+//      📌 MOSTRAR / OCULTAR BOTONES DE LOGIN EN INDEX
+// =====================================================
+export function actualizarInterfazSegunLoginMetodos(settings) {
+  if (!settings) return;
+  if (esAdminPage) return; // 🔥 Importante
 
-// Función de login
+  const btnGoogle = document.getElementById("btnGoogle");
+  const btnFacebook = document.getElementById("btnFacebook");
+  const divider = document.querySelector(".login-divider");
+
+  const phoneButtons = document.querySelectorAll(
+    "#btnTelefonoLogin, .btnTelefonoLogin"
+  );
+
+  // GOOGLE
+  if (btnGoogle)
+    settings.google
+      ? btnGoogle.classList.remove("d-none")
+      : btnGoogle.classList.add("d-none");
+
+  // FACEBOOK
+  if (btnFacebook)
+    settings.facebook
+      ? btnFacebook.classList.remove("d-none")
+      : btnFacebook.classList.add("d-none");
+
+  // TELÉFONO
+  phoneButtons.forEach((btn) => {
+    settings.phone
+      ? btn.classList.remove("d-none")
+      : btn.classList.add("d-none");
+  });
+
+  // Divider
+  if (divider)
+    settings.phone
+      ? divider.classList.remove("d-none")
+      : divider.classList.add("d-none");
+}
+
+// =====================================================
+//      📌 MOSTRAR USUARIO
+// =====================================================
+function mostrarUsuario(nombre) {
+  const noUser = document.getElementById("noUser");
+  const userInfo = document.getElementById("userInfo");
+  const userGreeting = document.getElementById("userGreeting");
+
+  if (nombre) {
+    if (userGreeting) userGreeting.textContent = `Hola, ${nombre}`;
+    noUser?.classList.add("d-none");
+    userInfo?.classList.remove("d-none");
+  } else {
+    noUser?.classList.remove("d-none");
+    userInfo?.classList.add("d-none");
+    if (userGreeting) userGreeting.textContent = "";
+  }
+}
+
+// =====================================================
+//      📌 LOGIN CON GOOGLE
+// =====================================================
+const btnGoogle = document.getElementById("btnGoogle");
+
 async function loginWithGoogle() {
-  const provider = new GoogleAuthProvider();
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+
+    const user = result.user;
+    const nombre = user.displayName || user.email;
+
+    await setDoc(doc(db, "usuarios", user.uid), {
+      nombre,
+      email: user.email,
+      uid: user.uid,
+      creadoEn: serverTimestamp(),
+    });
+
+    localStorage.setItem("userName", nombre);
+    mostrarUsuario(nombre);
+    cargarEntradas();
+  } catch (err) {
+    if (
+      err.code === "auth/popup-closed-by-user" ||
+      err.code === "auth/cancelled-popup-request"
+    )
+      return;
+
+    Swal.fire("Error", err.message, "error");
+  }
+}
+
+btnGoogle?.addEventListener("click", loginWithGoogle);
+
+// =====================================================
+//      📌 LOGIN CON FACEBOOK
+// =====================================================
+const btnFacebook = document.getElementById("btnFacebook");
+
+async function loginWithFacebook() {
+  const provider = new FacebookAuthProvider();
+
   try {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Guardar en Firestore si no existe
-    const userDocRef = doc(db, "usuarios", user.uid);
-    const userSnap = await getDoc(userDocRef);
-    if (!userSnap.exists()) {
-      await setDoc(userDocRef, {
-        nombre: user.displayName || "Sin nombre",
-        email: user.email,
+    const nombre = user.displayName;
+
+    await setDoc(doc(db, "usuarios", user.uid), {
+      nombre,
+      email: user.email || "",
+      uid: user.uid,
+      provider: "facebook",
+      creadoEn: serverTimestamp(),
+    });
+
+    localStorage.setItem("userName", nombre);
+    mostrarUsuario(nombre);
+    cargarEntradas();
+  } catch (err) {
+    if (
+      err.code === "auth/cancelled-popup-request" ||
+      err.code === "auth/popup-closed-by-user"
+    )
+      return;
+
+    Swal.fire("Error", err.message, "error");
+  }
+}
+
+btnFacebook?.addEventListener("click", loginWithFacebook);
+
+// =====================================================
+//      📌 LOGIN POR TELÉFONO
+// =====================================================
+function inicializarRecaptcha() {
+  try {
+    window.recaptchaVerifier = new RecaptchaVerifier(
+      auth,
+      "recaptcha-container",
+      { size: "invisible" }
+    );
+  } catch (e) {}
+}
+
+inicializarRecaptcha();
+
+let confirmationResult;
+
+document
+  .getElementById("btnEnviarCodigo")
+  ?.addEventListener("click", async () => {
+    const phoneInput = document.getElementById("phoneInput")?.value.trim();
+    if (!phoneInput.startsWith("+54")) {
+      return Swal.fire("Error", "El número debe comenzar con +54", "error");
+    }
+
+    try {
+      confirmationResult = await signInWithPhoneNumber(
+        auth,
+        phoneInput,
+        window.recaptchaVerifier
+      );
+
+      Swal.fire("Código enviado", "Revisa tu SMS", "success");
+    } catch (err) {
+      Swal.fire("Error", err.message, "error");
+    }
+  });
+
+document
+  .getElementById("btnValidarCodigo")
+  ?.addEventListener("click", async () => {
+    const code = document.getElementById("codeInput")?.value.trim();
+    if (!code) return Swal.fire("Error", "Ingresá el código", "error");
+
+    try {
+      const result = await confirmationResult.confirm(code);
+      const user = result.user;
+
+      // Pedir nombre
+      const { value: nombre } = await Swal.fire({
+        title: "Ingresá tu nombre",
+        input: "text",
+        inputValidator: (v) => (!v ? "Ingresá un nombre" : null),
+      });
+
+      await setDoc(doc(db, "usuarios", user.uid), {
+        nombre,
+        telefono: user.phoneNumber,
         uid: user.uid,
         creadoEn: serverTimestamp(),
       });
+
+      localStorage.setItem("userName", nombre);
+      localStorage.setItem("userPhone", user.phoneNumber);
+
+      mostrarUsuario(nombre);
+      cargarEntradas();
+    } catch {
+      Swal.fire("Error", "Código inválido", "error");
     }
+  });
 
-    // Guardar en localStorage y mostrar usuario
-    localStorage.setItem("userName", user.displayName || user.email);
-    mostrarUsuario(user.displayName || user.email);
-    cargarEntradas();
-  } catch (err) {
-    console.error(err);
-    Swal.fire("Error", err.message, "error");
-    // No cambiar nada en la UI
-  }
-}
-
-// Función de logout
+// =====================================================
+//      📌 LOGOUT
+// =====================================================
 async function logout() {
-  try {
-    await signOut(auth);
-    localStorage.removeItem("userName");
-    mostrarUsuario(null);
-  } catch (err) {
-    console.error(err);
-    Swal.fire("Error", "No se pudo cerrar sesión", "error");
-  }
+  await signOut(auth);
+  localStorage.removeItem("userName");
+  localStorage.removeItem("userPhone");
+  mostrarUsuario(null);
 }
 
-// Asignar eventos
-btnGoogle?.addEventListener("click", loginWithGoogle);
-btnLogout?.addEventListener("click", logout);
+document.getElementById("btnLogoutGoogle")?.addEventListener("click", logout);
+document.getElementById("btnLogoutPhone")?.addEventListener("click", logout);
 
-// Firebase: detectar cambios de sesión
-onAuthStateChanged(auth, (user) => {
+// =====================================================
+//      📌 OBSERVAR SESIÓN
+// =====================================================
+onAuthStateChanged(auth, async (user) => {
   if (user) {
-    // Usuario activo, actualizar UI
-    const nombre = user.displayName || user.email;
-    localStorage.setItem("userName", nombre);
-    mostrarUsuario(nombre);
+    mostrarUsuario(user.displayName || user.email || user.phoneNumber);
+    document.getElementById("userInfo")?.classList.remove("d-none");
+    document.getElementById("noUser")?.classList.add("d-none");
   } else {
     mostrarUsuario(null);
+    document.getElementById("userInfo")?.classList.add("d-none");
+    document.getElementById("noUser")?.classList.remove("d-none");
+    await cargarLoginSettings(); // 🔥 IMPORTANTE: recargar botones en index
   }
 });
+
+// Primera carga de configuración
+await cargarLoginSettings();

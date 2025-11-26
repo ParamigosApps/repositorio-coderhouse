@@ -84,6 +84,17 @@
                       />
                     </div>
                     <div class="mb-3">
+                      <label for="nombreEvento" class="form-label fw-semibold"
+                        >Imagen del evento (opcional)
+                      </label>
+                      <input
+                        type="file"
+                        id="imagenEvento"
+                        class="form-control mb-3"
+                        accept="image/*"
+                      />
+                    </div>
+                    <div class="mb-3">
                       <label for="fechaEvento" class="form-label fw-semibold"
                         >Fecha <span style="color: red">*</span></label
                       >
@@ -591,6 +602,88 @@
                   </div>
                 </div>
 
+                <!--  ---------- METODOS INICIO DE SESION ---------- -->
+                <button
+                  class="btn btn-outline-dark"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#loginOpciones"
+                  id="btnLoginConfig"
+                >
+                  Metodos de inicio de sesión
+                </button>
+                <!-- ===== REDES SOCIALES ===== -->
+                <div id="loginOpciones" class="mb-4 collapse">
+                  <h6 class="mt-2 mb-4 text-muted">
+                    Habilita/deshabilita metodos de inicio de sesión...
+                  </h6>
+
+                  <!-- GOOGLE -->
+                  <div class="login-opcion-row">
+                    <button
+                      id="btnGoogle"
+                      class="google-btn d-block mx-auto w-75"
+                    >
+                      <img
+                        src="./Assets/img/google.png"
+                        alt="Google"
+                        class="icon-google"
+                      />
+                      <span>Iniciar sesión con Google</span>
+                    </button>
+
+                    <input
+                      type="checkbox"
+                      id="toggleLoginGoogle"
+                      class="form-check-input toggle-red"
+                      checked
+                    />
+                  </div>
+
+                  <!-- FACEBOOK -->
+                  <div class="login-opcion-row mt-2">
+                    <button id="btnFacebook" class="facebook-btn-small">
+                      <span class="facebook-icon-box">
+                        <svg viewBox="0 0 36 36">
+                          <path
+                            fill="#1877F2"
+                            d="M36 18a18 18 0 1 0-20.8 17.8V23.3h-5.2v-5.3h5.2v-4c0-5.1 3-7.9 7.6-7.9 2.2 0 4.5.4 4.5.4v5h-2.5c-2.5 0-3.2 1.6-3.2 3.3v3.3h5.4l-.9 5.3h-4.5v12.5A18 18 0 0 0 36 18"
+                          />
+                          <path
+                            fill="#fff"
+                            d="M25.2 23.3l.9-5.3h-5.4v-3.3c0-1.7.7-3.3 3.2-3.3h2.5v-5s-2.3-.4-4.5-.4c-4.6 0-7.6 2.8-7.6 7.9v4h-5.2v5.3h5.2v12.5c1.1.1 2.3.2 3.5.2s2.4-.1 3.5-.2V23.3h4.5"
+                          />
+                        </svg>
+                      </span>
+                      Iniciar sesión con Facebook
+                    </button>
+
+                    <input
+                      type="checkbox"
+                      id="toggleLoginFacebook"
+                      class="form-check-input toggle-red"
+                      checked
+                    />
+                  </div>
+
+                  <!-- TELEFONO -->
+                  <div class="login-opcion-row mt-2">
+                    <button
+                      class="btnTelefonoLogin btn btn-outline-dark"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#containerTelefono"
+                    >
+                      Iniciar sesión con número de teléfono
+                    </button>
+
+                    <input
+                      type="checkbox"
+                      id="toggleLoginPhone"
+                      class="form-check-input toggle-red"
+                      checked
+                    />
+                  </div>
+                </div>
                 <!--  ---------- CONTACTO ---------- -->
                 <button
                   class="btn btn-outline-dark"
@@ -603,18 +696,13 @@
                 </button>
                 <!-- ===== REDES SOCIALES ===== -->
                 <div id="formContacto" class="collapse">
-                  <h6 class="mt-1 mb-3 text-muted">
+                  <h6 class="mt-3 mb-3 text-muted">
                     Ingresa tus datos de contacto...
                   </h6>
 
                   <!-- WHATSAPP -->
-                  <div class="d-flex align-items-center mb-2">
-                    <input
-                      type="checkbox"
-                      id="toggleWhatsapp"
-                      class="form-check-input me-2 toggle-red"
-                      data-target="whatsappContacto"
-                    />
+                  <div class="contacto-row mb-2">
+                    <label class="contacto-label">Whatsapp:</label>
                     <input
                       type="text"
                       id="whatsappContacto"
@@ -622,16 +710,17 @@
                       placeholder="Ej: 1112345678"
                       disabled
                     />
+                    <input
+                      type="checkbox"
+                      id="toggleWhatsapp"
+                      class="form-check-input toggle-red"
+                      data-target="whatsappContacto"
+                    />
                   </div>
 
                   <!-- INSTAGRAM -->
-                  <div class="d-flex align-items-center mb-2">
-                    <input
-                      type="checkbox"
-                      id="toggleInstagram"
-                      class="form-check-input me-2 toggle-red"
-                      data-target="instagramContacto"
-                    />
+                  <div class="contacto-row mb-2">
+                    <label class="contacto-label">Instagram:</label>
                     <input
                       type="text"
                       id="instagramContacto"
@@ -639,16 +728,17 @@
                       placeholder="Ej: @usuario_ig"
                       disabled
                     />
+                    <input
+                      type="checkbox"
+                      id="toggleInstagram"
+                      class="form-check-input toggle-red"
+                      data-target="instagramContacto"
+                    />
                   </div>
 
                   <!-- TIKTOK -->
-                  <div class="d-flex align-items-center mb-2">
-                    <input
-                      type="checkbox"
-                      id="toggleTiktok"
-                      class="form-check-input me-2 toggle-red"
-                      data-target="tiktokContacto"
-                    />
+                  <div class="contacto-row mb-2">
+                    <label class="contacto-label">TikTok:</label>
                     <input
                       type="text"
                       id="tiktokContacto"
@@ -656,16 +746,17 @@
                       placeholder="Ej: @usuario_tiktok"
                       disabled
                     />
+                    <input
+                      type="checkbox"
+                      id="toggleTiktok"
+                      class="form-check-input toggle-red"
+                      data-target="tiktokContacto"
+                    />
                   </div>
 
                   <!-- X -->
-                  <div class="d-flex align-items-center mb-2">
-                    <input
-                      type="checkbox"
-                      id="toggleX"
-                      class="form-check-input me-2 toggle-red"
-                      data-target="xContacto"
-                    />
+                  <div class="contacto-row mb-2">
+                    <label class="contacto-label">X:</label>
                     <input
                       type="text"
                       id="xContacto"
@@ -673,39 +764,47 @@
                       placeholder="Ej: @usuario_x"
                       disabled
                     />
+                    <input
+                      type="checkbox"
+                      id="toggleX"
+                      class="form-check-input toggle-red"
+                      data-target="xContacto"
+                    />
                   </div>
 
                   <!-- FACEBOOK -->
-                  <div class="d-flex align-items-center mb-2">
-                    <input
-                      type="checkbox"
-                      id="toggleFacebook"
-                      class="form-check-input me-2 toggle-red"
-                      data-target="facebookContacto"
-                    />
+                  <div class="contacto-row mb-2">
+                    <label class="contacto-label">Facebook:</label>
                     <input
                       type="text"
                       id="facebookContacto"
                       class="form-control social-input"
-                      placeholder="Ej: nombre página"
+                      placeholder="Nombre de página"
                       disabled
+                    />
+                    <input
+                      type="checkbox"
+                      id="toggleFacebook"
+                      class="form-check-input toggle-red"
+                      data-target="facebookContacto"
                     />
                   </div>
 
                   <!-- WEB -->
-                  <div class="d-flex align-items-center mb-2">
-                    <input
-                      type="checkbox"
-                      id="toggleWeb"
-                      class="form-check-input me-2 toggle-red"
-                      data-target="webContacto"
-                    />
+                  <div class="contacto-row mb-2">
+                    <label class="contacto-label">Sitio web:</label>
                     <input
                       type="text"
                       id="webContacto"
                       class="form-control social-input"
                       placeholder="https://tuweb.com"
                       disabled
+                    />
+                    <input
+                      type="checkbox"
+                      id="toggleWeb"
+                      class="form-check-input toggle-red"
+                      data-target="webContacto"
                     />
                   </div>
 
@@ -745,7 +844,7 @@
                   class="btn btn-outline-dark"
                   onclick="window.location.href='validarqr.html?modo=compras'"
                 >
-                  Verificador compras QR
+                  Verificador COMPRAS QR
                 </button>
                 <!--  ---------- VERIFICAR ENTRADAS ---------- -->
                 <button
@@ -754,7 +853,7 @@
                   type="button"
                   id="btnVerificarIngresos"
                 >
-                  Verificador ingresos QR
+                  Verificador ENTRADAS QR
                 </button>
                 <div id="verificarIngresos" class="collapse">
                   <div class="d-flex justify-content-center"></div>

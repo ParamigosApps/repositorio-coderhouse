@@ -919,8 +919,7 @@ header .navbar-brand {
 }
 
 #carritoItems {
-  height: 80px;
-  min-height: 140px !important;
+  min-height: 100px;
 }
 
 #cerrarCarrito {

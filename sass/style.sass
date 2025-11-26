@@ -886,7 +886,14 @@ header .navbar-brand
   z-index: 1
 
 #carritoItems
-  height: 100px
+  height: 80px
+  min-height: 140px !important
+
+  
+#cerrarCarrito
+  padding: 4px 7px
+#carritoTitulo
+  font-size: 1.2rem
 
 // Icono del carrito en el header
 #carritoIcono
@@ -967,7 +974,7 @@ header .contadorCarrito
 .carrito-table td:first-child 
   display: flex
   align-items: center
-  gap: 0.5rem // espacio entre imagen y texto
+  gap: 0.1rem // espacio entre imagen y texto
 
 
 .img-producto-carrito 
@@ -983,13 +990,14 @@ header .contadorCarrito
   flex-grow: 1 // que ocupe el resto del espacio
   word-break: break-word // que el texto largo se ajuste
 .nombre-producto 
-  font-size: 0.9rem
+  font-size: 0.8rem
+  padding: 0px
 .cantidad
-  font-size: 0.9rem
+  font-size: 0.8rem
 .precio 
-  font-size: 0.7rem
+  font-size: 0.6rem
 .subtotal
-  font-size: 0.9rem
+  font-size: 0.8rem
 
 #MontoTotalCarrito, .MontoTotalCarritoH2
     font-size: 1.3rem
@@ -997,6 +1005,11 @@ header .contadorCarrito
 .TituloCarrito
   font-size: 0.9rem
   padding: 4px
+.DescripcionCarrito
+  font-size: 0.6rem
+  text-align: end
+  padding-right: 2px
+  min-width: 10px
 
 // QR PAGE
 body.qr-body
@@ -1556,4 +1569,38 @@ body.qr-body
 .toggle-redes
   padding: 14px
   margin: 0px 2px 0px 6px
+
+// ACCIONES BOTONES + y - del carrito
+// Animación de rebote suave
+@keyframes bounce-soft
+  0%
+    transform: scale(1)
+  50%
+    transform: scale(1.15)
+  100%
+    transform: scale(1)
+
+.btn-resta, .btn-suma
+  color: white !important
+  border-radius: 6px
+  transition: transform .15s ease, box-shadow .2s ease, filter .2s ease
+
+  &:hover
+    animation: bounce-soft .25s ease
+    filter: brightness(1.25)
+
+  &:active
+    transform: scale(0.92)
+
+.btn-resta
+  background: #dc3545 !important
+
+  &:hover
+    box-shadow: 0 0 12px rgba(220, 53, 69, .7)
+
+.btn-suma
+  background: #14a8e2 !important
+
+  &:hover
+    box-shadow: 0 0 12px rgba(20, 168, 226, .7)
 

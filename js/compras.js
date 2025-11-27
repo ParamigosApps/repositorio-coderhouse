@@ -262,6 +262,10 @@ export async function mostrarQrCompra({
       </div>
 
       <!-- BOTONES EXTRA -->
+      
+      ${
+        estado == "pendiente" || estado == "pagado"
+          ? `
       <div class="botones-ticket">
         <button id="btnPdf" class="btn-pdf">
           <img src="https://cdn-icons-png.flaticon.com/512/337/337946.png" />
@@ -273,21 +277,26 @@ export async function mostrarQrCompra({
           WhatsApp
         </button>
       </div>
+      `
+          : ``
+      }
 
     `,
-    didOpen: async () => {
-      const qrContainer = document.getElementById("qrCompraContainer");
-      await generarCompraQr({
-        ticketId,
-        contenido: `Compra:${ticketId}`,
-        qrContainer,
-        tamaño: 200,
-      });
 
-      const ticket = document.getElementById("ticketGenerado");
+    didOpen: async () => {
+      if (estado != "retirado") {
+        const qrContainer = document.getElementById("qrCompraContainer");
+        await generarCompraQr({
+          ticketId,
+          contenido: `Compra:${ticketId}`,
+          qrContainer,
+          tamaño: 200,
+        });
+        const ticket = document.getElementById("ticketGenerado");
+      } else console.log("YA FUE RETIRADO:" + estado);
 
       /* ----------------------- 📄 Descargar PDF ----------------------- */
-      document.getElementById("btnPdf").addEventListener("click", async () => {
+      document.getElementById("btnPdf")?.addEventListener("click", async () => {
         const canvas = await html2canvas(ticket);
         const imgData = canvas.toDataURL("image/png");
         const pdf = new jsPDF();
@@ -296,7 +305,7 @@ export async function mostrarQrCompra({
       });
 
       /* ----------------------- 📲 Compartir WhatsApp ----------------------- */
-      document.getElementById("btnWsp").addEventListener("click", async () => {
+      document.getElementById("btnWsp")?.addEventListener("click", async () => {
         let mensaje = `🧾 *Ticket de compra*\n`;
         mensaje += `Pedido #${numeroPedido ?? ticketId}\n`;
         mensaje += `Estado: ${estado.toUpperCase()}\n`;

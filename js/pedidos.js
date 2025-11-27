@@ -207,8 +207,9 @@ function renderPedido(contenedor, pedido) {
   }
 
   <button class="btn btn-dark btn-sm ver-qr"
-    style="font-size:12px; padding:5px 14px; margin-bottom: 2px">
-    Ver QR
+    style="font-size:12px; padding:5px 14px; margin-bottom: 2px">  ${
+      pedido.estado !== "retirado" ? `Ver QR` : `Ver ticket`
+    }
   </button>
 </div>
 

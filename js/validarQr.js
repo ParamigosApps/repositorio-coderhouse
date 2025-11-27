@@ -275,13 +275,24 @@ async function validarTicket(ticketId, modoActual = "entradas") {
       // MARCAR COMO USADO
       // ------------------------------------------------
       if (modoActual === "entradas") {
-        await updateDoc(refActual, { usado: true });
-        qrResultado.textContent = "✅ Entrada válida - Permitido el ingreso";
-        qrInfo.textContent = `Evento: ${
-          ticketData.nombreEvento || ticketData.nombre || "Sin nombre"
-        } | Usuario: ${
-          ticketData.usuarioNombre || ticketData.usuario || "Desconocido"
-        }`;
+        const refUsadas = doc(db, "entradasUsadas", ticketId);
+
+        // Guardar entrada usada como historial
+        await setDoc(refUsadas, {
+          ...ticketData,
+          usado: true,
+          usadoEn: new Date().toISOString(),
+        });
+
+        // Eliminar de "entradas" para que no se pueda volver a usar
+        await deleteDoc(refActual);
+
+        qrResultado.textContent = "✅ INGRESO PERMITIDO";
+        qrResultado.className = "qr-resultado valid";
+
+        qrInfo.textContent = `Entrada de ${
+          ticketData.usuarioNombre || "Desconocido"
+        } movida a historial`;
       } else {
         await updateDoc(refActual, {
           usado: true,
@@ -362,3 +373,4 @@ function resetMensajesLuego() {
     qrInfo.textContent = "";
   }, 3000);
 }
+git;

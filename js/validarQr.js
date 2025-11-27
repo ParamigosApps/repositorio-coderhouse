@@ -1,3 +1,5 @@
+// /js/lector-qr.js  (o como se llame tu archivo)
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
 import {
   getFirestore,
@@ -8,6 +10,9 @@ import {
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
 import { formatearFecha } from "./utils.js";
 
+// ======================================================
+// 🔥 FIREBASE
+// ======================================================
 const firebaseConfig = {
   apiKey: "AIzaSyDkQEN7UMAVQQvOmWZjABmVYgVMMC4g9g0",
   authDomain: "appbar-24e02.firebaseapp.com",
@@ -21,6 +26,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// ======================================================
+// 🎥 ELEMENTOS DOM / ESTADO
+// ======================================================
 const video = document.getElementById("camara");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -29,10 +37,33 @@ const qrInfo = document.getElementById("qr-info-adicional");
 const qrTitulo = document.querySelector(".qr-title");
 const ticketsProcesados = new Set();
 
-// ---------------- Botón validar manual ----------------
+// Entrada manual
 const manualQrInput = document.getElementById("manualQrInput");
 const manualQrBtn = document.getElementById("manualQrBtn");
 
+// Botón salir
+const exitQrBtn = document.getElementById("exitQrBtn");
+
+// ======================================================
+// 🔁 MODO LECTOR (entradas / compras)
+// ======================================================
+const urlParams = new URLSearchParams(window.location.search);
+let modo = urlParams.get("modo") || "entradas";
+
+// Normalizo por si algún día usás "entrada"/"compra"
+if (modo === "entrada") modo = "entradas";
+if (modo === "compra") modo = "compras";
+
+setTituloModo(modo);
+
+function setTituloModo(modoActual = "entradas") {
+  qrTitulo.textContent =
+    modoActual === "entradas" ? "ESCÁNER ENTRADAS" : "ESCÁNER COMPRAS";
+}
+
+// ======================================================
+// 🧷 BOTÓN MANUAL
+// ======================================================
 manualQrBtn.addEventListener("click", () => {
   const ticketId = manualQrInput.value.trim();
   if (!ticketId) return;
@@ -40,32 +71,29 @@ manualQrBtn.addEventListener("click", () => {
   if (!ticketsProcesados.has(ticketId)) {
     ticketsProcesados.add(ticketId);
     validarTicket(ticketId, modo);
-    manualQrInput.value = ""; // limpiar input después de validar
+    manualQrInput.value = "";
   }
 });
 
-// Permitir validar presionando Enter
 manualQrInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    manualQrBtn.click();
-  }
+  if (e.key === "Enter") manualQrBtn.click();
 });
 
-// ---------------- Botón salir ----------------
-const exitQrBtn = document.getElementById("exitQrBtn");
-
+// ======================================================
+// 🚪 BOTÓN SALIR
+// ======================================================
 exitQrBtn.addEventListener("click", () => {
-  // Detener la cámara
   const stream = video.srcObject;
   if (stream) {
     stream.getTracks().forEach((track) => track.stop());
     video.srcObject = null;
   }
-  // Redirigir o cerrar modal
-  window.location.href = "/admin.html"; // ejemplo: volver al inicio
+  window.location.href = "/admin.html";
 });
 
-// ---------------- Cámara ----------------
+// ======================================================
+// 📷 INICIAR CÁMARA
+// ======================================================
 navigator.mediaDevices
   .getUserMedia({ video: { facingMode: "environment" } })
   .then((stream) => {
@@ -78,21 +106,9 @@ navigator.mediaDevices
     qrResultado.className = "qr-resultado invalid";
   });
 
-// ---------------- Modo ----------------
-const urlParams = new URLSearchParams(window.location.search);
-let modo = urlParams.get("modo") || "entradas"; // "entrada", "compra" o "carrito"
-setTituloModo(modo);
-
-function setTituloModo(modo = "entradas") {
-  qrTitulo.textContent =
-    modo === "entradas"
-      ? "ESCÁNER ENTRADAS"
-      : modo === "compras"
-      ? "ESCÁNER COMPRAS"
-      : "ESCÁNER COMPRAS";
-}
-
-// ---------------- Escanear QR ----------------
+// ======================================================
+// 🔎 ESCANEAR QR LOOP
+// ======================================================
 function scanQR() {
   if (video.readyState === video.HAVE_ENOUGH_DATA) {
     canvas.width = video.videoWidth;
@@ -104,28 +120,30 @@ function scanQR() {
 
     if (code) {
       const ticketId = code.data
-        .replace(/^(Entrada|Compra|Carrito):\s*/, "")
+        .replace(/^(Entrada|Compra|Carrito):\s*/i, "")
         .trim();
-      //const ticketId = code.data.trim();
 
       if (!ticketsProcesados.has(ticketId)) {
         ticketsProcesados.add(ticketId);
         validarTicket(ticketId, modo);
-        console.log("aca vemos ticket y modo " + ticketId + " " + modo);
+        console.log("Escaneado → ticketId:", ticketId, " | modo:", modo);
       }
     }
   }
   requestAnimationFrame(scanQR);
 }
 
-// ---------------- Validar ticket ----------------
-async function validarTicket(ticketId, modo = "entradas") {
+// ======================================================
+// ✅ VALIDAR TICKET
+// ======================================================
+async function validarTicket(ticketId, modoActual = "entradas") {
   console.log("Ticket escaneado:", ticketId);
-  console.log("Modo actual:", modo);
+  console.log("Modo actual:", modoActual);
 
   try {
-    const coleccionActual = modo; // "entradas" o "compras"
-    const coleccionOtra = modo === "entradas" ? "compras" : "entradas";
+    const coleccionActual = modoActual === "compras" ? "compras" : "entradas";
+    const coleccionOtra =
+      coleccionActual === "entradas" ? "compras" : "entradas";
 
     const refActual = doc(db, coleccionActual, ticketId);
     const refOtra = doc(db, coleccionOtra, ticketId);
@@ -133,134 +151,211 @@ async function validarTicket(ticketId, modo = "entradas") {
     const snapActual = await getDoc(refActual);
     const snapOtra = await getDoc(refOtra);
 
-    console.log("Snap actual existe:", snapActual.exists());
-    console.log("Snap otra existe:", snapOtra.exists());
-
     qrInfo.textContent = "";
 
+    // --------------------------------------------------
+    // 1) ENCONTRADO EN COLECCIÓN CORRECTA
+    // --------------------------------------------------
     if (snapActual.exists()) {
       const ticketData = snapActual.data();
-      console.log("Ticket encontrado en colección actual:", ticketData);
+      console.log("Ticket en colección actual:", coleccionActual, ticketData);
 
+      // Fecha segura (Timestamp o Date)
+      let fechaFormateada = "Sin fecha";
+      if (ticketData.fecha) {
+        const fechaRaw = ticketData.fecha.toDate
+          ? ticketData.fecha.toDate()
+          : ticketData.fecha;
+        fechaFormateada = formatearFecha(fechaRaw);
+      }
+
+      // Si ya fue usado
       if (ticketData.usado) {
         qrResultado.textContent =
-          modo === "entradas" ? "⚠ Entrada ya usada" : "⚠ Pedido ya entregado";
+          modoActual === "entradas"
+            ? "⚠ Entrada ya usada"
+            : "⚠ Pedido ya entregado";
         qrResultado.className = "qr-resultado used";
-      } else {
-        // Detalle de productos si es compra
-        let detalleHTML = "";
-        if (modo === "compras" && ticketData.items?.length) {
-          detalleHTML = `<div style="max-height:200px;overflow-y:auto;border:1px solid #ccc;padding:5px;margin-top:5px;">
+
+        qrInfo.textContent =
+          modoActual === "entradas"
+            ? `Evento: ${
+                ticketData.nombreEvento || ticketData.nombre || "Sin nombre"
+              }`
+            : `Pedido #${ticketData.numeroPedido || ticketId}`;
+        ticketsProcesados.delete(ticketId);
+        resetMensajesLuego();
+        return;
+      }
+
+      // ------------------------------------------------
+      // DETALLE DE PRODUCTOS (solo compras)
+      // ------------------------------------------------
+      let detalleHTML = "";
+      if (modoActual === "compras" && ticketData.items?.length) {
+        detalleHTML = `
+          <div style="max-height:200px;overflow-y:auto;border:1px solid #ccc;padding:5px;margin-top:5px;">
             <table style="width:100%;border-collapse:collapse;font-size:0.9em">
               <thead>
                 <tr>
                   <th style="border-bottom:1px solid #ccc;text-align:left">Producto</th>
-                  <th style="border-bottom:1px solid #ccc;text-align:center">Cantidad</th>
-                  <th style="border-bottom:1px solid #ccc;text-align:right">Precio</th>
+                  <th style="border-bottom:1px solid #ccc;text-align:center">Cant.</th>
+                  <th style="border-bottom:1px solid #ccc;text-align:right">Subtotal</th>
                 </tr>
               </thead>
               <tbody>
                 ${ticketData.items
                   .map(
                     (p) => `
-                  <tr>
-                    <td>${p.nombre}</td>
-                    <td style="text-align:center">${p.enCarrito}</td>
-                    <td style="text-align:right">$${p.precio}</td>
-                  </tr>`
+                      <tr>
+                        <td>${p.nombre}</td>
+                        <td style="text-align:center">${p.enCarrito}</td>
+                        <td style="text-align:right">$${
+                          p.precio * p.enCarrito
+                        }</td>
+                      </tr>`
                   )
                   .join("")}
               </tbody>
             </table>
           </div>`;
-        }
-
-        // Swal para aprobar
-        const result = await Swal.fire({
-          title: modo === "entradas" ? "Aprobar entrada" : "Confirmar pedido",
-          html: `
-            <p><strong>${modo === "entradas" ? "Evento" : "Pedido"}:</strong> ${
-            ticketData.nombre || "Sin nombre"
-          }</p>
-            <p><strong>Usuario:</strong> ${
-              ticketData.usuarioNombre || "Desconocido"
-            }</p>
-            <p><strong>Fecha:</strong> ${
-              formatearFecha(ticketData.fecha) || "Sin fecha"
-            }</p>
-            ${detalleHTML}
-          `,
-          icon: "question",
-          showCancelButton: true,
-          confirmButtonText: "Aprobar",
-          cancelButtonText: "Cancelar",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          width: 500,
-        });
-
-        if (!result.isConfirmed) {
-          ticketsProcesados.delete(ticketId);
-          return;
-        }
-
-        // Marcar como usado
-        if (modo === "entradas") {
-          await updateDoc(refActual, { usado: true });
-          qrResultado.textContent = "✅ Entrada válida - Permitido el ingreso";
-        } else if (modo === "compras") {
-          await updateDoc(refActual, { usado: true, estado: "retirado" });
-          qrResultado.textContent = "✅ Pedido válido - Entregar al cliente";
-          if (typeof mostrarPedidosConfirmados === "function") {
-            mostrarPedidosConfirmados(ticketData.usuarioId);
-          }
-        }
-
-        qrResultado.className = "qr-resultado valid";
-        qrInfo.textContent = `${modo === "entradas" ? "Evento" : "Pedido"}: ${
-          ticketData.nombre || "Sin nombre"
-        } | Usuario: ${ticketData.usuarioNombre || "Desconocido"}`;
       }
-    } else if (snapOtra.exists()) {
+
+      // ------------------------------------------------
+      // DATOS PARA SWAL
+      // ------------------------------------------------
+      const tituloSwal =
+        modoActual === "entradas" ? "Aprobar entrada" : "Confirmar pedido";
+
+      const lineaPrincipal =
+        modoActual === "entradas"
+          ? `<p><strong>Evento:</strong> ${
+              ticketData.nombreEvento || ticketData.nombre || "Sin nombre"
+            }</p>`
+          : `<p><strong>Pedido:</strong> #${
+              ticketData.numeroPedido || ticketId
+            }</p>`;
+
+      const usuarioLinea = `<p><strong>Usuario:</strong> ${
+        ticketData.usuarioNombre || ticketData.usuario || "Desconocido"
+      }</p>`;
+
+      const extraCompras =
+        modoActual === "compras"
+          ? `<p><strong>Total:</strong> $${ticketData.total || 0}</p>`
+          : "";
+
+      const htmlSwal = `
+        ${lineaPrincipal}
+        ${usuarioLinea}
+        <p><strong>Fecha:</strong> ${fechaFormateada}</p>
+        ${extraCompras}
+        ${detalleHTML}
+      `;
+
+      const result = await Swal.fire({
+        title: tituloSwal,
+        html: htmlSwal,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText:
+          modoActual === "entradas" ? "Permitir ingreso" : "Confirmar retiro",
+        cancelButtonText: "Cancelar",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        width: 520,
+      });
+
+      if (!result.isConfirmed) {
+        ticketsProcesados.delete(ticketId);
+        return resetMensajesLuego();
+      }
+
+      // ------------------------------------------------
+      // MARCAR COMO USADO
+      // ------------------------------------------------
+      if (modoActual === "entradas") {
+        await updateDoc(refActual, { usado: true });
+        qrResultado.textContent = "✅ Entrada válida - Permitido el ingreso";
+        qrInfo.textContent = `Evento: ${
+          ticketData.nombreEvento || ticketData.nombre || "Sin nombre"
+        } | Usuario: ${
+          ticketData.usuarioNombre || ticketData.usuario || "Desconocido"
+        }`;
+      } else {
+        await updateDoc(refActual, {
+          usado: true,
+          estado: "retirado",
+        });
+        qrResultado.textContent = "✅ Pedido válido - Entregar al cliente";
+        qrInfo.textContent = `Pedido #${
+          ticketData.numeroPedido || ticketId
+        } | Usuario: ${
+          ticketData.usuarioNombre || ticketData.usuario || "Desconocido"
+        } | Total: $${ticketData.total || 0}`;
+
+        // Si tenés una función global para refrescar la lista de pedidos:
+        if (typeof mostrarPedidosConfirmados === "function") {
+          mostrarPedidosConfirmados(ticketData.usuarioId);
+        }
+      }
+
+      qrResultado.className = "qr-resultado valid";
+    }
+
+    // --------------------------------------------------
+    // 2) NO ENCONTRADO EN COLECCIÓN ACTUAL PERO SÍ EN LA OTRA
+    // --------------------------------------------------
+    else if (snapOtra.exists()) {
       const ticketData = snapOtra.data();
-      console.log("Ticket encontrado en otra colección:", ticketData);
+      console.log("Ticket en la otra colección:", coleccionOtra, ticketData);
 
       qrResultado.textContent =
-        modo === "entradas"
+        modoActual === "entradas"
           ? "⚠ Este QR corresponde a un pedido"
           : "⚠ Este QR corresponde a una entrada";
       qrResultado.className = "qr-resultado other";
 
       await Swal.fire({
         title:
-          modo === "entradas"
-            ? "QR Invalido: es un pedido."
-            : "QR Invalido: es una Entrada.",
+          modoActual === "entradas"
+            ? "QR inválido en este modo"
+            : "QR inválido en este modo",
         html: `<p style="color:orange; font-size:0.9em">
-                Este QR corresponde a ${
-                  modo === "entradas" ? "un pedido" : "una entrada"
-                } y no puede ser confirmado en este modo.
+                Este QR corresponde a la colección <b>${coleccionOtra}</b> y no puede ser confirmado en el modo actual.
               </p>`,
         icon: "info",
         confirmButtonText: "Aceptar",
         allowOutsideClick: false,
         allowEscapeKey: false,
       });
-    } else {
-      console.log("Ticket no encontrado en ninguna colección");
-      qrResultado.textContent =
-        modo === "entradas" ? "❌ Entrada inválida" : "❌ Pedido inválido";
-      qrResultado.className = "qr-resultado invalid";
     }
 
-    ticketsProcesados.delete(ticketId);
+    // --------------------------------------------------
+    // 3) NO EXISTE EN NINGUNA COLECCIÓN
+    // --------------------------------------------------
+    else {
+      console.log("Ticket no encontrado en ninguna colección");
+      qrResultado.textContent =
+        modoActual === "entradas"
+          ? "❌ Entrada inválida"
+          : "❌ Pedido inválido";
+      qrResultado.className = "qr-resultado invalid";
+    }
   } catch (err) {
     console.error("Error validando ticket:", err);
     qrResultado.textContent = "Error validando ticket";
     qrResultado.className = "qr-resultado invalid";
+  } finally {
     ticketsProcesados.delete(ticketId);
+    resetMensajesLuego();
   }
+}
 
+// ======================================================
+// 🕒 RESET MENSAJES
+// ======================================================
+function resetMensajesLuego() {
   setTimeout(() => {
     qrResultado.textContent = "Esperando QR...";
     qrResultado.className = "qr-resultado";

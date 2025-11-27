@@ -1163,7 +1163,7 @@ body.qr-body
 
 .lista-pedidos h3
   margin-bottom: 10px
-  font-size: 14px
+  font-size: 12px
   font-weight: 600
   text-align: center
   color: #222
@@ -1178,6 +1178,12 @@ body.qr-body
   position: relative
   cursor: pointer
   transition: 0.2s ease
+  min-height: 150px
+  display: flex
+  flex-direction: column
+  justify-content: space-between
+
+
 
   &:hover
     background-color: #f0f0f0
@@ -1208,8 +1214,7 @@ body.qr-body
 // Botón "Ver QR"
 .pedido-item .ver-qr
   position: absolute
-  right: 6px
-  bottom: 6px
+  right: 10px
   background: #000
   color: #fff
   font-weight: 600
@@ -1235,7 +1240,7 @@ body.qr-body
 
 
 // BOTÓN CONFIRMAR (Azul profesional)
-.swal2-popup .swal-btn-confirm
+.swal2-popup .swal-btn-confirm, .swal2-confirm
   background: #1e88e5 !important      // azul profesional
   color: #fff !important
   padding: 10px 24px !important
@@ -1250,7 +1255,9 @@ body.qr-body
     background: #1565c0 !important    // azul más fuerte
     transform: scale(1.05) !important
 
-
+.swal-input
+  background: #1e88e5 !important
+  width: 70px
 .btn-swal-estilo 
   background: #1e88e5 !important
   color: #fff !important
@@ -1281,6 +1288,18 @@ body.qr-body
 
   &:hover
     background: #222 !important
+    transform: scale(1.05) !important
+
+.btn-deny
+  background: #424242 !important
+  color: #fff !important
+  padding: 10px 24px !important
+  border-radius: 8px !important
+  font-weight: 600 !important
+  transition: 0.2s ease !important
+
+  &:hover
+    background: #212121 !important
     transform: scale(1.05) !important
 
 // BOTONES + y -
@@ -1603,4 +1622,40 @@ body.qr-body
 
   &:hover
     box-shadow: 0 0 12px rgba(20, 168, 226, .7)
+
+// QR BOTONES WHATSAPP Y PDF DESCARGA
+
+.botones-ticket
+  margin-top: 15px
+  display: flex
+  justify-content: center
+  gap: 12px
+
+  button
+    display: flex
+    align-items: center
+    gap: 8px
+    padding: 8px 14px
+    border-radius: 8px
+    background: white
+    font-weight: 700
+    cursor: pointer
+    transition: transform .12s ease, opacity .12s ease
+    img
+      width: 36px
+      height: 36px
+
+    &:hover
+      transform: scale(1.05)
+      opacity: .85
+
+  .btn-pdf
+    color: #d32f2f
+    border: 1px solid #d32f2f
+
+  .btn-wsp
+    color: #58c07e
+    border: 1px solid #25d366
+
+
 

@@ -107,7 +107,12 @@ export async function pedirEntrada(eventoId, e) {
         text: "Solo usuarios con Google pueden comprar entradas.",
         icon: "warning",
         confirmButtonText: "Iniciar sesión",
-        customClass: { confirmButton: "btn btn-dark" },
+        showCancelButton: false, // 🔥 obligatorio
+        reverseButtons: false, // 🔥 evitar invertir el solo botón
+        customClass: {
+          popup: "swal-popup-custom",
+          confirmButton: "swal-btn-confirm", // 🔥 aplica el azul
+        },
         buttonsStyling: false,
       });
     }
@@ -309,8 +314,8 @@ export async function pedirEntrada(eventoId, e) {
       cancelButtonText: "Salir",
       customClass: {
         confirmButton: "btn btn-success",
-        denyButton: "btn btn-dark",
-        cancelButton: "btn btn-secondary",
+        cancelButton: "btn btn-dark",
+        denyButton: "btn btn-deny",
       },
       buttonsStyling: false,
     });

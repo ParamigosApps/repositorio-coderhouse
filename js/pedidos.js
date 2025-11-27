@@ -1,32 +1,26 @@
-// ======================================================
-// P E D I D O S   –   SISTEMA CENTRALIZADO
-// ======================================================
-
+// /js/pedidos.js
 import { db, auth } from "./firebase.js";
 import {
   collection,
-  addDoc,
   getDocs,
   deleteDoc,
   doc,
   query,
   where,
-  updateDoc,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
-import { generarCompraQr } from "./generarQr.js";
-import { mostrarMensaje } from "./utils.js";
-import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
+import { mostrarMensaje, formatearFecha } from "./utils.js";
+import { devolverStock, mostrarQrCompra } from "./compras.js";
 
-// ======================================================
-// 1. HELPERS INTERNOS
-// ======================================================
+const expiradosNotificados = new Set();
 
-// Obtiene todos los pedidos de un usuario
-async function _traerPedidosRaw(usuarioId) {
+/* -------------------------------------------------------
+   📌 TRAER TODOS LOS PEDIDOS DEL USUARIO
+------------------------------------------------------- */
+async function traerPedidosRaw(usuarioId) {
   const pedidos = [];
-
   const snap = await getDocs(collection(db, "compras"));
+
   snap.forEach((docSnap) => {
     const data = docSnap.data();
     if (data.usuarioId === usuarioId) {
@@ -38,86 +32,9 @@ async function _traerPedidosRaw(usuarioId) {
   return pedidos;
 }
 
-// Cuenta pedidos pendientes del usuario
-async function _contarPendientes(usuarioId) {
-  const q = query(
-    collection(db, "compras"),
-    where("usuarioId", "==", usuarioId),
-    where("estado", "==", "pendiente")
-  );
-
-  const snap = await getDocs(q);
-  return snap.size;
-}
-
-// ======================================================
-// 2. REGLAS DEL SISTEMA
-// ======================================================
-
-// 🔥 Bloquea al usuario si ya tiene 3 pedidos pendientes
-export async function verificarLimitePedidosPendientes(usuarioId) {
-  const pendientes = await _contarPendientes(usuarioId);
-  return pendientes >= 3;
-}
-
-// ======================================================
-// 3. CREAR PEDIDO
-// ======================================================
-export async function crearPedido({
-  carrito,
-  total,
-  lugar = "Tienda",
-  pagado,
-}) {
-  try {
-    const usuarioId = auth.currentUser?.uid;
-    const usuarioNombre = auth.currentUser?.displayName || "Usuario";
-
-    if (!usuarioId) throw new Error("Usuario no logueado");
-
-    // ------------------------------------------------------
-    // 🔥 LÍMITE DE 3 PENDIENTES
-    // ------------------------------------------------------
-    const tieneLimite = await verificarLimitePedidosPendientes(usuarioId);
-
-    if (!pagado && tieneLimite) {
-      return null; // no mostrar ningún Swal acá
-    }
-
-    // ------------------------------------------------------
-    // ✔ CREAR PEDIDO
-    // ------------------------------------------------------
-    const docRef = await addDoc(collection(db, "compras"), {
-      usuarioId,
-      usuarioNombre,
-      items: carrito,
-      total,
-      fecha: new Date().toISOString(),
-      estado: pagado ? "pagado" : "pendiente",
-      pagado,
-      lugar,
-      usado: false,
-    });
-
-    // Guardar ticketId
-    await updateDoc(doc(db, "compras", docRef.id), {
-      ticketId: docRef.id,
-    });
-
-    return docRef.id;
-  } catch (err) {
-    console.error("❌ Error creando pedido:", err);
-    return null;
-  }
-}
-
-// ======================================================
-// 4. OBTENER PEDIDOS
-// ======================================================
-export async function obtenerPedidosPorUsuario(usuarioId) {
-  return await _traerPedidosRaw(usuarioId);
-}
-
+/* -------------------------------------------------------
+   📌 OBTENER PEDIDOS POR ESTADO (para otros módulos)
+------------------------------------------------------- */
 export async function obtenerPedidosPorEstado(usuarioId, estado) {
   try {
     const q = query(
@@ -125,9 +42,7 @@ export async function obtenerPedidosPorEstado(usuarioId, estado) {
       where("usuarioId", "==", usuarioId),
       where("estado", "==", estado)
     );
-
     const snap = await getDocs(q);
-
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (err) {
     console.error("❌ Error obteniendo pedidos:", err);
@@ -135,9 +50,9 @@ export async function obtenerPedidosPorEstado(usuarioId, estado) {
   }
 }
 
-// ======================================================
-// 5. ELIMINAR PEDIDO
-// ======================================================
+/* -------------------------------------------------------
+   📌 ELIMINAR PEDIDO
+------------------------------------------------------- */
 export async function eliminarPedido(pedidoId) {
   try {
     await deleteDoc(doc(db, "compras", pedidoId));
@@ -148,9 +63,9 @@ export async function eliminarPedido(pedidoId) {
   }
 }
 
-// ======================================================
-// 6. MOSTRAR PEDIDOS EN LA UI
-// ======================================================
+/* -------------------------------------------------------
+   📌 MOSTRAR TODOS LOS PEDIDOS EN LA UI
+------------------------------------------------------- */
 export async function mostrarTodosLosPedidos(usuarioId) {
   if (!usuarioId) return;
 
@@ -160,71 +75,151 @@ export async function mostrarTodosLosPedidos(usuarioId) {
 
   if (!contPendientes && !contPagos && !contRetirados) return;
 
-  const pedidos = await obtenerPedidosPorUsuario(usuarioId);
+  const pedidos = await traerPedidosRaw(usuarioId);
 
   const pendientes = pedidos.filter((p) => p.estado === "pendiente");
   const pagados = pedidos.filter((p) => p.estado === "pagado");
   const retirados = pedidos.filter((p) => p.estado === "retirado");
 
-  mostrarPedidosUI(contPendientes, pendientes);
-  mostrarPedidosUI(contPagos, pagados);
-  mostrarPedidosUI(contRetirados, retirados);
+  renderPedidos(contPendientes, pendientes);
+  renderPedidos(contPagos, pagados);
+  renderPedidos(contRetirados, retirados);
 }
 
-function mostrarPedidosUI(contenedor, pedidos) {
+/* -------------------------------------------------------
+   📌 RENDERIZAR UNA LISTA (por estado)
+------------------------------------------------------- */
+function renderPedidos(contenedor, pedidos) {
   if (!contenedor) return;
 
   contenedor.innerHTML = "";
-  let estado = "";
-
-  if (contenedor.id === "listaPedidosPendientes") estado = "Pendientes";
-  else if (contenedor.id === "listaPedidosPagos") estado = "Pagados";
-  else if (contenedor.id === "listaPedidosRetirados") estado = "Retirados";
 
   if (pedidos.length === 0) {
-    contenedor.innerHTML = `<p class="text-muted text-center">No tienes pedidos <strong>${estado}</strong></p>`;
+    contenedor.innerHTML =
+      "<p class='text-muted text-center'>No tienes pedidos en este estado.</p>";
     return;
   }
 
   pedidos.forEach((pedido) => {
-    const div = document.createElement("div");
-    div.className = "pedido-item p-2 mb-2 rounded position-relative";
-    div.style.backgroundColor =
-      pedido.estado === "pagado"
-        ? "#c1f1cdff"
-        : pedido.estado === "pendiente"
-        ? "#f8e8b3ff"
-        : "#bcb8b9bb";
+    renderPedido(contenedor, pedido);
+  });
+}
 
-    const id = pedido.id;
+/* -------------------------------------------------------
+   📌 RENDERIZAR 1 PEDIDO + EXPIRACIÓN
+------------------------------------------------------- */
+function renderPedido(contenedor, pedido) {
+  const div = document.createElement("div");
+  div.className = "pedido-item p-2 mb-2 rounded position-relative";
+  div.style.backgroundColor =
+    pedido.estado === "pagado"
+      ? "#c1f1cdff"
+      : pedido.estado === "pendiente"
+      ? "#f8e8b3ff"
+      : "#bcb8b9bb";
 
-    // Contador solo si es PENDIENTE
-    let contadorHtml = "";
-    if (pedido.estado === "pendiente") {
-      contadorHtml = `<p id="exp-${id}" class="fw-bold text-danger">⏳ Calculando...</p>`;
+  const id = pedido.id;
+
+  let contadorHtml = "";
+  if (pedido.estado === "pendiente") {
+    contadorHtml = `<p id="exp-${id}" class="fw-bold text-danger mt-1">⏳ Calculando...</p>`;
+  }
+
+  div.innerHTML = `
+
+
+  <div style="
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid #ddd;
+    padding-bottom:6px;
+  ">
+    <strong style="font-size:18px; letter-spacing:0.5px;">
+      PEDIDO #${pedido.numeroPedido}
+    </strong>
+
+    ${
+      pedido.estado === "pendiente"
+        ? `<button class="btn btn-sm btn-danger btn-eliminar"
+             style="font-size:12px; padding:4px 10px;">
+             X
+           </button>`
+        : ``
     }
+  </div>
 
-    div.innerHTML = `
-      <strong>ID:</strong> ${pedido.id}<br>
-      <strong>Total:</strong> $${pedido.total}<br>
-      <strong>Fecha:</strong> ${pedido.fecha}<br>
-      <strong>Estado:</strong> ${pedido.estado}<br>
 
-      ${contadorHtml}
+  <!-- BLOQUE INFO -->
+  <div style="font-size:14px; line-height:1.35; color:#333; margin-top:6px;">
 
+    <!-- Total + Fecha pegados -->
+    <p style="margin-bottom: 4px;"><strong>Total:</strong> $${pedido.total}</p>
+
+    <p style="margin:0;">
+      <strong>Fecha:</strong>
       ${
-        pedido.estado !== "retirado"
-          ? `<button class="btn btn-sm btn-dark mt-2 ver-qr" ${
-              pedido.estado === "pendiente" ? "disabled" : ""
-            }>Ver QR</button>`
-          : ``
+        pedido.fecha?.toDate
+          ? formatearFecha(pedido.fecha.toDate())
+          : formatearFecha(pedido.fecha)
       }
+    </p>
 
-      <button class="btn btn-sm btn-danger position-absolute top-0 end-0">X</button>
-    `;
+    <!-- Estado un poquito más abajo -->
+    <p style="margin:6px 0 0 0;">
+      <strong>Estado:</strong>
+      <span style="
+        background:${
+          pedido.estado === "pagado"
+            ? "#42b14dff"
+            : pedido.estado === "pendiente"
+            ? "#fac834ff"
+            : "#ddd"
+        };
+        padding:3px 8px;
+        border-radius:6px;
+        font-size:12px;
+        font-weight:600;
+        color:#333;
+      ">
+        ${pedido.estado.toUpperCase()}
+      </span>
+    </p>
 
-    // === ELIMINAR ===
-    div.querySelector(".btn-danger").addEventListener("click", async (e) => {
+  </div>
+
+
+  <!-- BLOQUE PIE: Caduca + Ver QR alineados -->
+<div style="
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:10px;
+  min-height:22px;  /* fuerza mismo alto siempre */
+">
+  ${
+    pedido.estado === "pendiente"
+      ? `<p id="exp-${pedido.id}"
+           style="font-weight:bold; color:#c40b1d; margin:0; font-size:16px;">
+           ⏳ Calculando...
+         </p>`
+      : `<span style="visibility:hidden;">placeholder</span>`
+  }
+
+  <button class="btn btn-dark btn-sm ver-qr"
+    style="font-size:12px; padding:5px 14px; margin-bottom: 2px">
+    Ver QR
+  </button>
+</div>
+
+
+`;
+
+  // ---- ELIMINAR MANUAL ----
+  const btnEliminar = div.querySelector(".btn-eliminar");
+
+  if (btnEliminar) {
+    btnEliminar.addEventListener("click", async (e) => {
       e.stopPropagation();
 
       const result = await Swal.fire({
@@ -244,118 +239,128 @@ function mostrarPedidosUI(contenedor, pedidos) {
       if (!result.isConfirmed) return;
 
       await eliminarPedido(pedido.id);
+      await devolverStock(pedido.items);
       div.remove();
 
       mostrarTodosLosPedidos(auth.currentUser.uid);
       actualizarContadoresPedidos(auth.currentUser.uid);
     });
+  }
 
-    // === VER QR ===
-    const btnQr = div.querySelector(".ver-qr");
-    if (btnQr) {
-      btnQr.addEventListener("click", (e) => {
-        e.stopPropagation();
-        generarCompraQr({
-          carrito: pedido.items,
-          usuarioId: pedido.usuarioId,
-          nombreUsuario: pedido.usuarioNombre,
-          lugar: pedido.lugar,
-          total: pedido.total,
-          ticketId: pedido.id,
-          fecha: pedido.fecha,
-          modoLectura: true,
-        });
+  // ---- VER QR ----
+  const btnQr = div.querySelector(".ver-qr");
+  if (btnQr) {
+    btnQr.addEventListener("click", (e) => {
+      e.stopPropagation();
+      mostrarQrCompra({
+        carrito: pedido.items,
+        total: pedido.total,
+        ticketId: pedido.id,
+        numeroPedido: pedido.numeroPedido,
+        lugar: pedido.lugar,
+        estado: pedido.estado,
       });
-    }
+    });
+  }
 
-    contenedor.appendChild(div);
+  contenedor.appendChild(div);
 
-    // ======================================================
-    //  ⏳ CONTADOR CON TIMESTAMP REAL + AUTO-REMOVE
-    // ======================================================
-    if (pedido.estado === "pendiente") {
-      const label = document.getElementById(`exp-${id}`);
-
-      // ⛔ USAMOS EL TIMESTAMP REAL
-      const fechaCreacion = pedido.creadoEn?.toDate?.()
-        ? pedido.creadoEn.toDate()
-        : new Date();
-
-      const expiraEnMs = fechaCreacion.getTime() + 15 * 60 * 1000;
-
-      let expiradoMostrado = false;
-      let timeoutAutoRemove = null;
-
-      const interval = setInterval(() => {
-        const ahora = Date.now();
-        const diff = expiraEnMs - ahora;
-
-        // ------------ PEDIDO EXPIRADO ------------
-        if (diff <= 0) {
-          clearInterval(interval);
-
-          if (!expiradoMostrado) {
-            expiradoMostrado = true;
-
-            if (label) {
-              label.textContent = "⛔ Expirado";
-              label.classList.remove("text-warning");
-              label.classList.add("text-danger");
-            }
-
-            div.style.opacity = "0.5";
-
-            mostrarMensaje(
-              `⚠️ Tu pedido #${id} venció y fue cancelado.`,
-              "#dc3545",
-              "#fff"
-            );
-
-            // borrar de la UI tras 60s
-            timeoutAutoRemove = setTimeout(() => {
-              div.remove();
-            }, 60 * 1000);
-          }
-          return;
-        }
-
-        // ------------ CONTADOR VÁLIDO (ya NO NaN) ------------
-        const min = Math.floor(diff / 60000);
-        const sec = Math.floor((diff % 60000) / 1000);
-
-        if (label) {
-          label.textContent = `⏳ Expira en: ${String(min).padStart(
-            2,
-            "0"
-          )}:${String(sec).padStart(2, "0")}`;
-        }
-      }, 1000);
-    }
-  });
+  // ---- EXPIRACIÓN AUTOMÁTICA ----
+  if (pedido.estado === "pendiente") iniciarExpiracion(div, pedido);
 }
 
+/* -------------------------------------------------------
+   ⏳ EXPIRAR PEDIDO PENDIENTE AUTOMÁTICAMENTE
+------------------------------------------------------- */
+function iniciarExpiracion(div, pedido) {
+  const id = pedido.id;
+  const label = document.getElementById(`exp-${id}`);
+  const btnQr = div.querySelector(".ver-qr");
+
+  const fechaCreacion = pedido.creadoEn?.toDate?.()
+    ? pedido.creadoEn.toDate()
+    : new Date(pedido.fecha);
+
+  const expiraEnMs = fechaCreacion.getTime() + 15 * 60 * 1000;
+
+  const interval = setInterval(async () => {
+    const ahora = Date.now();
+    const diff = expiraEnMs - ahora;
+
+    if (diff <= 0) {
+      clearInterval(interval);
+
+      if (!expiradosNotificados.has(id)) {
+        expiradosNotificados.add(id);
+
+        if (label) {
+          label.textContent = "⛔ Expirado";
+          label.classList.remove("text-warning");
+          label.classList.add("text-danger");
+          label.style.opacity = "0.9";
+          label.style.fontWeight = "bold";
+        }
+
+        if (btnQr) {
+          btnQr.disabled = true;
+          btnQr.style.opacity = "0.5";
+          btnQr.style.cursor = "not-allowed";
+        }
+
+        div.style.filter = "grayscale(70%)";
+
+        mostrarMensaje(`⚠ Caducó 1 pedido pendiente.`, "#c40b1dff", "#fff");
+
+        try {
+          await devolverStock(pedido.items);
+          await eliminarPedido(id);
+          div.remove();
+          actualizarContadoresPedidos(auth.currentUser.uid);
+        } catch (err) {
+          console.error("❌ Error al expirar pedido:", err);
+        }
+      }
+
+      return;
+    }
+
+    const min = Math.floor(diff / 60000);
+    const sec = Math.floor((diff % 60000) / 1000);
+
+    if (label) {
+      label.textContent = `⏳ Expira en: ${String(min).padStart(
+        2,
+        "0"
+      )}:${String(sec).padStart(2, "0")}`;
+    }
+  }, 1000);
+}
 // ======================================================
-// 7. CONTADORES
+// 7. CONTADORES — Mostrar cantidad de pedidos por estado
 // ======================================================
 export async function actualizarContadoresPedidos(usuarioId) {
   if (!usuarioId) return;
 
   const pagosEl = document.getElementById("contadorPedidosPagos");
   const pendientesEl = document.getElementById("contadorPedidosPendientes");
+  const retiradosEl = document.getElementById("contadorPedidosRetirados");
 
+  // Obtener pedidos por estado
   const pagos = await obtenerPedidosPorEstado(usuarioId, "pagado");
   const pendientes = await obtenerPedidosPorEstado(usuarioId, "pendiente");
+  const retirados = await obtenerPedidosPorEstado(usuarioId, "retirado");
 
+  // Pintar valores en la UI
   if (pagosEl) pagosEl.textContent = pagos.length;
   if (pendientesEl) pendientesEl.textContent = pendientes.length;
+  if (retiradosEl) retiradosEl.textContent = retirados.length;
 }
 
-// ======================================================
-// 8. LISTENER DE AUTH
-// ======================================================
+/* -------------------------------------------------------
+   📌 LISTENER DE AUTH
+------------------------------------------------------- */
 auth.onAuthStateChanged((user) => {
   if (user) {
     mostrarTodosLosPedidos(user.uid);
-    actualizarContadoresPedidos(user.uid);
   }
 });

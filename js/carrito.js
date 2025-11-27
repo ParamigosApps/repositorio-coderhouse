@@ -1,9 +1,12 @@
 // /js/carrito.js
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
-import { mostrarTodosLosPedidos, obtenerPedidosPorEstado } from "./pedidos.js";
 import { auth } from "./firebase.js";
+import { crearPedido } from "./compras.js";
+import { mostrarTodosLosPedidos, obtenerPedidosPorEstado } from "./pedidos.js";
 
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+// DOM
 const carritoItems = document.getElementById("carritoItemsMensaje");
 const contadorCarrito = document.getElementById("carritoContador");
 const montoTotalCarrito = document.getElementById("MontoTotalCarrito");
@@ -13,7 +16,13 @@ const carritoPanel = document.getElementById("carritoPanel");
 const carritoOverlay = document.getElementById("carritoOverlay");
 const cerrarCarrito = document.getElementById("cerrarCarrito");
 
-// ================= FUNCIONES =================
+// Hacerlos accesibles desde otros módulos (cargarCatalogo.js)
+window.carritoPanel = carritoPanel;
+window.carritoOverlay = carritoOverlay;
+
+/* -------------------------------------------------------
+   📌 CALCULAR TOTAL
+------------------------------------------------------- */
 export function calcularTotal() {
   return carrito.reduce((total, producto) => {
     const precio = Number(
@@ -23,8 +32,12 @@ export function calcularTotal() {
   }, 0);
 }
 
+/* -------------------------------------------------------
+   📌 MOSTRAR CARRITO
+------------------------------------------------------- */
 export async function mostrarCarrito() {
   if (!carritoItems) return;
+
   carritoItems.innerHTML = "";
 
   if (carrito.length === 0) {
@@ -32,18 +45,16 @@ export async function mostrarCarrito() {
     if (montoTotalCarrito) montoTotalCarrito.textContent = "$0";
     if (btnFinalizarCompra) btnFinalizarCompra.style.display = "none";
 
-    if (!auth.currentUser) {
-      console.warn("⚠ No hay usuario logueado todavía");
-      return;
-    }
-    const uid = auth.currentUser.uid;
+    // Mensaje extra si tiene pedidos QR generados
+    if (auth.currentUser) {
+      const uid = auth.currentUser.uid;
+      const resultado = await qrPendientesEnCarrito(uid);
 
-    const resultado = await qrPendientesEnCarrito(uid);
-
-    if (resultado) {
-      if (resultado.qrGenerados <= 1)
+      if (resultado && resultado.qrGenerados > 0) {
         carritoItems.innerHTML = `Tu carrito está vacío 🛒. ¡Tienes pedidos QR generados!`;
+      }
     }
+
     return;
   }
 
@@ -66,10 +77,9 @@ export async function mostrarCarrito() {
       <td class="text-center subtotal fw-bold">$${total}</td>
       <td class="text-center acciones">
         <div class="btn-group">
-  <button class="btn btn-sm btn-resta" data-index="${index}">-</button>
-  <button class="btn btn-sm btn-success btn-suma" data-index="${index}">+</button>
-</div>
-
+          <button class="btn btn-sm btn-resta" data-index="${index}">-</button>
+          <button class="btn btn-sm btn-success btn-suma" data-index="${index}">+</button>
+        </div>
       </td>
     `;
     carritoItems.appendChild(row);
@@ -80,6 +90,9 @@ export async function mostrarCarrito() {
     btnFinalizarCompra.style.display = carrito.length > 0 ? "block" : "none";
 }
 
+/* -------------------------------------------------------
+   📌 ACTUALIZAR BURBUJA DEL CARRITO
+------------------------------------------------------- */
 export function actualizarCarritoVisual() {
   carrito = JSON.parse(localStorage.getItem("carrito")) || [];
   if (contadorCarrito) {
@@ -90,40 +103,43 @@ export function actualizarCarritoVisual() {
   }
 }
 
-// ==================== AGREGAR PRODUCTO ====================
+/* -------------------------------------------------------
+   📌 AGREGAR PRODUCTO DESDE EL CATÁLOGO
+   👉 Respeta stock REAL (producto.stock)
+------------------------------------------------------- */
 export function agregarProducto(producto) {
   if (!producto) return;
 
-  const productoExistente = carrito.find((p) => p.id === producto.id);
-  const claveStock = `stock-${producto.id}`;
-  let stockActual = JSON.parse(localStorage.getItem(claveStock)) || 0;
-
+  const existente = carrito.find((p) => p.id === producto.id);
   const cantidadAAgregar = producto.enCarrito || 1;
+  const stockDisponible = producto.stock ?? Infinity;
+  const cantidadActual = existente ? existente.enCarrito : 0;
 
-  if (cantidadAAgregar > stockActual) {
+  if (cantidadActual + cantidadAAgregar > stockDisponible) {
     Swal.fire(
       "No hay suficiente stock",
-      `Solo quedan ${stockActual} unidades de ${producto.nombre}`,
+      `Solo quedan ${stockDisponible - cantidadActual} unidades de ${
+        producto.nombre
+      }`,
       "error"
     );
     return;
   }
 
-  if (productoExistente) {
-    productoExistente.enCarrito += cantidadAAgregar;
+  if (existente) {
+    existente.enCarrito += cantidadAAgregar;
   } else {
     carrito.push({ ...producto });
   }
 
-  stockActual -= cantidadAAgregar;
   localStorage.setItem("carrito", JSON.stringify(carrito));
-  localStorage.setItem(claveStock, JSON.stringify(stockActual));
-
   mostrarCarrito();
   actualizarCarritoVisual();
 }
 
-// ==================== SUMAR / QUITAR UNIDADES ====================
+/* -------------------------------------------------------
+   📌 SUMAR / RESTAR DESDE LA TABLA
+------------------------------------------------------- */
 if (carritoItems) {
   carritoItems.addEventListener("click", (e) => {
     const index = Number(e.target.dataset.index);
@@ -132,10 +148,7 @@ if (carritoItems) {
     const producto = carrito[index];
     if (!producto) return;
 
-    const claveStock = `stock-${producto.id}`;
-    let stockActual = JSON.parse(localStorage.getItem(claveStock)) || 0;
-
-    // ---- ELIMINAR o QUITAR UNA UNIDAD ----
+    // ---- RESTAR ----
     if (e.target.classList.contains("btn-resta")) {
       if (producto.enCarrito === 1) {
         carrito.splice(index, 1);
@@ -146,7 +159,7 @@ if (carritoItems) {
           gravity: "bottom",
           position: "center",
           style: {
-            background: "#ee0202db", // 🔥 SIEMPRE USAR "background"
+            background: "#ee0202db",
             width: "80%",
             margin: "0 auto",
             textAlign: "center",
@@ -161,29 +174,27 @@ if (carritoItems) {
           gravity: "bottom",
           position: "center",
           style: {
-            background: "#ee0202db", // 🔥 mismo atributo
+            background: "#ee0202db",
             width: "80%",
             margin: "0 auto",
             textAlign: "center",
           },
         }).showToast();
       }
-
-      stockActual += 1;
     }
 
-    // ---- AGREGAR UNA UNIDAD ----
-    else if (e.target.classList.contains("btn-suma")) {
-      if (stockActual <= 0) {
-        return Swal.fire(
+    // ---- SUMAR ----
+    if (e.target.classList.contains("btn-suma")) {
+      if (producto.enCarrito >= (producto.stock ?? Infinity)) {
+        Swal.fire(
           "No hay más stock",
           "No quedan más unidades de " + producto.nombre,
           "error"
         );
+        return;
       }
 
       producto.enCarrito += 1;
-      stockActual -= 1;
 
       Toastify({
         text: `Añadiste una unidad más de ${producto.nombre}`,
@@ -191,7 +202,7 @@ if (carritoItems) {
         gravity: "bottom",
         position: "center",
         style: {
-          background: "#1e88e5", // 💙 tu color azul
+          background: "#1e88e5",
           width: "80%",
           margin: "0 auto",
           textAlign: "center",
@@ -199,53 +210,38 @@ if (carritoItems) {
       }).showToast();
     }
 
-    // Guardar cambios
-    localStorage.setItem(claveStock, JSON.stringify(stockActual));
     localStorage.setItem("carrito", JSON.stringify(carrito));
-
     mostrarCarrito();
     actualizarCarritoVisual();
   });
 }
 
-// ================= UI carrito panel =================
+/* -------------------------------------------------------
+   📌 ABRIR / CERRAR PANEL DE CARRITO
+------------------------------------------------------- */
 export function abrirCarrito() {
+  if (!carritoPanel || !carritoOverlay) return;
   carritoPanel.classList.add("open");
   carritoOverlay.hidden = false;
 }
 
 export function cerrarPanel() {
+  if (!carritoPanel || !carritoOverlay) return;
   carritoPanel.classList.remove("open");
   carritoOverlay.hidden = true;
 }
 
-// ================= EVENTOS =================
 carritoIcono?.addEventListener("click", abrirCarrito);
 carritoOverlay?.addEventListener("click", cerrarPanel);
 cerrarCarrito?.addEventListener("click", cerrarPanel);
 
-// ================= INICIALIZAR =================
-export { carrito };
-document.addEventListener("DOMContentLoaded", async () => {
-  if (auth.currentUser) {
-    await mostrarTodosLosPedidos(auth.currentUser.uid);
-  }
-
-  auth.onAuthStateChanged(async (user) => {
-    if (user) {
-      await mostrarTodosLosPedidos(user.uid);
-      await mostrarCarrito(user.uid);
-    }
-  });
-
-  mostrarCarrito();
-  actualizarCarritoVisual();
-});
-
+/* -------------------------------------------------------
+   📌 CONSULTAR SI TIENE QR GENERADOS (pagados o pendientes)
+------------------------------------------------------- */
 export async function qrPendientesEnCarrito(usuarioId) {
   if (!usuarioId) {
     console.warn("❌ qrPendientesEnCarrito: usuarioId es undefined");
-    return { pagos: 0, pendientes: 0 };
+    return { qrGenerados: 0 };
   }
 
   try {
@@ -255,12 +251,27 @@ export async function qrPendientesEnCarrito(usuarioId) {
       "pendiente"
     );
 
-    let valor = pedidosPagos.length + pedidosPendientes.length;
-    return {
-      qrGenerados: valor,
-    };
+    const valor = pedidosPagos.length + pedidosPendientes.length;
+    return { qrGenerados: valor };
   } catch (err) {
     console.error("❌ Error en qrPendientesEnCarrito:", err);
-    return { pagos: 0, pendientes: 0 };
+    return { qrGenerados: 0 };
   }
 }
+
+/* -------------------------------------------------------
+   📌 INICIALIZAR
+------------------------------------------------------- */
+export { carrito };
+
+document.addEventListener("DOMContentLoaded", () => {
+  mostrarCarrito();
+  actualizarCarritoVisual();
+
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      await mostrarTodosLosPedidos(user.uid);
+      await mostrarCarrito();
+    }
+  });
+});

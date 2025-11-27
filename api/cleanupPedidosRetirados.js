@@ -42,21 +42,20 @@ export default async function handler(req, res) {
         : new Date(pedido.fecha).getTime();
 
       if (ahora - creadoEn >= DOCE_HORAS) {
+        console.log("🗑 Eliminando retirado:", docSnap.id);
+
+        // Eliminación directa (NO se necesita notificación)
         await db.collection("compras").doc(docSnap.id).delete();
         eliminados++;
       }
     }
 
-    // 🔥 Registrar log
-    await db
-      .collection("logsCron")
-      .doc(`${new Date().toISOString()}_retirados`)
-      .set({
-        tipo: "retirados",
-        timestamp: new Date().toISOString(),
-        eliminados,
-        detalle: `Eliminados ${eliminados} pedidos retirados`,
-      });
+    // 📄 Log
+    await db.collection("logsCron").add({
+      tipo: "retirados",
+      timestamp: new Date().toISOString(),
+      eliminados,
+    });
 
     return res.status(200).json({
       ok: true,

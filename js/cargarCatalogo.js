@@ -5,7 +5,9 @@ import {
   collection,
   getDocs,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
+
 import {
   agregarProducto,
   mostrarCarrito,
@@ -14,30 +16,24 @@ import {
 
 const catalogoContainer = document.getElementById("catalogoContainer");
 let productos = []; // para el filtrado
+let catalogoVisible = false; // 🔥 NUEVO — controla visibilidad
 
+// ======================================================
+// 🛒 PRODUCTO — stock REAL desde Firebase (colección: productos)
+// ======================================================
 class Producto {
-  constructor(
-    id,
-    imgSrc,
-    nombre,
-    descripcion,
-    precio,
-    categoria,
-    destacado = false,
-    stock
-  ) {
+  constructor(id, data) {
     this.id = id;
-    this.imgSrc = imgSrc;
-    this.nombre = nombre;
-    this.descripcion = descripcion;
-    this.precio = precio;
-    this.categoria = categoria;
-    this.destacado = destacado;
-    this.enCarrito = 1;
+    this.imgSrc = data.imagen || "/img/default-product.png";
+    this.nombre = data.nombre || "Sin título";
+    this.descripcion = data.descripcion || "Sin descripción";
+    this.precio = data.precio || 0;
+    this.categoria = data.categoria || "Sin categoría";
+    this.destacado = data.destacado || false;
 
-    const stockGuardado = JSON.parse(localStorage.getItem(`stock-${this.id}`));
-    this.stock = stockGuardado ?? stock ?? 0;
-    localStorage.setItem(`stock-${this.id}`, JSON.stringify(this.stock));
+    this.stock = data.stock ?? 0; // 🔥 STOCK REAL desde Firestore
+
+    this.enCarrito = 1;
   }
 
   renderCard() {
@@ -45,27 +41,25 @@ class Producto {
     div.className = "product-card";
 
     div.innerHTML = `
-    <div class="product-info">
-      <h3 class="product-description-title">${this.nombre}</h3>
-      <p class="product-description">${this.descripcion}</p>
-      <h5 class="product-price">$${this.precio}</h5>
-    </div>
-    <div class="product-image">
-      <img src="${this.imgSrc}" alt="${this.nombre}" />
-    </div>
-  `;
+      <div class="product-info">
+        <h3 class="product-description-title">${this.nombre}</h3>
+        <p class="product-description">${this.descripcion}</p>
+        <h5 class="product-price">$${this.precio}</h5>
+      </div>
+      <div class="product-image">
+        <img src="${this.imgSrc}" alt="${this.nombre}" />
+      </div>
+    `;
 
     if (this.stock <= 0) {
       div.style.backgroundColor = "#d3d3d3";
       div.style.pointerEvents = "none";
-      div.style.opacity = "0.7";
+      div.style.opacity = "0.6";
     } else {
       div.style.cursor = "pointer";
     }
 
-    // ============================================
-    // FUNCIÓN POPUP REUTILIZABLE
-    // ============================================
+    // ========= POPUP REUTILIZABLE =========
     const popupAñadido = (nombre, cantidad) => {
       return Swal.fire({
         title: "¡Producto añadido!",
@@ -84,29 +78,26 @@ class Producto {
       });
     };
 
-    // ============================================
-    // CLICK EN EL PRODUCTO
-    // ============================================
+    // ========= CLICK PARA AGREGAR =========
     div.addEventListener("click", () => {
       if (this.stock <= 0) return;
 
       Swal.fire({
         title: this.nombre,
         html: `
-    <img src="${this.imgSrc}" alt="${this.nombre}" style="width:150px;margin-bottom:10px;" />
-    <p>${this.descripcion}</p>
-    <h5>Precio: $${this.precio}</h5>
+          <img src="${this.imgSrc}" style="width:150px;margin-bottom:10px;" />
+          <p>${this.descripcion}</p>
+          <h5>Precio: $${this.precio}</h5>
 
-    <div style="display:flex; justify-content:center; align-items:center; gap:10px;">
-      <button id="menos" class="btn-swal-cantidad">-</button>
-      <input type="number" id="cantidad" class="swal2-input" value="1" min="1" max="${this.stock}" style="width:60px; text-align:center;">
-      <button id="mas" class="btn-swal-cantidad">+</button>
-    </div>
-  `,
+          <div style="display:flex; justify-content:center; align-items:center; ">
+            <button id="menos" class="btn-swal-cantidad">-</button>
+            <input type="number" id="cantidad" class="swal2-input" value="1" min="1" max="${this.stock}" style="width:70px; text-align:center; margin: 0.5rem;">
+            <button id="mas" class="btn-swal-cantidad">+</button>
+          </div>
+        `,
         showCancelButton: true,
         confirmButtonText: "Agregar al carrito",
         cancelButtonText: "Cancelar",
-
         customClass: {
           popup: "swal-popup-custom",
           confirmButton: "swal-btn-confirm",
@@ -143,20 +134,16 @@ class Producto {
       }).then((result) => {
         if (!result.isConfirmed) return;
 
-        // Cantidad seleccionada
         this.enCarrito = result.value;
 
-        // Guardar en carrito
         agregarProducto(this);
         mostrarCarrito();
         actualizarCarritoVisual();
 
-        // Popup añadido con botones
         popupAñadido(this.nombre, this.enCarrito).then((r) => {
           if (r.isConfirmed) {
             carritoPanel.classList.add("open");
             carritoOverlay.hidden = false;
-            carritoPanel.scrollIntoView({ behavior: "smooth" });
           }
         });
       });
@@ -166,10 +153,13 @@ class Producto {
   }
 }
 
-// ------------------------------ RENDER CATALOGO ------------------------------ //
+// ======================================================
+// 📌 Renderizar catálogo por categoría
+// ======================================================
 export function renderizarCatalogo(filtro = "Todos") {
   catalogoContainer.innerHTML = "";
   const categorias = {};
+
   productos.forEach((p) => {
     if (!categorias[p.categoria]) categorias[p.categoria] = [];
     categorias[p.categoria].push(p);
@@ -194,54 +184,25 @@ export function renderizarCatalogo(filtro = "Todos") {
 
     section.appendChild(titulo);
     section.appendChild(grid);
+
     catalogoContainer.appendChild(section);
   });
 }
 
-// ------------------------------ CARGAR CATALOGO ------------------------------ //
+// ======================================================
+// 📌 Cargar catálogo desde Firebase
+// ======================================================
 export async function cargarCatalogo() {
   if (!catalogoContainer) return;
-  catalogoContainer.classList.add("collapse");
-  catalogoContainer.innerHTML = "<p>Cargando productos...</p>";
+
+  // 🔥 OCULTAR CATÁLOGO AL INICIAR
+  catalogoContainer.style.display = "none";
+  catalogoVisible = false;
+
   try {
     const snapshot = await getDocs(collection(db, "productos"));
-    productos = snapshot.docs.map((doc) => {
-      const data = doc.data();
-      return new Producto(
-        doc.id,
-        data.imagen || "/img/default-product.png",
-        data.nombre || "Sin título",
-        data.descripcion || "Sin descripción",
-        data.precio || 0,
-        data.categoria || "Sin categoría",
-        data.destacado || false,
-        data.stock ?? 0
-      );
-    });
-
+    productos = snapshot.docs.map((doc) => new Producto(doc.id, doc.data()));
     renderizarCatalogo("Todos");
-
-    // Mensaje de filtrado
-    const mensaje = document.getElementById("mensajeFiltro");
-    const botonesCategorias = document.querySelectorAll(".btnCategorias");
-    botonesCategorias.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const categoria = btn.dataset.categoria;
-        renderizarCatalogo(categoria);
-        if (mensaje)
-          mensaje.innerHTML = `🔎 Filtrado por: <strong>${categoria}</strong>`;
-        catalogoContainer.classList.remove("collapse");
-      });
-    });
-
-    const btnCatalogoCompleto = document.getElementById("btnCatalogoCompleto");
-    if (btnCatalogoCompleto) {
-      btnCatalogoCompleto.addEventListener("click", () => {
-        renderizarCatalogo("Todos");
-        if (mensaje)
-          mensaje.innerHTML = `🔎 Mostrando: <strong>Catálogo completo</strong>`;
-      });
-    }
   } catch (error) {
     console.error("Error cargando el catálogo:", error);
     catalogoContainer.innerHTML =
@@ -249,5 +210,54 @@ export async function cargarCatalogo() {
   }
 }
 
-// ------------------------------ INICIO ------------------------------ //
+// ======================================================
+// 🔍 Filtro por categorías + lógica de visibilidad
+// ======================================================
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".btnCategorias");
+  if (!btn) return;
+
+  const categoria = btn.dataset.categoria;
+  const mensaje = document.getElementById("mensajeFiltro");
+
+  // ================================
+  // 📌 1. Si es una categoría normal
+  // ================================
+  if (categoria !== "Todos") {
+    renderizarCatalogo(categoria);
+
+    // Mostrar catálogo siempre
+    catalogoContainer.style.display = "block";
+    catalogoVisible = true;
+
+    if (mensaje)
+      mensaje.innerHTML = `🔎 Filtrado por: <strong>${categoria}</strong>`;
+
+    return;
+  }
+
+  // ================================
+  // 📌 2. Si es "Todos" → TOGGLE
+  // ================================
+  if (!catalogoVisible) {
+    // Estaba oculto → mostrar todo
+    renderizarCatalogo("Todos");
+    catalogoContainer.style.display = "block";
+    catalogoVisible = true;
+
+    if (mensaje)
+      mensaje.innerHTML = `🔎 Mostrando: <strong>Catálogo completo</strong>`;
+  } else {
+    // Estaba visible → ocultar
+    catalogoContainer.style.display = "none";
+    catalogoVisible = false;
+
+    if (mensaje)
+      mensaje.innerHTML = `Puedes filtrar los productos por categorías.`;
+  }
+});
+
+// ======================================================
+// 🚀 Iniciar carga
+// ======================================================
 document.addEventListener("DOMContentLoaded", () => cargarCatalogo());

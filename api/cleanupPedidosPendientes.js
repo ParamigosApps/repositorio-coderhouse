@@ -1,3 +1,4 @@
+// /api/cleanupPedidosPendientes.js
 import admin from "firebase-admin";
 
 if (!admin.apps.length) {
@@ -32,6 +33,7 @@ export default async function handler(req, res) {
       .where("estado", "==", "pendiente")
       .get();
 
+    let pedidosEliminados = [];
     let eliminados = 0;
 
     for (const docSnap of pendientesSnap.docs) {
@@ -42,21 +44,35 @@ export default async function handler(req, res) {
         : new Date(pedido.fecha).getTime();
 
       if (ahora - creadoEn >= QUINCE_MIN) {
+        pedidosEliminados.push({
+          pedidoId: docSnap.id,
+          usuarioId: pedido.usuarioId,
+        });
+
         await db.collection("compras").doc(docSnap.id).delete();
         eliminados++;
       }
     }
 
-    // 🔥 Registrar log
-    await db
-      .collection("logsCron")
-      .doc(`${new Date().toISOString()}_pendientes`)
-      .set({
-        tipo: "pendientes",
-        timestamp: new Date().toISOString(),
-        eliminados,
-        detalle: `Eliminados ${eliminados} pedidos pendientes`,
+    // ================================
+    // 🔔 NOTIFICACIÓN ÚNICA POR USUARIO
+    // ================================
+    const porUsuario = {};
+
+    pedidosEliminados.forEach((p) => {
+      if (!porUsuario[p.usuarioId]) porUsuario[p.usuarioId] = 0;
+      porUsuario[p.usuarioId]++;
+    });
+
+    for (const [usuarioId, cantidad] of Object.entries(porUsuario)) {
+      await db.collection("notificaciones").add({
+        usuarioId,
+        tipo: "pedidos_vencidos",
+        cantidad,
+        creadoEn: admin.firestore.FieldValue.serverTimestamp(),
+        visto: false,
       });
+    }
 
     return res.status(200).json({
       ok: true,

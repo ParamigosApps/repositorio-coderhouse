@@ -386,12 +386,6 @@ export function cargarEntradasPendientes() {
             `Se aprobaron ${e.cantidad} entradas`,
             "success"
           );
-          console.log("📌 NOTIFICANDO APROBACIÓN:", {
-            usuarioId: e.usuarioId,
-            eventoNombre: e.eventoNombre,
-            cantidad: e.cantidad,
-            eventoId: e.eventoId,
-          });
 
           // 🟢 USAR eventoNombre
           await notificarAprobacionEntrada(
@@ -706,7 +700,6 @@ async function cargarLoginSettingsAdmin() {
   if (loginSettingsActual.phone !== undefined)
     togglePhone.checked = loginSettingsActual.phone;
 
-  console.log("CARGANDO");
   // ⭐ IMPORTANTE: disparar los eventos change para actualizar la UI
   toggleGoogle.dispatchEvent(new Event("change"));
   toggleFacebook.dispatchEvent(new Event("change"));
@@ -772,9 +765,7 @@ export async function notificarAprobacionEntrada(
     nombreEvento,
     cantidad,
     tipo: "entrada_aprobada",
-    leida: false,
-    creadoEn: new Date(),
+    creadoEn: serverTimestamp(),
+    visto: false, // <--- MUY IMPORTANTE
   });
-
-  console.log("✅ Notificación insertada correctamente");
 }

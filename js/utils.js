@@ -115,21 +115,21 @@ export function vincularClickProducto(producto, card) {
   });
 }
 
-// formatea fechas tipo "2024-06-15" a "15/06/2024"
-export function formatearFecha(fechaStr) {
-  if (!fechaStr) return "";
+export function formatearFecha(fecha) {
+  if (!fecha) return "Fecha inválida";
 
-  // Si es un objeto Date o Timestamp de Firestore
-  if (typeof fechaStr === "object" && fechaStr.toDate) {
-    fechaStr = fechaStr.toDate().toISOString().split("T")[0];
-  } else if (fechaStr instanceof Date) {
-    fechaStr = fechaStr.toISOString().split("T")[0];
-  }
-  const partes = fechaStr.split("-");
-  if (partes.length !== 3) return fechaStr;
+  const d = fecha instanceof Date ? fecha : new Date(fecha);
 
-  const [año, mes, dia] = partes;
-  return `${dia}/${mes}/${año}`;
+  // Fecha: dd/mm/yyyy
+  const dia = String(d.getDate()).padStart(2, "0");
+  const mes = String(d.getMonth() + 1).padStart(2, "0");
+  const año = d.getFullYear();
+
+  // Hora: hh:mm
+  const horas = String(d.getHours()).padStart(2, "0");
+  const minutos = String(d.getMinutes()).padStart(2, "0");
+
+  return `${dia}/${mes}/${año} - ${horas}:${minutos} hs`;
 }
 
 export function popupAñadido(nombre, cantidad) {

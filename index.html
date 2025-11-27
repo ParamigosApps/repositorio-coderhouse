@@ -169,7 +169,8 @@
                 <div class="col-12">
                   <button
                     id="btnCatalogoCompleto"
-                    class="btn btn-outline-dark w-100"
+                    data-categoria="Todos"
+                    class="btnCategorias btn btn-outline-dark w-100"
                   >
                     Ver catálogo completo
                   </button>
@@ -514,6 +515,14 @@
     <script src="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Librerías PDF (versiones UMD globales) -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+    <script>
+      window.html2canvas = html2canvas;
+      window.jsPDF = window.jspdf.jsPDF;
+    </script>
 
     <!-- Módulos JS (tu lógica) -->
     <script type="module" src="js/cargarCatalogo.js"></script>

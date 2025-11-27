@@ -133,19 +133,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 // LISTENER LOGIN
 // ======================================================
 
-auth.onAuthStateChanged(async (user) => {
-  console.log("👤 onAuthStateChanged USER:", user?.uid);
+let listenerNotificacionesActivo = false;
 
+auth.onAuthStateChanged(async (user) => {
   if (!user) return;
 
-  // Cargar datos
   await mostrarTodosLosPedidos(user.uid);
   await actualizarContadoresPedidos(user.uid);
   await cargarEntradas(listaEntradas);
   await actualizarContadorMisEntradas(user.uid);
 
-  console.log("🔔 ACTIVANDO escucharNotificaciones para:", user.uid);
-  escucharNotificaciones(user.uid);
+  if (!listenerNotificacionesActivo) {
+    console.log("🔔 ACTIVANDO listener de notificaciones una sola vez");
+    escucharNotificaciones(user.uid);
+    listenerNotificacionesActivo = true;
+  }
 
   // ======================================================
   // 🔔 ESCUCHAR APROBACIÓN DE PAGOS (NOTIFICACIÓN EN VIVO)
@@ -243,91 +245,72 @@ async function ObtenerDatosGuardadosDB() {
   });
 }
 
-let ultimaNotificacion = null;
+export function escucharNotificaciones(usuarioId) {
+  console.log("🔔 Escuchando notificaciones NO vistas para:", usuarioId);
 
-function escucharNotificaciones(usuarioId) {
-  console.log("🔔 escucharNotificaciones() llamado con usuarioId:", usuarioId);
   if (!usuarioId) {
-    console.warn("⚠ usuarioId ES NULL, no se escuchan notificaciones");
+    console.warn("⚠ usuarioId vacío, no se escuchan notificaciones.");
     return;
   }
 
   const q = query(
     collection(db, "notificaciones"),
     where("usuarioId", "==", usuarioId),
+    where("visto", "==", false), // <--- SOLO NOTIFICACIONES NUEVAS
     orderBy("creadoEn", "desc"),
-    limit(1)
+    limit(10)
   );
 
-  console.log("📡 Listener creado. Esperando notificaciones…");
-
-  onSnapshot(
-    q,
-    (snap) => {
-      console.log("📨 Snapshot recibido:", snap.size, "documentos");
-
-      snap.docChanges().forEach((change) => {
-        console.log("🔄 change detectado:", change.type, change.doc.id);
-
-        if (change.type !== "added") {
-          console.log("⏭ No es 'added', se ignora.");
-          return;
-        }
-
-        const data = change.doc.data();
-        console.log("📌 Datos de la notificación recibida:", data);
-
-        // Evitar notificaciones duplicadas al recargar
-        if (ultimaNotificacion === change.doc.id) {
-          console.log("⛔ Notificación duplicada ignorada:", change.doc.id);
-          return;
-        }
-
-        ultimaNotificacion = change.doc.id;
-
-        // --------------------------
-        // 🎟 ENTRADA APROBADA
-        // --------------------------
-        if (data.tipo === "entrada_aprobada") {
-          console.log("🎉 Disparando mensaje de entrada aprobada…", data);
-
-          const entradaText = data.cantidad == 1 ? "entrada" : "entradas";
-
-          mostrarMensaje(
-            `🎉 ¡Te aprobaron ${data.cantidad} ${entradaText} para ${data.nombreEvento}!`,
-            "#28a745",
-            "#ffffff"
-          );
-
-          return;
-        }
-
-        // --------------------------
-        // ⚠ PEDIDO VENCIDO
-        // --------------------------
-        if (data.tipo === "pedido_vencido") {
-          console.log("⚠️ Notificación de pedido vencido recibida:", data);
-
-          mostrarMensaje(
-            "⚠️ Tu pedido pendiente venció y fue cancelado.",
-            "#ffcc00",
-            "#000"
-          );
-
-          // Refrescar listas
-          if (auth.currentUser) {
-            mostrarTodosLosPedidos(auth.currentUser.uid);
-            actualizarContadoresPedidos(auth.currentUser.uid);
-          }
-
-          return;
-        }
-
-        console.log("📭 Tipo de notificación desconocido:", data.tipo);
-      });
-    },
-    (err) => {
-      console.error("❌ Error en onSnapshot escuchando notificaciones:", err);
+  onSnapshot(q, async (snap) => {
+    if (snap.empty) {
+      console.log("📭 No hay notificaciones nuevas.");
+      return;
     }
-  );
+
+    snap.docChanges().forEach(async (change) => {
+      if (change.type !== "added") return;
+
+      const data = change.doc.data();
+      const notifId = change.doc.id;
+
+      console.log("📩 Nueva notificación:", data);
+
+      // ==============================================================
+      // 1) ENTRADAS APROBADAS
+      // ==============================================================
+      if (data.tipo === "entrada_aprobada") {
+        let entradaText = data.cantidad === 1 ? "entrada" : "entradas";
+
+        mostrarMensaje(
+          `🎉 ¡Te aprobaron ${data.cantidad} ${entradaText} para ${data.nombreEvento}!`,
+          "#28a745",
+          "#fff"
+        );
+      }
+
+      // ==============================================================
+      // 2) PEDIDO VENCIDO
+      // ==============================================================
+      else if (data.tipo === "pedido_vencido") {
+        let texto =
+          data.cantidad === 1
+            ? `⚠ Caducó ${data.cantidad} pedido pendiente.`
+            : `⚠ Caducaron ${data.cantidad} pedidos pendientes.`;
+
+        mostrarMensaje(texto, "#c40b1dff", "#fff");
+      }
+
+      // ==============================================================
+      // 3) Marcar como visto (para que NO se repita nunca)
+      // ==============================================================
+      try {
+        await updateDoc(doc(db, "notificaciones", notifId), {
+          visto: true,
+        });
+        console.log("✔ Notificación marcada como vista:", notifId);
+      } catch (err) {
+        console.error("❌ Error al marcar vista:", err);
+      }
+    });
+  });
 }

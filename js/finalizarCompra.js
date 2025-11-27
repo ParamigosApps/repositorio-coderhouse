@@ -15,6 +15,8 @@ import {
   actualizarContadoresPedidos,
   mostrarTodosLosPedidos,
 } from "./pedidos.js";
+import { crearPreferenciaCompra } from "./mercadopago.js";
+
 export async function finalizarCompra() {
   try {
     // =====================================================
@@ -131,9 +133,9 @@ export async function finalizarCompra() {
         return Swal.fire({
           title: "No puedes generar más pedidos",
           html: `
-            <p>Ya tienes <strong>3 pedidos pendientes</strong>.</p>
-            <p>Debes pagar o eliminar alguno antes de crear otro.</p>
-          `,
+        <p>Ya tienes <strong>3 pedidos pendientes</strong>.</p>
+        <p>Debes pagar o eliminar alguno antes de crear otro.</p>
+      `,
           icon: "warning",
           confirmButtonText: "Aceptar",
           customClass: { confirmButton: "btn btn-dark" },
@@ -142,27 +144,16 @@ export async function finalizarCompra() {
       }
 
       // Crear preferencia MP
-      const res = await fetch("/api/crear-preferencia", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: carrito.map((p) => ({
-            title: p.nombre,
-            quantity: p.enCarrito,
-            price: Number(p.precio),
-            usuarioId: auth.currentUser.uid,
-            productoId: p.id,
-          })),
-          ticketId,
-        }),
+      const initPoint = await crearPreferenciaCompra({
+        carrito,
+        ticketId,
       });
 
-      const data = await res.json();
-
-      if (!data.init_point)
+      if (!initPoint) {
         return Swal.fire("Error", "No se pudo iniciar el pago.", "error");
+      }
 
-      window.location.href = data.init_point;
+      window.location.href = initPoint;
     }
   } catch (err) {
     console.error("❌ Error:", err);

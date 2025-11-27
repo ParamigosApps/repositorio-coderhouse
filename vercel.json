@@ -6,13 +6,18 @@
     { "src": "css/**", "use": "@vercel/static" },
     { "src": "js/**", "use": "@vercel/static" },
     { "src": "Assets/**", "use": "@vercel/static" },
-    {
-      "src": "json/**",
-      "use": "@vercel/static"
-    }
+    { "src": "json/**", "use": "@vercel/static" }
   ],
+
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1.js" },
+    { "src": "^/api/(.*)$", "dest": "/api/$1.js" },
     { "src": "/(.*)", "dest": "/$1" }
+  ],
+
+  "crons": [
+    {
+      "path": "/api/cleanupPedidosPendientes",
+      "schedule": "*/5 * * * *"
+    }
   ]
 }

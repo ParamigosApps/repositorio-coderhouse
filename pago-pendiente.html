@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pago pendiente</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </head>
+  <body>
+    <script>
+      Swal.fire({
+        icon: "warning",
+        title: "Pago pendiente ⏳",
+        text: "Mercado Pago aún no confirmó el pago. Te avisaremos si se acredita.",
+        confirmButtonText: "Volver",
+        customClass: { confirmButton: "btn btn-dark" },
+        buttonsStyling: false,
+      }).then(() => {
+        window.location.href = "/index.html";
+      });
+    </script>
+  </body>
+</html>

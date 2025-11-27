@@ -21,6 +21,8 @@ import {
   updateDoc,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
+import { crearPreferenciaEntrada } from "./mercadopago.js";
+
 // ======================================================
 // 2. VARIABLES GLOBALES
 // ======================================================
@@ -437,38 +439,106 @@ Titular: ${datos.titularBanco}
     }
 
     // --------------------------------------------------
-    // 4.10 MERCADO PAGO
+    // 4.10 MERCADO PAGO (CORREGIDO TOTAL)
     // --------------------------------------------------
-    const res = await fetch("/api/crear-preferencia", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        items: [
-          {
-            title: e.nombre,
-            quantity: cantidad,
-            unit_price: Number(e.precio),
-          },
-        ],
-        metadata: {
-          usuarioId,
-          eventoId,
-          fecha: e.fecha,
-          lugar: e.lugar,
-        },
-      }),
+
+    const initPoint = await crearPreferenciaEntrada({
+      usuarioId,
+      eventoId,
+      nombreEvento: e.nombre,
+      cantidad,
+      precio: e.precio,
+      imagenEventoUrl: e.imagenEventoUrl,
     });
 
-    const data = await res.json();
-
-    if (!data.init_point) {
+    if (!initPoint) {
       return Swal.fire("Error", "No se pudo iniciar el pago.", "error");
     }
 
-    window.location.href = data.init_point;
+    // Redirigir al checkout
+    window.location.href = initPoint;
   } catch (err) {
     console.error("❌ Error en pedirEntrada:", err);
     Swal.fire("Error", "Ocurrió un error al procesar la entrada.", "error");
+  }
+}
+
+// ======================================================
+// 🟦 FUNCIÓN: Mostrar resultado de compra de entradas
+// ======================================================
+export async function mostrarResultadoCompraEntradas({
+  cantidad,
+  entradaId,
+  nombreEvento,
+  fecha,
+  lugar,
+  precio,
+  usuario,
+}) {
+  try {
+    // Solo 1 entrada → mostrar QR directamente
+    if (cantidad === 1 && entradaId) {
+      return Swal.fire({
+        title: "🎫 ¡Entrada generada!",
+        html: `
+          <p><strong>${nombreEvento}</strong></p>
+          <p>${fecha} — ${lugar}</p>
+          <div id="qrCompraContainer" class="my-3"></div>
+          <p class="mt-2 text-muted" style="font-size:0.9rem;">
+            Presentá este código en la entrada.
+          </p>
+        `,
+        showConfirmButton: true,
+        confirmButtonText: "Ver mis entradas",
+        customClass: { confirmButton: "btn btn-dark" },
+        buttonsStyling: false,
+        didOpen: () => {
+          const container = document.getElementById("qrCompraContainer");
+
+          generarEntradaQr({
+            ticketId: entradaId,
+            nombreEvento,
+            usuario,
+            fecha,
+            lugar,
+            precio:
+              precio === 0 || precio == null
+                ? "Entrada gratuita"
+                : `$${precio}`,
+            qrContainer: container,
+            individual: true,
+            modoAdmin: false,
+          });
+        },
+      }).then(() => {
+        document.getElementById("btnMisEntradas")?.click();
+      });
+    }
+
+    // Varias entradas → solo informar
+    return Swal.fire({
+      icon: "success",
+      title: "🎉 ¡Entradas generadas!",
+      html: `
+        <p>Se generaron <strong>${cantidad}</strong> entradas para:</p>
+        <p><strong>${nombreEvento}</strong></p>
+        <p class="mt-2 text-muted" style="font-size:0.9rem;">
+          Podés ver y descargar los QR desde <strong>Mis Entradas</strong>.
+        </p>
+      `,
+      confirmButtonText: "Ir a Mis Entradas",
+      customClass: { confirmButton: "btn btn-dark" },
+      buttonsStyling: false,
+    }).then(() => {
+      document.getElementById("btnMisEntradas")?.click();
+    });
+  } catch (err) {
+    console.error("❌ Error en mostrarResultadoCompraEntradas:", err);
+    Swal.fire(
+      "Error",
+      "No se pudo mostrar el resultado de la compra.",
+      "error"
+    );
   }
 }
 
@@ -485,7 +555,23 @@ export function escucharEntradasPendientes(usuarioId, callback) {
 
   return onSnapshot(q, (snapshot) => {
     snapshot.docChanges().forEach((change) => {
-      if (change.type === "added") callback(change.doc.data().ticketId);
+      // Solo cuando se agrega un nuevo documento REAL
+      if (change.type !== "added") return;
+
+      const data = change.doc.data();
+
+      if (!data || !data.ticketId) {
+        console.warn("⚠ Documento sin ticketId, ignorado:", data);
+        return;
+      }
+
+      console.log("🟢 Pago aprobado detectado:", data);
+
+      callback({
+        ticketId: data.ticketId,
+        eventoId: data.eventoId ?? null,
+        usuarioId: data.usuarioId,
+      });
     });
   });
 }

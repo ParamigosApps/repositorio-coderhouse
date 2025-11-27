@@ -265,13 +265,39 @@ document.getElementById("btnLogoutPhone")?.addEventListener("click", logout);
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     mostrarUsuario(user.displayName || user.email || user.phoneNumber);
+
     document.getElementById("userInfo")?.classList.remove("d-none");
     document.getElementById("noUser")?.classList.add("d-none");
+
+    // ================================
+    // 🔥 MOSTRAR CORRECTO BOTÓN LOGOUT
+    // ================================
+    const prov = user.providerData[0]?.providerId;
+
+    const btnLogoutGoogle = document.getElementById("btnLogoutGoogle");
+    const btnLogoutPhone = document.getElementById("btnLogoutPhone");
+
+    // Ocultar ambos primero
+    btnLogoutGoogle?.classList.add("d-none");
+    btnLogoutPhone?.classList.add("d-none");
+
+    if (prov === "google.com" || prov === "facebook.com") {
+      // Login con Google o Facebook → botón con icono
+      btnLogoutGoogle?.classList.remove("d-none");
+    } else if (prov === "phone") {
+      // Login con teléfono → botón simple
+      btnLogoutPhone?.classList.remove("d-none");
+    }
   } else {
     mostrarUsuario(null);
     document.getElementById("userInfo")?.classList.add("d-none");
     document.getElementById("noUser")?.classList.remove("d-none");
-    await cargarLoginSettings(); // 🔥 IMPORTANTE: recargar botones en index
+
+    // 🔥 Reset botones
+    document.getElementById("btnLogoutGoogle")?.classList.add("d-none");
+    document.getElementById("btnLogoutPhone")?.classList.add("d-none");
+
+    await cargarLoginSettings();
   }
 });
 

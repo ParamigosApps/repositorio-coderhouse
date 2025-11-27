@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pago aprobado</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Firebase -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+      import { getFirestore } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+      import { getAuth } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+
+      // ⚠️ Debe coincidir exactamente con tu firebase.js
+      const firebaseConfig = {
+        apiKey: "TU_API_KEY",
+        authDomain: "TU_AUTH_DOMAIN",
+        projectId: "TU_PROJECT_ID",
+        storageBucket: "TU_STORAGE_BUCKET",
+        messagingSenderId: "TU_MSG_ID",
+        appId: "TU_APP_ID",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      window.db = getFirestore(app);
+      window.auth = getAuth(app);
+    </script>
+
+    <!-- Entradas.js -->
+    <script type="module" src="/js/entradas.js"></script>
+  </head>
+
+  <body>
+    <script type="module">
+      import { crearEntrada } from "/js/entradas.js";
+      import {
+        addDoc,
+        collection,
+        serverTimestamp,
+      } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+      import { auth } from "/js/firebase.js";
+
+      // =====================================================
+      // 1) LEER PARÁMETROS DE MERCADO PAGO
+      // =====================================================
+      const params = new URLSearchParams(window.location.search);
+      const status = params.get("status");
+      const external = params.get("external_reference");
+
+      console.log("📌 Status MP:", status);
+      console.log("📌 External Reference:", external);
+
+      // Si no vino nada
+      if (!external) {
+        Swal.fire({
+          icon: "error",
+          title: "Pago recibido, pero sin datos",
+          text: "No pudimos identificar tu compra. Contactá al administrador.",
+        }).then(() => (window.location.href = "/index.html"));
+        throw new Error("No llegó external_reference");
+      }
+
+      // Decodificar
+      let data;
+      try {
+        data = JSON.parse(external);
+      } catch (e) {
+        console.error("❌ Error decodificando external_reference:", e);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Los datos de la compra llegaron dañados. Contactá al administrador.",
+        }).then(() => (window.location.href = "/index.html"));
+        throw e;
+      }
+
+      console.log("🟢 Datos decodificados:", data);
+
+      // =====================================================
+      // 2) VALIDAR ESTADO DEL PAGO
+      // =====================================================
+      if (status !== "approved") {
+        Swal.fire({
+          icon: "warning",
+          title: "Pago no aprobado",
+          text: "El pago está pendiente o fue rechazado.",
+          confirmButtonText: "Volver",
+        }).then(() => (window.location.href = "/index.html"));
+        return;
+      }
+
+      // =====================================================
+      // 3) CREAR TODAS LAS ENTRADAS EN FIRESTORE
+      // =====================================================
+      Swal.fire({
+        title: "¡Pago aprobado! 🎉",
+        text: "Estamos generando tus entradas...",
+        icon: "success",
+        timer: 1800,
+        showConfirmButton: false,
+      });
+
+      const usuarioId = data.usuarioId;
+      const eventoId = data.eventoId;
+
+      const entradaBase = {
+        nombre: data.nombreEvento,
+        fecha: data.fecha,
+        lugar: data.lugar,
+        horario: data.horario || "A confirmar",
+        precio: Number(data.precio),
+      };
+
+      // Generar N entradas individuales
+      for (let i = 0; i < data.cantidad; i++) {
+        await crearEntrada(
+          eventoId,
+          { ...entradaBase, cantidad: 1 },
+          true,
+          false
+        );
+      }
+
+      // Guardar registro del pago procesado (opcional)
+      await addDoc(collection(db, "pagosProcesados"), {
+        usuarioId,
+        eventoId,
+        cantidad: data.cantidad,
+        creadoEn: serverTimestamp(),
+      });
+
+      // =====================================================
+      // 4) REDIRIGIR A MIS ENTRADAS
+      // =====================================================
+      setTimeout(() => {
+        window.location.href = "/index.html#mis-entradas";
+      }, 1800);
+    </script>
+  </body>
+</html>

@@ -15,6 +15,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
 import { generarCompraQr } from "./generarQr.js";
+import { mostrarMensaje } from "./utils.js";
 import Swal from "https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.esm.js";
 
 // ======================================================
@@ -195,22 +196,34 @@ function mostrarPedidosUI(contenedor, pedidos) {
         ? "#f8e8b3ff"
         : "#bcb8b9bb";
 
+    const id = pedido.id;
+
+    // Contador solo si es PENDIENTE
+    let contadorHtml = "";
+    if (pedido.estado === "pendiente") {
+      contadorHtml = `<p id="exp-${id}" class="fw-bold text-danger">⏳ Calculando...</p>`;
+    }
+
     div.innerHTML = `
       <strong>ID:</strong> ${pedido.id}<br>
       <strong>Total:</strong> $${pedido.total}<br>
       <strong>Fecha:</strong> ${pedido.fecha}<br>
       <strong>Estado:</strong> ${pedido.estado}<br>
 
+      ${contadorHtml}
+
       ${
         pedido.estado !== "retirado"
-          ? `<button class="btn btn-sm btn-dark mt-2 ver-qr">Ver QR</button>`
+          ? `<button class="btn btn-sm btn-dark mt-2 ver-qr" ${
+              pedido.estado === "pendiente" ? "disabled" : ""
+            }>Ver QR</button>`
           : ``
       }
 
       <button class="btn btn-sm btn-danger position-absolute top-0 end-0">X</button>
     `;
 
-    // Eliminar
+    // === ELIMINAR ===
     div.querySelector(".btn-danger").addEventListener("click", async (e) => {
       e.stopPropagation();
 
@@ -237,7 +250,7 @@ function mostrarPedidosUI(contenedor, pedidos) {
       actualizarContadoresPedidos(auth.currentUser.uid);
     });
 
-    // Ver QR
+    // === VER QR ===
     const btnQr = div.querySelector(".ver-qr");
     if (btnQr) {
       btnQr.addEventListener("click", (e) => {
@@ -256,6 +269,68 @@ function mostrarPedidosUI(contenedor, pedidos) {
     }
 
     contenedor.appendChild(div);
+
+    // ======================================================
+    //  ⏳ CONTADOR CON TIMESTAMP REAL + AUTO-REMOVE
+    // ======================================================
+    if (pedido.estado === "pendiente") {
+      const label = document.getElementById(`exp-${id}`);
+
+      // ⛔ USAMOS EL TIMESTAMP REAL
+      const fechaCreacion = pedido.creadoEn?.toDate?.()
+        ? pedido.creadoEn.toDate()
+        : new Date();
+
+      const expiraEnMs = fechaCreacion.getTime() + 15 * 60 * 1000;
+
+      let expiradoMostrado = false;
+      let timeoutAutoRemove = null;
+
+      const interval = setInterval(() => {
+        const ahora = Date.now();
+        const diff = expiraEnMs - ahora;
+
+        // ------------ PEDIDO EXPIRADO ------------
+        if (diff <= 0) {
+          clearInterval(interval);
+
+          if (!expiradoMostrado) {
+            expiradoMostrado = true;
+
+            if (label) {
+              label.textContent = "⛔ Expirado";
+              label.classList.remove("text-warning");
+              label.classList.add("text-danger");
+            }
+
+            div.style.opacity = "0.5";
+
+            mostrarMensaje(
+              `⚠️ Tu pedido #${id} venció y fue cancelado.`,
+              "#dc3545",
+              "#fff"
+            );
+
+            // borrar de la UI tras 60s
+            timeoutAutoRemove = setTimeout(() => {
+              div.remove();
+            }, 60 * 1000);
+          }
+          return;
+        }
+
+        // ------------ CONTADOR VÁLIDO (ya NO NaN) ------------
+        const min = Math.floor(diff / 60000);
+        const sec = Math.floor((diff % 60000) / 1000);
+
+        if (label) {
+          label.textContent = `⏳ Expira en: ${String(min).padStart(
+            2,
+            "0"
+          )}:${String(sec).padStart(2, "0")}`;
+        }
+      }, 1000);
+    }
   });
 }
 

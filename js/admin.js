@@ -356,7 +356,7 @@ export function cargarEntradasPendientes() {
         }</strong></p>
 
         <div class="text-center mt-2">
-          <button class="btn btn-success btn-aprobar">Aprobar</button>
+          <button class="btn btn-success btn-aprobar">Aprobar y notificar</button>
           <button class="btn btn-danger btn-rechazar">Rechazar</button>
         </div>
       `;
@@ -369,7 +369,7 @@ export function cargarEntradasPendientes() {
             await crearEntrada(
               e.eventoId,
               {
-                nombre: e.eventoNombre,
+                nombre: e.eventoNombre, // <-- BIEN
                 fecha: e.fecha,
                 lugar: e.lugar,
                 precio: e.precio,
@@ -385,6 +385,19 @@ export function cargarEntradasPendientes() {
             "🎉 Aprobado",
             `Se aprobaron ${e.cantidad} entradas`,
             "success"
+          );
+          console.log("📌 NOTIFICANDO APROBACIÓN:", {
+            usuarioId: e.usuarioId,
+            eventoNombre: e.eventoNombre,
+            cantidad: e.cantidad,
+            eventoId: e.eventoId,
+          });
+
+          // 🟢 USAR eventoNombre
+          await notificarAprobacionEntrada(
+            e.usuarioId,
+            e.eventoNombre,
+            e.cantidad
           );
 
           actualizarContadorEntradasPendientes();
@@ -742,3 +755,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     await cargarLoginSettingsAdmin();
   }, 50);
 });
+
+export async function notificarAprobacionEntrada(
+  usuarioId,
+  nombreEvento,
+  cantidad
+) {
+  console.log("📤 Enviando notificación...", {
+    usuarioId,
+    nombreEvento,
+    cantidad,
+  });
+
+  await addDoc(collection(db, "notificaciones"), {
+    usuarioId,
+    nombreEvento,
+    cantidad,
+    tipo: "entrada_aprobada",
+    leida: false,
+    creadoEn: new Date(),
+  });
+
+  console.log("✅ Notificación insertada correctamente");
+}

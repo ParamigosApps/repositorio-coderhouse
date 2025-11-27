@@ -269,6 +269,14 @@
                         <span id="contadorMisEntradas">0</span>
                       </span>
                     </button>
+                    <!-- Botón Historial de entradas -->
+                    <button
+                      class="btn btn-outline-dark position-relative boton-historial"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#containerHistorial"
+                    >
+                      Historial
+                    </button>
                   </div>
 
                   <!-- Contenedor EVENTOS -->
@@ -294,6 +302,16 @@
                       id="listaEntradas"
                       class="d-flex flex-column gap-3"
                     ></div>
+                  </div>
+                  <div
+                    id="containerHistorial"
+                    class="collapse"
+                    data-bs-parent="#collapseEntradasEventos"
+                  >
+                    <!-- Contenedor HISTORIAL DE ENTRADAS -->
+                    <hr class="my-4" />
+                    <h6 class="fw-semibold mb-3">Historial de entradas</h6>
+                    <div id="listaEntradasUsadas"></div>
                   </div>
                 </div>
               </div>

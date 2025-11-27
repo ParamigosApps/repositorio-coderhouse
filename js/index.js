@@ -16,6 +16,7 @@ import {
 import { cargarEventos } from "/js/cargarEventos.js";
 import { renderizarCatalogo } from "./cargarCatalogo.js";
 import { mostrarMensaje } from "./utils.js";
+
 import {
   cargarEntradas,
   actualizarContadorMisEntradas,

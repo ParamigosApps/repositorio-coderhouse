@@ -600,31 +600,40 @@ export async function actualizarContadorEntradasPendientes() {
 }
 
 export async function actualizarContadorMisEntradas() {
-  const usuarioId = auth.currentUser?.uid;
-  const contadorElem = document.getElementById("contadorMisEntradas");
-
-  if (!usuarioId || !contadorElem) {
-    console.warn("⚠ No hay usuario logueado o no existe contadorMisEntradas");
-    return;
-  }
-
   try {
+    const user = auth.currentUser;
+
+    if (!user) {
+      contadorMisEntradas.textContent = "0";
+      return;
+    }
+
+    const ahora = new Date();
+
     const q = query(
       collection(db, "entradas"),
-      where("usuarioId", "==", usuarioId)
+      where("usuarioId", "==", user.uid),
+      where("usado", "==", false)
     );
 
     const snapshot = await getDocs(q);
 
     let total = 0;
+
     snapshot.forEach((docSnap) => {
       const entrada = docSnap.data();
+
+      // ⚠ Detectar expiradas (no contarlas)
+      if (entrada.fechaEvento && new Date(entrada.fechaEvento) < ahora) {
+        return; // no sumarlas
+      }
+
       total += entrada.cantidad ?? 1;
     });
 
-    contadorElem.textContent = total;
+    contadorMisEntradas.textContent = total;
   } catch (err) {
-    console.error("❌ Error contando mis entradas:", err);
+    console.error("Error obteniendo entradas:", err);
   }
 }
 
@@ -916,8 +925,86 @@ export async function ObtenerContacto() {
 }
 
 // ======================================================
-// 11. LISTENER DE AUTH
+// 11. CARGAR ENTRADAS USADAS
+// ======================================================
+
+export async function cargarEntradasUsadas() {
+  const contenedor = document.getElementById("listaEntradasUsadas");
+  if (!contenedor) return;
+
+  try {
+    const usuarioId = auth.currentUser?.uid;
+
+    if (!usuarioId) {
+      contenedor.innerHTML = `<p class="text-danger mt-3 text-center">Debes iniciar sesión para ver tu historial.</p>`;
+      return;
+    }
+
+    contenedor.innerHTML = `<p class="text-secondary mt-3 text-center">Cargando historial...</p>`;
+
+    const q = query(
+      collection(db, "entradasUsadas"),
+      where("usuarioId", "==", usuarioId)
+    );
+
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      contenedor.innerHTML = `<p class="text-secondary text-center">Aún no tienes entradas usadas.</p>`;
+      return;
+    }
+
+    // Convertir snapshot a array
+    const entradas = snapshot.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    }));
+
+    // Ordenar por fecha usada (usadoEn)
+    entradas.sort((a, b) => {
+      const fa = new Date(a.usadoEn || a.fechaEvento || 0);
+      const fb = new Date(b.usadoEn || b.fechaEvento || 0);
+      return fb - fa;
+    });
+
+    contenedor.innerHTML = "";
+
+    entradas.forEach((entrada) => {
+      const estado =
+        entrada.razon === "expirada"
+          ? `<span class="badge bg-danger">Expirada</span>`
+          : `<span class="badge bg-success">Usada</span>`;
+
+      const fechaUso = entrada.usadoEn
+        ? formatearFecha(entrada.usadoEn)
+        : "No disponible";
+
+      const div = document.createElement("div");
+      div.className = "card p-3 mb-3 shadow-sm";
+
+      div.innerHTML = `
+        <h5 class="mb-1">${entrada.nombre}</h5>
+        <p class="mb-0">📅 ${formatearFecha(entrada.fecha)}</p>
+        <p class="mb-0">📍 ${entrada.lugar}</p>
+        <p class="mb-0">🕑 ${entrada.horario}</p>
+        <p class="mb-0 mt-2">Estado: ${estado}</p>
+        <p class="mb-0">Usada/expirada: ${fechaUso}</p>
+      `;
+
+      contenedor.appendChild(div);
+    });
+  } catch (err) {
+    console.error("❌ Error al cargar historial:", err);
+    contenedor.innerHTML = `<p class="text-danger text-center mt-3">Error al cargar historial.</p>`;
+  }
+}
+
+// ======================================================
+// 12. LISTENER DE AUTH
 // ======================================================
 auth.onAuthStateChanged((user) => {
-  if (user) actualizarContadorMisEntradas();
+  if (user) {
+    actualizarContadorMisEntradas();
+    cargarEntradasUsadas();
+  }
 });

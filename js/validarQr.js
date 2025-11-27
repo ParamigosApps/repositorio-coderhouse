@@ -277,14 +277,14 @@ async function validarTicket(ticketId, modoActual = "entradas") {
       if (modoActual === "entradas") {
         const refUsadas = doc(db, "entradasUsadas", ticketId);
 
-        // Guardar entrada usada como historial
+        // Guardar copia como historial
         await setDoc(refUsadas, {
           ...ticketData,
           usado: true,
           usadoEn: new Date().toISOString(),
         });
 
-        // Eliminar de "entradas" para que no se pueda volver a usar
+        // ELIMINAR de entradas (🔥 esto hace que no aparezca más al usuario)
         await deleteDoc(refActual);
 
         qrResultado.textContent = "✅ INGRESO PERMITIDO";

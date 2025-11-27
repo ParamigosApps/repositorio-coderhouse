@@ -1734,4 +1734,17 @@ body.qr-body {
   border: 1px solid #25d366;
 }
 
+.boton-historial {
+  color: #888 !important;
+  border-color: #ccc !important;
+  background: #f7f7f7 !important;
+}
+.boton-historial:hover {
+  background: #eaeaea !important;
+  border-color: #bfbfbf !important;
+  color: #666 !important;
+  transform: scale(1.02);
+  transition: 0.15s ease;
+}
+
 /*# sourceMappingURL=style.css.map */
